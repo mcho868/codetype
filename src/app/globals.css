@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+:root {
+  --page-bg: radial-gradient(circle at top, #0f172a, #0b1120 45%, #020617);
+  --page-text: #e2e8f0;
+}
+
+:root[data-theme="light"] {
+  --page-bg: radial-gradient(circle at top, #f8fafc, #e2e8f0 45%, #cbd5f5);
+  --page-text: #0f172a;
+}
+
+body {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  background: var(--page-bg);
+  color: var(--page-text);
+}
+
+body[data-theme="light"] .bg-slate-950 {
+  background-color: #f8fafc !important;
+}
+
+body[data-theme="light"] .bg-slate-950\/70 {
+  background-color: rgba(248, 250, 252, 0.8) !important;
+}
+
+body[data-theme="light"] .bg-slate-950\/80 {
+  background-color: rgba(248, 250, 252, 0.9) !important;
+}
+
+body[data-theme="light"] .bg-slate-900 {
+  background-color: #e2e8f0 !important;
+}
+
+body[data-theme="light"] .bg-slate-900\/70 {
+  background-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+body[data-theme="light"] .bg-slate-900\/60 {
+  background-color: rgba(226, 232, 240, 0.65) !important;
+}
+
+body[data-theme="light"] .border-slate-800 {
+  border-color: #cbd5f5 !important;
+}
+
+body[data-theme="light"] .border-slate-800\/70 {
+  border-color: rgba(203, 213, 245, 0.7) !important;
+}
+
+body[data-theme="light"] .border-slate-800\/80 {
+  border-color: rgba(203, 213, 245, 0.85) !important;
+}
+
+body[data-theme="light"] .border-slate-700 {
+  border-color: #cbd5f5 !important;
+}
+
+body[data-theme="light"] .text-white {
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] .text-slate-100 {
+  color: #0f172a !important;
+}
+
+body[data-theme="light"] .text-slate-200 {
+  color: #1e293b !important;
+}
+
+body[data-theme="light"] .text-slate-300 {
+  color: #334155 !important;
+}
+
+body[data-theme="light"] .text-slate-400 {
+  color: #475569 !important;
+}
+
+body[data-theme="light"] .text-slate-500 {
+  color: #64748b !important;
+}
+
+.word-pop {
+  animation: word-pop 420ms ease;
+  border-radius: 0.3rem;
+  box-shadow: 0 0 22px rgba(56, 189, 248, 0.7),
+    0 0 40px rgba(14, 165, 233, 0.35);
+}
+
+@keyframes word-pop {
+  0% {
+    transform: scale(1);
+    background-color: rgba(56, 189, 248, 0.08);
+  }
+  35% {
+    transform: scale(1.12);
+    background-color: rgba(34, 211, 238, 0.35);
+  }
+  100% {
+    transform: scale(1);
+    background-color: rgba(56, 189, 248, 0.12);
+  }
+}
