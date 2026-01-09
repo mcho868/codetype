@@ -12,6 +12,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CodeType",
   description: "Typing practice for real algorithm snippets.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
