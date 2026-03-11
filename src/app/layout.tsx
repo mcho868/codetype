@@ -34,7 +34,10 @@ export default function RootLayout({
               CodeType
             </Link>
             <nav className="flex items-center gap-4 text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-              <Link href="/">Home</Link>
+              <Link href="/">TYPE</Link>
+              <Link href="/learn" className="text-cyan-300 hover:text-cyan-100 transition">
+                Learn
+              </Link>
               <a
                 href="https://manseungchoi.com"
                 target="_blank"

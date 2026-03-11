@@ -15,6 +15,7 @@ body {
     Consolas, "Liberation Mono", "Courier New", monospace;
   background: var(--page-bg);
   color: var(--page-text);
+  font-variant-ligatures: none;
 }
 
 body[data-theme="light"] .bg-slate-950 {
