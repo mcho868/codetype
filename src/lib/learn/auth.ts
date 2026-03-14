@@ -9,9 +9,9 @@ const USERS: Record<string, { password: string; user: LearnUser }> = {
     password: "yohan123",
     user: { username: "yohan", displayName: "Yohan", role: "student" },
   },
-  seonghyun: {
-    password: "seonghyun123",
-    user: { username: "seonghyun", displayName: "Seonghyun", role: "student" },
+  sunghyun: {
+    password: "sunghyun123",
+    user: { username: "sunghyun", displayName: "Sunghyun", role: "student" },
   },
   admin: {
     password: "qwer1234",
