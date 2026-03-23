@@ -2,83 +2,62 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import AuthGuard from "@/components/learn/AuthGuard";
-import QuestionCard from "@/components/learn/QuestionCard";
 import ProgressBar from "@/components/learn/ProgressBar";
-import { getModule } from "@/lib/learn/courseData";
-import { getModuleFromCourse } from "@/lib/learn/registry";
+import QuestionCard from "@/components/learn/QuestionCard";
 import { QuestionAnswer, calculateScore } from "@/lib/learn/progress";
 import { saveAnswer, loadModuleAnswers, clearModuleAnswers } from "@/lib/learn/db";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { cn } from "@/lib/utils";
+import type { CourseTest } from "@/lib/learn/courses/python101/tests/resit-test-1";
 
-interface QuizViewProps {
-  moduleId: string;
-  courseSlug?: string;
+// Pass threshold: student must score ≥ this fraction to pass
+const PASS_THRESHOLD = 0.6;
+
+interface TestViewProps {
+  test: CourseTest;
+  courseSlug: string;
+  backPath: string;
 }
 
-export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
+export default function TestView({ test, courseSlug, backPath }: TestViewProps) {
   const router = useRouter();
   const { studentId } = useLearnAuth();
-  const mod = courseSlug
-    ? getModuleFromCourse(courseSlug, moduleId)
-    : getModule(moduleId);
-  // Storage slug is prefixed with courseSlug to avoid collisions between courses with the same module slug numbers
-  const storageSlug = courseSlug ? `${courseSlug}/${mod?.slug ?? moduleId}` : (mod?.slug ?? moduleId);
-  const lessonPath = courseSlug
-    ? `/learn/courses/${courseSlug}/${moduleId}`
-    : `/learn/${moduleId}`;
+  const storageSlug = `${courseSlug}/test/${test.slug}`;
 
   const [answers, setAnswers] = useState<Record<string, QuestionAnswer>>({});
   const [currentIdx, setCurrentIdx] = useState(0);
   const [loadingAnswers, setLoadingAnswers] = useState(true);
 
-  // Load saved answers from Supabase on mount
   useEffect(() => {
-    if (!studentId || !mod) {
-      setLoadingAnswers(false);
-      return;
-    }
+    if (!studentId) { setLoadingAnswers(false); return; }
     loadModuleAnswers(studentId, storageSlug).then((saved) => {
       setAnswers(saved);
-      // Jump to first unanswered question
-      const firstUnanswered = mod.questions.findIndex((q) => !saved[q.id]);
+      const firstUnanswered = test.questions.findIndex((q) => !saved[q.id]);
       if (firstUnanswered !== -1) setCurrentIdx(firstUnanswered);
       setLoadingAnswers(false);
     });
   }, [studentId, storageSlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!mod) {
-    return (
-      <AuthGuard>
-        <main className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center">
-          <p className="text-slate-400">Module not found.</p>
-        </main>
-      </AuthGuard>
-    );
-  }
-
-  const questions = mod.questions;
+  const questions = test.questions;
   const totalQ = questions.length;
   const answeredCount = Object.keys(answers).length;
   const allDone = answeredCount === totalQ;
   const score = calculateScore(answers);
+  const passed = score / totalQ >= PASS_THRESHOLD;
   const currentQuestion = questions[Math.min(currentIdx, totalQ - 1)];
 
   async function handleAnswerSubmit(questionId: string, answer: QuestionAnswer) {
     const updated = { ...answers, [questionId]: answer };
     setAnswers(updated);
-
-    // Persist to Supabase
-    if (studentId && mod) {
+    if (studentId) {
       await saveAnswer(studentId, storageSlug, questionId, answer);
     }
-
-    // No auto-advance — user presses Next manually
   }
 
   async function handleRetake() {
-    if (studentId && mod) {
+    if (studentId) {
       await clearModuleAnswers(studentId, storageSlug);
     }
     setAnswers({});
@@ -93,28 +72,31 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
           {/* Header */}
           <div>
             <button
-              onClick={() => router.push(lessonPath)}
-              className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 hover:text-slate-300 transition mb-4 flex items-center gap-2"
+              onClick={() => router.push(backPath)}
+              className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 hover:text-slate-300 transition mb-4"
             >
-              ← Back to Lessons
+              ← Back to Course
             </button>
             <div className="flex items-center gap-4">
-              <span className="text-4xl">{mod.icon}</span>
+              <span className="text-4xl">📝</span>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Quiz</p>
-                <h1 className="text-2xl font-semibold text-white">{mod.title}</h1>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-red-400 mb-0.5">
+                  Test · {totalQ} Questions · Pass: {Math.round(PASS_THRESHOLD * 100)}%
+                </p>
+                <h1 className="text-2xl font-semibold text-white">{test.title}</h1>
+                <p className="text-sm text-slate-400 mt-1">{test.description}</p>
               </div>
             </div>
           </div>
 
-          {/* Loading answers spinner */}
+          {/* Body */}
           {loadingAnswers ? (
             <div className="flex justify-center py-16">
               <div className="w-6 h-6 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
             </div>
           ) : !allDone ? (
             <>
-              {/* Progress */}
+              {/* Progress nav */}
               <div className="rounded-3xl border border-slate-800/70 bg-slate-900/70 px-6 py-4 backdrop-blur shadow-sm">
                 <div className="flex justify-between text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 mb-3">
                   <span>Question {currentIdx + 1} of {totalQ}</span>
@@ -172,28 +154,30 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
             <div className="space-y-6">
               <div className={cn(
                 "rounded-3xl border p-8 text-center backdrop-blur shadow-sm",
-                score === totalQ ? "border-emerald-500/30 bg-emerald-500/5"
-                  : score >= totalQ / 2 ? "border-yellow-500/30 bg-yellow-500/5"
+                passed
+                  ? "border-emerald-500/30 bg-emerald-500/5"
                   : "border-red-500/30 bg-red-500/5"
               )}>
-                <p className="text-5xl mb-4">
-                  {score === totalQ ? "🎉" : score >= totalQ / 2 ? "👍" : "📚"}
-                </p>
+                <p className="text-6xl mb-4">{passed ? "🎉" : "📚"}</p>
                 <p className="text-3xl font-semibold text-white mb-1">{score} / {totalQ}</p>
                 <p className={cn(
-                  "text-xs font-semibold uppercase tracking-[0.3em] mb-5",
-                  score === totalQ ? "text-emerald-400"
-                    : score >= totalQ / 2 ? "text-yellow-400"
-                    : "text-red-400"
+                  "text-sm font-semibold uppercase tracking-[0.3em] mb-5",
+                  passed ? "text-emerald-400" : "text-red-400"
                 )}>
-                  {score === totalQ ? "Perfect score"
-                    : score >= totalQ / 2 ? "Good job — review the ones you missed"
-                    : "Keep studying and try again"}
+                  {passed ? "Passed" : "Not yet passed"}
                 </p>
                 <ProgressBar
-                  current={score} total={totalQ} showLabel size="md"
-                  colorClass={score === totalQ ? "bg-emerald-400" : score >= totalQ / 2 ? "bg-yellow-400" : "bg-red-400"}
+                  current={score}
+                  total={totalQ}
+                  showLabel
+                  size="md"
+                  colorClass={passed ? "bg-emerald-400" : "bg-red-400"}
                 />
+                {!passed && (
+                  <p className="text-slate-400 text-sm mt-4">
+                    You need {Math.ceil(PASS_THRESHOLD * totalQ)} / {totalQ} to pass. Review the explanations below and try again.
+                  </p>
+                )}
               </div>
 
               {/* Per-question review */}
@@ -206,17 +190,21 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
                   return (
                     <div key={q.id} className={cn(
                       "rounded-2xl border px-5 py-4 text-sm",
-                      ans?.isCorrect ? "border-emerald-500/20 bg-emerald-500/5" : "border-red-500/20 bg-red-500/5"
+                      ans?.isCorrect
+                        ? "border-emerald-500/20 bg-emerald-500/5"
+                        : "border-red-500/20 bg-red-500/5"
                     )}>
                       <div className="flex items-start gap-3">
                         <span className={cn(
-                          "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold",
+                          "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5",
                           ans?.isCorrect ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
                         )}>
                           {ans?.isCorrect ? "✓" : "✗"}
                         </span>
-                        <div>
-                          <p className="text-slate-300 font-semibold">Q{i + 1}: {q.prompt.split("\n")[0]}</p>
+                        <div className="min-w-0">
+                          <p className="text-slate-300 font-semibold">
+                            Q{i + 1}: {q.prompt.replace(/\*\*/g, '').split('\n')[0]}
+                          </p>
                           {!ans?.isCorrect && (
                             <p className="text-slate-500 text-xs mt-1">{q.explanation}</p>
                           )}
@@ -229,20 +217,21 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
 
               <div className="flex gap-3">
                 <button
-                  onClick={() => router.push("/learn/dashboard")}
+                  onClick={() => router.push(backPath)}
                   className="flex-1 rounded-full border border-slate-700 py-3 text-sm font-semibold text-slate-300 hover:border-slate-500 hover:text-white transition uppercase tracking-[0.2em]"
                 >
-                  Dashboard
+                  Back to Course
                 </button>
                 <button
                   onClick={handleRetake}
                   className="flex-1 rounded-full bg-cyan-400 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-300 transition uppercase tracking-[0.2em]"
                 >
-                  Retake Quiz
+                  Retake Test
                 </button>
               </div>
             </div>
           )}
+
         </div>
       </main>
     </AuthGuard>

@@ -13,6 +13,10 @@ const USERS: Record<string, { password: string; user: LearnUser }> = {
     password: "sunghyun123",
     user: { username: "sunghyun", displayName: "Sunghyun", role: "student" },
   },
+  min: {
+    password: "min123",
+    user: { username: "min", displayName: "Min", role: "student" },
+  },
   admin: {
     password: "qwer1234",
     user: { username: "admin", displayName: "Admin", role: "admin" },

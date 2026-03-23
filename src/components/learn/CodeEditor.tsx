@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { usePyodide, type TerminalLine } from "@/lib/learn/usePyodide";
+
+const CodeMirrorEditor = dynamic(() => import("./CodeMirrorEditor"), { ssr: false });
 
 interface CodeEditorProps {
   initialCode: string;
@@ -17,6 +20,7 @@ export default function CodeEditor({
   readOnly = false,
 }: CodeEditorProps) {
   const [code, setCode] = useState(initialCode);
+  const [resetKey, setResetKey] = useState(0);
   const [termLines, setTermLines] = useState<TerminalLine[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "running" | "waiting" | "done" | "pass" | "fail">("idle");
   const [inputPrompt, setInputPrompt] = useState("");
@@ -26,21 +30,16 @@ export default function CodeEditor({
   const outputAccRef = useRef<string[]>([]);
   const { runCode, submitInput } = usePyodide();
 
-  const lineCount = code.split("\n").length;
   const isRunning = status === "loading" || status === "running" || status === "waiting";
 
-  // Auto-scroll terminal to bottom
   useEffect(() => {
     if (termRef.current) {
       termRef.current.scrollTop = termRef.current.scrollHeight;
     }
   }, [termLines, status]);
 
-  // Focus input when waiting
   useEffect(() => {
-    if (status === "waiting") {
-      inputRef.current?.focus();
-    }
+    if (status === "waiting") inputRef.current?.focus();
   }, [status]);
 
   async function handleRun() {
@@ -60,9 +59,7 @@ export default function CodeEditor({
         setInputPrompt(prompt);
         setStatus("waiting");
       },
-      () => {
-        // onDone — status set below after error check
-      }
+      () => {}
     );
 
     if (error) {
@@ -80,7 +77,6 @@ export default function CodeEditor({
   function handleInputSubmit() {
     if (status !== "waiting") return;
     const val = inputValue;
-    // Add the input line to terminal display
     setTermLines((prev) => [...prev, { type: "input", prompt: inputPrompt, value: val }]);
     setInputValue("");
     setInputPrompt("");
@@ -90,6 +86,7 @@ export default function CodeEditor({
 
   function handleReset() {
     setCode(initialCode);
+    setResetKey((k) => k + 1);
     setTermLines([]);
     setStatus("idle");
     setInputValue("");
@@ -102,9 +99,7 @@ export default function CodeEditor({
     <div className="rounded-3xl border border-slate-800/70 bg-slate-950/70 overflow-hidden my-4 shadow-sm backdrop-blur">
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 py-2.5 border-b border-slate-800/70 bg-slate-900/60">
-        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-          python
-        </span>
+        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">python</span>
         <div className="flex items-center gap-2">
           {!readOnly && (
             <button
@@ -136,35 +131,14 @@ export default function CodeEditor({
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="flex bg-slate-950/70">
-        <div className="select-none px-4 py-4 text-right text-slate-700 text-sm leading-6 min-w-[2.5rem]">
-          {Array.from({ length: lineCount }, (_, i) => (
-            <div key={i}>{i + 1}</div>
-          ))}
-        </div>
-        <textarea
-          value={code}
-          onChange={(e) => !readOnly && setCode(e.target.value)}
-          readOnly={readOnly}
-          spellCheck={false}
-          className="flex-1 py-4 pr-4 bg-transparent text-slate-100 text-sm leading-6 resize-none outline-none"
-          style={{ height: `${Math.max(6, lineCount) * 1.5 + 2}rem`, fontFamily: "var(--font-mono), monospace" }}
-          onKeyDown={(e) => {
-            if (e.key === "Tab") {
-              e.preventDefault();
-              const el = e.currentTarget;
-              const start = el.selectionStart;
-              const end = el.selectionEnd;
-              const next = code.substring(0, start) + "    " + code.substring(end);
-              setCode(next);
-              requestAnimationFrame(() => {
-                el.selectionStart = el.selectionEnd = start + 4;
-              });
-            }
-          }}
-        />
-      </div>
+      {/* CodeMirror editor */}
+      <CodeMirrorEditor
+        key={resetKey}
+        initialCode={code}
+        language="python"
+        onChange={(v) => !readOnly && setCode(v)}
+        readOnly={readOnly}
+      />
 
       {/* Terminal */}
       {hasTerminalContent && (
@@ -178,30 +152,20 @@ export default function CodeEditor({
               <span className="text-xs font-semibold text-red-400">✗ Not quite</span>
             )}
           </div>
-
-          {/* Terminal output lines */}
           <div
             ref={termRef}
             className="px-5 py-4 text-sm max-h-64 overflow-y-auto"
             style={{ fontFamily: "var(--font-mono), monospace" }}
           >
             {termLines.map((line, i) => {
-              if (line.type === "output") {
-                return <div key={i} className="text-emerald-400 whitespace-pre-wrap">{line.text}</div>;
-              }
-              if (line.type === "input") {
-                return (
-                  <div key={i} className="text-slate-300 whitespace-pre-wrap">
-                    {line.prompt}<span className="text-cyan-300">{line.value}</span>
-                  </div>
-                );
-              }
-              if (line.type === "error") {
-                return <div key={i} className="text-red-400 whitespace-pre-wrap">{line.text}</div>;
-              }
+              if (line.type === "output") return <div key={i} className="text-emerald-400 whitespace-pre-wrap">{line.text}</div>;
+              if (line.type === "input") return (
+                <div key={i} className="text-slate-300 whitespace-pre-wrap">
+                  {line.prompt}<span className="text-cyan-300">{line.value}</span>
+                </div>
+              );
+              if (line.type === "error") return <div key={i} className="text-red-400 whitespace-pre-wrap">{line.text}</div>;
             })}
-
-            {/* Live input row */}
             {status === "waiting" && (
               <div className="flex items-center gap-0 text-slate-300">
                 <span className="whitespace-pre">{inputPrompt}</span>
@@ -209,12 +173,7 @@ export default function CodeEditor({
                   ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleInputSubmit();
-                    }
-                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleInputSubmit(); } }}
                   className="flex-1 bg-transparent text-cyan-300 outline-none caret-cyan-400 min-w-0"
                   style={{ fontFamily: "var(--font-mono), monospace" }}
                   autoComplete="off"

@@ -1,46 +1,36 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthGuard from "@/components/learn/AuthGuard";
 import ModuleCard from "@/components/learn/ModuleCard";
 import ProgressBar from "@/components/learn/ProgressBar";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { getAllModules } from "@/lib/learn/courseData";
-import { loadAllProgress, loadStudentStatuses, StudentMonitoringRow } from "@/lib/learn/db";
+import { loadAllProgress } from "@/lib/learn/db";
 
 const modules = getAllModules();
 const totalQ = modules.reduce((s, m) => s + m.questions.length, 0);
-const moduleBySlug = Object.fromEntries(modules.map((m) => [m.slug, m]));
 
 interface ModuleProgress {
   score: number;
   answeredCount: number;
 }
 
-type Tab = "learn" | "challenge";
+type Tab = "learn" | "challenge" | "tests";
 
 export default function Python101Page() {
   const { user, studentId, logout } = useLearnAuth();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("learn");
   const [progress, setProgress] = useState<Record<string, ModuleProgress>>({});
-  const [studentStatuses, setStudentStatuses] = useState<StudentMonitoringRow[]>([]);
   const [loadingProgress, setLoadingProgress] = useState(true);
 
   useEffect(() => {
     let active = true;
     async function load() {
       setLoadingProgress(true);
-      if (user?.role === "admin") {
-        const [statuses, ownProgress] = await Promise.all([
-          loadStudentStatuses(),
-          studentId ? loadAllProgress(studentId) : Promise.resolve({}),
-        ]);
-        if (!active) return;
-        setStudentStatuses(statuses);
-        setProgress(ownProgress);
-      } else if (studentId) {
+      if (studentId) {
         const data = await loadAllProgress(studentId);
         if (!active) return;
         setProgress(data);
@@ -49,7 +39,7 @@ export default function Python101Page() {
     }
     load();
     return () => { active = false; };
-  }, [studentId, user?.role]);
+  }, [studentId]);
 
   function handleLogout() {
     logout();
@@ -57,9 +47,6 @@ export default function Python101Page() {
   }
 
   const totalCorrect = Object.values(progress).reduce((s, m) => s + m.score, 0);
-  const completedStudents = studentStatuses.filter((s) =>
-    modules.every((m) => (s.progress[m.slug]?.answeredCount ?? 0) >= m.questions.length)
-  ).length;
 
   return (
     <AuthGuard>
@@ -88,13 +75,11 @@ export default function Python101Page() {
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
-                  {user?.role === "admin" ? "Students Completed" : "Overall"}
+                  Overall
                 </p>
                 <p className="text-2xl font-semibold text-white">
-                  {loadingProgress ? "—" : user?.role === "admin" ? completedStudents : totalCorrect}{" "}
-                  <span className="text-slate-500 text-base font-normal">
-                    / {user?.role === "admin" ? studentStatuses.length : totalQ}
-                  </span>
+                  {loadingProgress ? "—" : totalCorrect}{" "}
+                  <span className="text-slate-500 text-base font-normal">/ {totalQ}</span>
                 </p>
               </div>
               <button
@@ -128,96 +113,25 @@ export default function Python101Page() {
             >
               Challenge
             </button>
+            <button
+              onClick={() => setTab("tests")}
+              className={`px-6 py-2.5 rounded-xl text-sm font-semibold uppercase tracking-[0.25em] transition ${
+                tab === "tests"
+                  ? "bg-slate-700 text-white shadow"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              Tests
+            </button>
           </div>
 
           {/* Learn tab */}
           {tab === "learn" && (
             <>
-              {/* Admin: student monitoring */}
-              {user?.role === "admin" && (
-                <section className="space-y-6">
-                  <div className="rounded-3xl border border-slate-800/70 bg-slate-900/70 px-8 py-5 backdrop-blur shadow-sm">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-3">
-                          Student Progress
-                        </p>
-                        <p className="text-sm text-slate-400">
-                          Live course status pulled from quiz attempts stored in Supabase.
-                        </p>
-                      </div>
-                      <div className="text-right text-sm text-slate-400">
-                        <p>{studentStatuses.length} students</p>
-                        <p>{completedStudents} finished the course</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4 xl:grid-cols-2">
-                    {studentStatuses.map((s) => {
-                      const completedModuleCount = modules.filter(
-                        (m) => (s.progress[m.slug]?.answeredCount ?? 0) >= m.questions.length
-                      ).length;
-                      const statusLabel =
-                        s.answeredCount === 0 ? "Not started"
-                        : completedModuleCount === modules.length ? "Completed"
-                        : "In progress";
-                      const lastModule = s.lastActiveModuleSlug ? moduleBySlug[s.lastActiveModuleSlug] : null;
-
-                      return (
-                        <article
-                          key={s.student.id}
-                          className="rounded-3xl border border-slate-800/70 bg-slate-900/70 p-6 shadow-sm backdrop-blur"
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                                {s.student.username}
-                              </p>
-                              <h2 className="mt-2 text-2xl font-semibold text-white">
-                                {s.student.display_name}
-                              </h2>
-                            </div>
-                            <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                              {statusLabel}
-                            </span>
-                          </div>
-                          <div className="mt-6">
-                            <ProgressBar current={s.totalScore} total={totalQ} showLabel size="md" />
-                          </div>
-                          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Answered</p>
-                              <p className="mt-2 text-lg font-semibold text-white">{s.answeredCount} / {totalQ}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Modules Done</p>
-                              <p className="mt-2 text-lg font-semibold text-white">{completedModuleCount} / {modules.length}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Last Activity</p>
-                              <p className="mt-2 text-sm font-medium text-slate-200">
-                                {s.lastAnsweredAt ? new Date(s.lastAnsweredAt).toLocaleString() : "No attempts yet"}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Focus Area</p>
-                            <p className="mt-2 text-sm text-slate-300">
-                              {lastModule ? `Most recent module: ${lastModule.title}` : "No quiz attempts yet."}
-                            </p>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
-
               {/* Progress bar */}
               <div className="rounded-3xl border border-slate-800/70 bg-slate-900/70 px-8 py-5 backdrop-blur shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-3">
-                  {user?.role === "admin" ? "Your Course Progress" : "Course Progress"}
+                  Course Progress
                 </p>
                 <ProgressBar current={totalCorrect} total={totalQ} showLabel size="md" />
               </div>
@@ -244,6 +158,9 @@ export default function Python101Page() {
 
           {/* Challenge tab */}
           {tab === "challenge" && <ChallengeTab />}
+
+          {/* Tests tab */}
+          {tab === "tests" && <TestsTab router={router} />}
 
         </div>
       </main>
@@ -432,6 +349,38 @@ function ChallengeCard({ challenge }: { challenge: ChallengeDetail }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function TestsTab({ router }: { router: ReturnType<typeof useRouter> }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="mb-2">
+        <h2 className="text-xl font-semibold text-white mb-1">Tests</h2>
+        <p className="text-sm text-slate-400">
+          Formal assessments for this course. Each test is timed and graded — you need 60% or above to pass.
+        </p>
+      </div>
+      <div
+        onClick={() => router.push("/learn/courses/python101/tests/resit-1")}
+        className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
+      >
+        <div className="bg-gradient-to-r from-red-500 to-rose-400 h-1.5" />
+        <div className="p-7 flex items-center gap-6">
+          <span className="text-4xl">📝</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
+              8 Questions
+            </p>
+            <h3 className="text-xl font-semibold text-white mb-1">Python 101 — Test</h3>
+            <p className="text-sm text-slate-400">
+              3 multiple-choice + 5 coding questions covering the full Python 101 curriculum. Difficulty scales from easy to hard.
+            </p>
+          </div>
+          <span className="text-slate-600 text-xl shrink-0">→</span>
+        </div>
+      </div>
     </div>
   );
 }

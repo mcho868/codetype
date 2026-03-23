@@ -7,6 +7,8 @@ export interface Question {
   choices?: { id: string; text: string }[];
   correctAnswer: string;
   explanation: string;
+  /** Language for code-challenge questions (defaults to 'python') */
+  language?: 'python' | 'java';
   /** For code-challenge questions: starter code shown in the editor */
   starterCode?: string;
   /** For code-challenge questions: expected stdout output (trimmed) */
@@ -16,7 +18,7 @@ export interface Question {
 }
 
 export interface CodeExample {
-  language: 'python';
+  language: 'python' | 'java';
   code: string;
   caption?: string;
   /** If true, the code block will be an editable runner */

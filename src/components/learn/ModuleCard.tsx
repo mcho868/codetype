@@ -9,16 +9,23 @@ interface ModuleCardProps {
   module: Module;
   score?: number;
   completed?: boolean;
+  courseSlug?: string;
+  courseTitle?: string;
 }
 
 export default function ModuleCard({
   module,
   score = 0,
   completed = false,
+  courseSlug,
+  courseTitle = 'Python 101',
 }: ModuleCardProps) {
   const router = useRouter();
   const total = module.questions.length;
   const locked = module.locked;
+  const modulePath = courseSlug
+    ? `/learn/courses/${courseSlug}/${module.slug}`
+    : `/learn/${module.slug}`;
 
   let statusLabel = "Not Started";
   if (locked) statusLabel = "Coming Soon";
@@ -33,7 +40,7 @@ export default function ModuleCard({
           ? "border-slate-800/50 opacity-50 cursor-not-allowed"
           : "border-slate-800/70 cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg"
       )}
-      onClick={() => !locked && router.push(`/learn/${module.slug}`)}
+      onClick={() => !locked && router.push(modulePath)}
     >
       {/* Colour band */}
       <div className={cn("bg-gradient-to-r h-1.5", module.color)} />
@@ -58,7 +65,7 @@ export default function ModuleCard({
         </div>
 
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-2">
-          Python 101
+          {courseTitle}
         </p>
         <h3 className="text-lg font-semibold text-white mb-2">{module.title}</h3>
         <p className="text-sm text-slate-400 mb-5">{module.description}</p>

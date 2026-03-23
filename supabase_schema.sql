@@ -17,6 +17,7 @@ create table if not exists students (
 insert into students (username, display_name, role) values
   ('yohan',      'Yohan',      'student'),
   ('seonghyun',  'Seonghyun',  'student'),
+  ('min',        'Min',        'student'),
   ('admin',      'Admin',      'admin')
 on conflict (username) do nothing;
 

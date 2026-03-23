@@ -169,6 +169,26 @@ export async function loadStudentStatuses(): Promise<StudentMonitoringRow[]> {
   return Array.from(monitorRows.values());
 }
 
+export interface StudentAttemptDetail {
+  module_slug: string;
+  question_id: string;
+  selected_answer: string;
+  is_correct: boolean;
+  answered_at: string;
+}
+
+/** Load every attempt (with selected_answer) for one student — used by admin detail view. */
+export async function loadStudentDetail(studentId: string): Promise<StudentAttemptDetail[]> {
+  const { data, error } = await supabase
+    .from("quiz_attempts")
+    .select("module_slug, question_id, selected_answer, is_correct, answered_at")
+    .eq("student_id", studentId)
+    .order("answered_at", { ascending: true });
+
+  if (error || !data) return [];
+  return data as StudentAttemptDetail[];
+}
+
 /**
  * Delete all answers for a student + module (used by Retake Quiz).
  */

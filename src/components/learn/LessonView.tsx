@@ -4,12 +4,32 @@ import { useRouter } from "next/navigation";
 import AuthGuard from "@/components/learn/AuthGuard";
 import CodeBlock from "@/components/learn/CodeBlock";
 import CodeEditor from "@/components/learn/CodeEditor";
+import JavaEditor from "@/components/learn/JavaEditor";
 import { getModule } from "@/lib/learn/courseData";
+import { getCourse, getModuleFromCourse } from "@/lib/learn/registry";
 import { cn } from "@/lib/utils";
 
-export default function LessonView({ moduleId }: { moduleId: string }) {
+interface LessonViewProps {
+  moduleId: string;
+  courseSlug?: string;
+}
+
+export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
   const router = useRouter();
-  const mod = getModule(moduleId);
+  const course = courseSlug ? getCourse(courseSlug) : undefined;
+  const mod = courseSlug
+    ? getModuleFromCourse(courseSlug, moduleId)
+    : getModule(moduleId);
+  const courseTitle = course?.title ?? 'Python 101';
+  const lessonPath = courseSlug
+    ? `/learn/courses/${courseSlug}/${moduleId}`
+    : `/learn/${moduleId}`;
+  const quizPath = courseSlug
+    ? `/learn/courses/${courseSlug}/${moduleId}/quiz`
+    : `/learn/${moduleId}/quiz`;
+  const backPath = courseSlug
+    ? `/learn/courses/${courseSlug}`
+    : '/learn/dashboard';
 
   if (!mod || mod.locked) {
     return (
@@ -24,7 +44,7 @@ export default function LessonView({ moduleId }: { moduleId: string }) {
               {mod ? "This module is not available yet." : "Module not found."}
             </p>
             <button
-              onClick={() => router.push("/learn/dashboard")}
+              onClick={() => router.push(backPath)}
               className="rounded-full bg-cyan-400 px-5 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300 transition"
             >
               Back to Dashboard
@@ -43,10 +63,10 @@ export default function LessonView({ moduleId }: { moduleId: string }) {
           {/* Breadcrumb */}
           <div className="flex items-center gap-3">
             <button
-              onClick={() => router.push("/learn/dashboard")}
+              onClick={() => router.push(backPath)}
               className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 hover:text-slate-300 transition"
             >
-              ← Dashboard
+              ← {courseSlug ? 'Course' : 'Dashboard'}
             </button>
             <span className="text-slate-700">/</span>
             <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
@@ -61,7 +81,7 @@ export default function LessonView({ moduleId }: { moduleId: string }) {
               <span className="text-5xl">{mod.icon}</span>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
-                  Python 101
+                  {courseTitle}
                 </p>
                 <h1 className="text-2xl font-semibold text-white">{mod.title}</h1>
                 <p className="text-sm text-slate-400 mt-1">{mod.description}</p>
@@ -109,7 +129,13 @@ export default function LessonView({ moduleId }: { moduleId: string }) {
                 </div>
 
                 {lesson.codeExamples.map((ex, ci) =>
-                  ex.editable ? (
+                  ex.editable && ex.language === 'java' ? (
+                    <JavaEditor
+                      key={ci}
+                      initialCode={ex.code}
+                      caption={ex.caption}
+                    />
+                  ) : ex.editable ? (
                     <CodeEditor
                       key={ci}
                       initialCode={ex.code}
@@ -137,7 +163,7 @@ export default function LessonView({ moduleId }: { moduleId: string }) {
               </p>
             </div>
             <button
-              onClick={() => router.push(`/learn/${moduleId}/quiz`)}
+              onClick={() => router.push(quizPath)}
               className="rounded-full bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-300 transition whitespace-nowrap"
             >
               Take the Quiz →
