@@ -42,7 +42,8 @@ export function usePyodide() {
     code: string,
     onLine: (line: TerminalLine) => void,
     onWaitingForInput: (prompt: string) => void,
-    onDone: () => void
+    onDone: () => void,
+    timeoutMs = 5000
   ): Promise<{ error: string }> {
     // Terminate any previous run
     if (workerRef.current) {
@@ -53,6 +54,19 @@ export function usePyodide() {
     const worker = getWorker();
 
     return new Promise((resolve) => {
+      let settled = false;
+
+      const timeoutId = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        worker.terminate();
+        workerRef.current = null;
+        const msg = "TimeoutError: Program ran for too long — possible infinite loop. Check your loop conditions.";
+        onLine({ type: "error", text: msg });
+        onDone();
+        resolve({ error: msg });
+      }, timeoutMs);
+
       worker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === "stdout") {
@@ -62,9 +76,15 @@ export function usePyodide() {
         } else if (msg.type === "input_request") {
           onWaitingForInput(msg.prompt);
         } else if (msg.type === "done") {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeoutId);
           onDone();
           resolve({ error: "" });
         } else if (msg.type === "error") {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timeoutId);
           onLine({ type: "error", text: msg.text });
           onDone();
           resolve({ error: msg.text });
@@ -84,7 +104,7 @@ export function usePyodide() {
   async function runCodeSimple(code: string): Promise<{ output: string; error: string }> {
     const lines: string[] = [];
     let errorMsg = "";
-    await runCode(
+    const result = await runCode(
       code,
       (line) => {
         if (line.type === "output") lines.push(line.text);
@@ -93,8 +113,16 @@ export function usePyodide() {
       () => {},
       () => {}
     );
+    if (result.error) errorMsg = result.error;
     return { output: lines.join("\n"), error: errorMsg };
   }
 
-  return { runCode, runCodeSimple, submitInput };
+  function terminateWorker() {
+    if (workerRef.current) {
+      workerRef.current.terminate();
+      workerRef.current = null;
+    }
+  }
+
+  return { runCode, runCodeSimple, submitInput, terminateWorker };
 }

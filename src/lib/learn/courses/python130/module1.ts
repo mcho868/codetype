@@ -69,7 +69,7 @@ for n in [10, 100, 1000, 10000]:
 
 When code has sequential sections (one block after another), you take the *maximum* complexity — O(n) followed by O(n²) is still O(n²). Constants don't change the Big-O class: a loop that does 5 operations per iteration is still O(n), not O(5n).
 
-For nested loops, multiply the complexities: an outer loop running n times with an inner loop running m times is O(n×m). If both loops go to n, it's O(n²). If the inner loop goes to n but starts at i (the outer index), it's O(n²/2) which is still O(n²) after dropping the constant.
+For nested loops, multiply the complexities: an outer loop running n times with an inner loop running m times is O(n×m). If both loops go to n, it\’s O(n²). If the inner loop goes to n but starts at i (the outer index), it's O(n²/2) which is still O(n²) after dropping the constant.
 
 Python's built-in list operations have specific complexities you should know: **list[i]** is O(1). **list.append(x)** is O(1) amortised. **list.insert(0, x)** is O(n) because every existing element must shift right. **x in list** is O(n) because Python scans the whole list. **len(list)** is O(1). In contrast, dictionary lookup **d[key]** is O(1) average case. This is why using a set or dict for membership tests is much faster than using a list for large collections.
 
@@ -108,7 +108,7 @@ print(count_halvings(1024))  # 10 steps for 1024 elements`,
         },
         {
           language: 'python',
-          code: `# List vs dict for membership: a huge practical difference
+          code: `# List vs set for membership: a huge practical difference
 import time
 
 data_list = list(range(100000))
@@ -117,20 +117,23 @@ data_set  = set(range(100000))
 target = 99999  # worst case: near the end
 
 # O(n) list search
-start = time.time()
+start = time.perf_counter()
 for _ in range(1000):
     result = target in data_list
-list_time = time.time() - start
+list_time = time.perf_counter() - start
 
 # O(1) set search
-start = time.time()
+start = time.perf_counter()
 for _ in range(1000):
     result = target in data_set
-set_time = time.time() - start
+set_time = time.perf_counter() - start
 
 print(f"List lookup: {list_time:.4f}s")
 print(f"Set  lookup: {set_time:.4f}s")
-print(f"Set is ~{list_time/set_time:.0f}x faster")`,
+if set_time > 0:
+    print(f"Set is ~{list_time / set_time:.0f}x faster")
+else:
+    print("Set lookup was too fast to measure precisely")`,
           caption: 'O(n) list membership vs O(1) set membership — measured difference',
           editable: true,
         },
@@ -139,44 +142,56 @@ print(f"Set is ~{list_time/set_time:.0f}x faster")`,
     {
       id: 'lesson-1-3',
       title: 'Space Complexity & Trade-offs',
-      content: `Time complexity is only half the picture. **Space complexity** measures how much extra memory an algorithm uses as the input grows. An algorithm might be fast but require enormous amounts of RAM — that can be just as problematic as being slow.
+      content: `Time complexity is only half the story. **Space complexity** measures how much **extra memory** an algorithm uses as the input grows. Some operations are fast because they allocate extra storage; others save memory by modifying data in place.
 
-Space complexity uses the same Big-O notation. An algorithm that uses a fixed amount of extra memory regardless of input size is O(1) space. One that creates a new list of size n is O(n) space. Recursive algorithms often use O(depth) space for the call stack, which can be O(log n) for balanced recursion or O(n) for linear recursion.
+Space complexity uses the same Big-O notation. If an algorithm only needs a few variables no matter how large the input gets, that is **O(1) space**. If it builds a new list, set, or dictionary that grows with the input, that is usually **O(n) space**.
 
-The classic **time-space trade-off** is memoisation: paying with memory to avoid recomputing values. The Fibonacci sequence calculated naively with recursion is O(2^n) time — exponentially slow — because it recalculates the same sub-problems millions of times. By storing results in a dictionary (a technique called **memoisation** or **dynamic programming**), you reduce the time to O(n) at the cost of O(n) space. This is almost always a worthwhile bargain.
+A very practical trade-off in Python is **using extra memory to speed up lookup**. Checking \`x in my_list\` is O(n), because Python may need to scan the whole list. But if you convert the data to a set first, \`x in my_set\` is O(1) average case. The cost is that the set itself takes extra memory. This is often a good trade when you need many lookups.
 
-**Best, worst, and average case** analysis gives a fuller picture of an algorithm's behaviour. For example, searching a list for a target: the best case is O(1) if it's the first element; the worst case is O(n) if it's the last or absent. We usually focus on worst-case because it's a guarantee — your program will never be slower than that. Average case (assuming random data) often equals worst case for simple algorithms.
+Another common example is copying a list versus updating it in place. Making \`new_list = old_list[:]\` uses O(n) extra space because it creates a second list of the same size. Updating elements inside the original list can often be done in O(1) extra space.
 
-Why does O(n²) fail on large inputs? A sorting algorithm with O(n²) time on a list of 100,000 items performs 10,000,000,000 operations. At 1 billion operations per second, that's 10 seconds — and it gets worse fast. The same task with an O(n log n) algorithm is roughly 1,700,000 operations — nearly instant. This is why knowing complexity matters even for "working" code.`,
+**Best, worst, and average case** analysis gives a fuller picture of an algorithm\'s behaviour. For example, searching a list for a target: the best case is O(1) if it's the first element; the worst case is O(n) if it\'s the last or absent. We usually focus on worst-case because it\'s a guarantee — your program will never be slower than that.
+
+The key habit is practical: when a program feels slow, ask both questions. How many operations is it doing? And how much extra memory is it allocating? Good algorithm design is usually about choosing the right balance for the job.`,
       codeExamples: [
         {
           language: 'python',
-          code: `# Fibonacci: naive recursion vs memoisation
+          code: `# Time-space trade-off: use extra memory for faster membership checks
 import time
 
-# O(2^n) time, O(n) space (call stack)
-def fib_slow(n):
-    if n <= 1:
-        return n
-    return fib_slow(n - 1) + fib_slow(n - 2)
+data_list = list(range(100000))
+data_set = set(data_list)  # extra memory: O(n) space
 
-# O(n) time, O(n) space (the memo dict)
-def fib_fast(n, memo={}):
-    if n in memo:
-        return memo[n]
-    if n <= 1:
-        return n
-    memo[n] = fib_fast(n - 1, memo) + fib_fast(n - 2, memo)
-    return memo[n]
+target = 99999
 
-start = time.time()
-print("fib_slow(30) =", fib_slow(30))
-print(f"Slow took: {time.time()-start:.3f}s")
+start = time.perf_counter()
+print(target in data_list)   # O(n) time, O(1) extra space
+print(f"List lookup: {time.perf_counter() - start:.6f}s")
 
-start = time.time()
-print("fib_fast(30) =", fib_fast(30))
-print(f"Fast took: {time.time()-start:.6f}s")`,
-          caption: 'Memoisation trades O(n) space for a dramatic time speedup',
+start = time.perf_counter()
+print(target in data_set)    # O(1) average time, but set uses extra memory
+print(f"Set lookup:  {time.perf_counter() - start:.6f}s")`,
+          caption: 'A set uses extra memory, but repeated membership checks become much faster',
+          editable: true,
+        },
+        {
+          language: 'python',
+          code: `# O(1) extra space vs O(n) extra space
+def double_in_place(numbers):
+    for i in range(len(numbers)):
+        numbers[i] = numbers[i] * 2   # modifies original list
+    return numbers
+
+def doubled_copy(numbers):
+    result = []
+    for num in numbers:
+        result.append(num * 2)        # builds a new list
+    return result
+
+data = [1, 2, 3, 4]
+print(double_in_place(data[:]))   # O(1) extra space
+print(doubled_copy(data))         # O(n) extra space`,
+          caption: 'Updating in place uses constant extra space; building a new list uses linear extra space',
           editable: true,
         },
         {
@@ -267,9 +282,15 @@ print(linear_search(data, 9999)) # not found, scans all 1000
     },
     {
       id: 'q1-6',
-      type: 'fill-in-blank',
+      type: 'multiple-choice',
       prompt: 'An algorithm that halves its search space each step (like binary search) has O(_____) complexity.',
-      correctAnswer: 'log n',
+      choices: [
+        { id: 'a', text: '1' },
+        { id: 'b', text: 'log n' },
+        { id: 'c', text: 'n' },
+        { id: 'd', text: 'n²' },
+      ],
+      correctAnswer: 'b',
       explanation: 'When you halve the problem each step, you need at most log₂(n) steps to reduce it to size 1. This is O(log n) — logarithmic complexity.',
     },
     {
@@ -300,10 +321,16 @@ print(linear_search(data, 9999)) # not found, scans all 1000
     },
     {
       id: 'q1-9',
-      type: 'true-false',
-      prompt: 'Memoisation (caching computed results in a dict) is an example of a time-space trade-off.',
-      correctAnswer: 'true',
-      explanation: 'Memoisation uses extra memory (space) to avoid recomputing values (time). The classic example is Fibonacci: naive recursion is O(2^n) time; memoised is O(n) time at the cost of O(n) space.',
+      type: 'multiple-choice',
+      prompt: 'Why can using a set for membership checks be faster than using a list?',
+      choices: [
+        { id: 'a', text: 'Sets are always smaller in memory than lists' },
+        { id: 'b', text: 'Set membership is O(1) average case, while list membership is O(n)' },
+        { id: 'c', text: 'Lists cannot store integers efficiently' },
+        { id: 'd', text: 'A set keeps items sorted automatically' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'A set uses hashing, so `x in my_set` is O(1) average case. A list may need to scan element by element, so `x in my_list` is O(n). The speed gain comes from using extra memory for the set structure.',
     },
     {
       id: 'q1-10',

@@ -133,7 +133,7 @@ print(parse_value(None))      # TypeError`,
 
 Why write tests? Because without them, the only way to know your code works is to manually run it and stare at the output. That doesn't scale. When you add a new feature or fix a bug, tests catch if you accidentally broke something that was working before — this is called a **regression**. Teams with good test coverage can make changes confidently.
 
-The simplest form of testing uses Python's built-in **assert** statement. \`assert condition\` does nothing if condition is True, but raises an AssertionError immediately if it's False. This lets you write quick sanity checks. A more structured approach uses the **pytest** framework — you write functions whose names start with \`test_\`, and pytest discovers and runs them all, reporting any failures.
+The simplest form of testing uses Python\'s built-in **assert** statement. \`assert condition\` does nothing if condition is True, but raises an AssertionError immediately if it’s False. This lets you write quick sanity checks. A more structured approach uses the **pytest** framework — you write functions whose names start with \`test_\`, and pytest discovers and runs them all, reporting any failures.
 
 Good tests cover three categories: **normal cases** (typical inputs that should work), **edge cases** (boundary values like empty lists, zero, very large numbers), and **error cases** (inputs that should raise exceptions). Thinking about edge cases forces you to understand your function's requirements deeply. For exception testing, use \`try/except\` in your test to confirm the right exception is raised.
 

@@ -268,7 +268,7 @@ print(f"New area: {c.area:.2f}")
     {
       id: 'q3-3',
       type: 'multiple-choice',
-      prompt: 'What does __str__ allow you to do?',
+      prompt: 'What does __ str __ allow you to do?',
       choices: [
         { id: 'a', text: 'Convert the object to an integer' },
         { id: 'b', text: 'Compare two objects with ==' },

@@ -28,7 +28,7 @@ export default function CodeEditor({
   const termRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputAccRef = useRef<string[]>([]);
-  const { runCode, submitInput } = usePyodide();
+  const { runCode, submitInput, terminateWorker } = usePyodide();
 
   const isRunning = status === "loading" || status === "running" || status === "waiting";
 
@@ -109,25 +109,35 @@ export default function CodeEditor({
               Reset
             </button>
           )}
-          <button
-            onClick={handleRun}
-            disabled={isRunning}
-            className="inline-flex items-center gap-1.5 rounded-full bg-cyan-400 px-4 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-50"
-          >
-            {status === "loading" ? (
-              <>
-                <span className="w-3 h-3 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
-                Loading Python...
-              </>
-            ) : status === "running" || status === "waiting" ? (
-              <>
-                <span className="w-3 h-3 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
-                Running...
-              </>
-            ) : (
-              "▶ Run"
-            )}
-          </button>
+          {isRunning ? (
+            <button
+              onClick={() => {
+                terminateWorker();
+                setTermLines((prev) => [...prev, { type: "error", text: "Execution stopped by user." }]);
+                setStatus("fail");
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-400"
+            >
+              {status === "loading" ? (
+                <>
+                  <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Stop
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleRun}
+              className="inline-flex items-center gap-1.5 rounded-full bg-cyan-400 px-4 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-300"
+            >
+              ▶ Run
+            </button>
+          )}
         </div>
       </div>
 

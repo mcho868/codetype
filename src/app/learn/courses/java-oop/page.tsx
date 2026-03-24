@@ -40,7 +40,7 @@ export default function JavaOopPage() {
 
   function handleLogout() {
     logout();
-    router.push("/learn");
+    router.push("/learn/auth");
   }
 
   const totalCorrect = Object.entries(progress)

@@ -7,7 +7,7 @@ const module10: Module = {
   description: 'Process elements by priority using the binary heap — the most efficient priority queue implementation.',
   icon: '⬆️',
   color: 'from-teal-500 to-green-400',
-  locked: false,
+  locked: true,
   lessons: [
     {
       id: 'lesson-10-1',

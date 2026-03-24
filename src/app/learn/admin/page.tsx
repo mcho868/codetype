@@ -59,7 +59,7 @@ export default function AdminPage() {
 
   function handleLogout() {
     logout();
-    router.push("/learn");
+    router.push("/learn/auth");
   }
 
   const filteredCourses =

@@ -56,7 +56,7 @@ export default function QuestionCard({
   const [codeError, setCodeError] = useState("");
   const [patternError, setPatternError] = useState("");
   const [runStatus, setRunStatus] = useState<"idle" | "loading" | "pass" | "fail">("idle");
-  const { runCodeSimple } = usePyodide();
+  const { runCodeSimple, terminateWorker } = usePyodide();
 
   const isJava = question.language === "java";
   const lang = isJava ? "java" : "python";
@@ -272,21 +272,30 @@ export default function QuestionCard({
             {/* Editor top bar */}
             <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/60 border-b border-slate-800/70">
               <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">{lang}</span>
-              <button
-                onClick={handleRunCode}
-                disabled={submitted || runStatus === "loading"}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-slate-950 transition disabled:opacity-50",
-                  accentClass
-                )}
-              >
-                {runStatus === "loading" ? (
-                  <>
-                    <span className="w-3 h-3 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
-                    {isJava ? "Compiling..." : "Loading..."}
-                  </>
-                ) : "▶ Run & Check"}
-              </button>
+              {runStatus === "loading" ? (
+                <button
+                  onClick={() => {
+                    terminateWorker();
+                    setCodeError("Execution stopped by user.");
+                    setRunStatus("fail");
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-400"
+                >
+                  <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Stop
+                </button>
+              ) : (
+                <button
+                  onClick={handleRunCode}
+                  disabled={submitted}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-slate-950 transition disabled:opacity-50",
+                    accentClass
+                  )}
+                >
+                  ▶ Run & Check
+                </button>
+              )}
             </div>
 
             {/* CodeMirror editor */}

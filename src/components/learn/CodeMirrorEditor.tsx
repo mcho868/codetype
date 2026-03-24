@@ -18,6 +18,7 @@ interface CodeMirrorEditorProps {
 
 const MIN_HEIGHT = 120;
 const DEFAULT_HEIGHT = 200;
+const EDITOR_VERTICAL_CHROME = 28;
 
 export default function CodeMirrorEditor({
   initialCode,
@@ -27,13 +28,22 @@ export default function CodeMirrorEditor({
 }: CodeMirrorEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
   const dragStartY = useRef<number>(0);
   const dragStartH = useRef<number>(DEFAULT_HEIGHT);
+  const hasManualResizeRef = useRef(false);
+
+  const fitHeightToContent = useCallback(() => {
+    const view = viewRef.current;
+    if (!view) return;
+
+    const contentHeight = view.scrollDOM.scrollHeight;
+    setHeight(Math.max(MIN_HEIGHT, contentHeight + EDITOR_VERTICAL_CHROME));
+  }, []);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    hasManualResizeRef.current = true;
     dragStartY.current = e.clientY;
     dragStartH.current = height;
 
@@ -137,13 +147,17 @@ export default function CodeMirrorEditor({
 
     const view = new EditorView({ state, parent: containerRef.current });
     viewRef.current = view;
+    hasManualResizeRef.current = false;
+    requestAnimationFrame(() => {
+      fitHeightToContent();
+    });
 
     return () => {
       view.destroy();
       viewRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, readOnly]);
+  }, [fitHeightToContent, language, readOnly]);
 
   // Sync external code resets (e.g. Reset button) without re-mounting
   useEffect(() => {
@@ -154,13 +168,16 @@ export default function CodeMirrorEditor({
       view.dispatch({
         changes: { from: 0, to: current.length, insert: initialCode },
       });
+      if (!hasManualResizeRef.current) {
+        requestAnimationFrame(() => {
+          fitHeightToContent();
+        });
+      }
     }
-    // Only run when initialCode changes due to an explicit reset
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialCode]);
+  }, [fitHeightToContent, initialCode]);
 
   return (
-    <div ref={wrapperRef} className="relative w-full select-none">
+    <div className="relative w-full select-none">
       <div
         ref={containerRef}
         className="w-full bg-slate-950/70 text-sm"

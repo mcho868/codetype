@@ -43,7 +43,7 @@ export default function Python101Page() {
 
   function handleLogout() {
     logout();
-    router.push("/learn");
+    router.push("/learn/auth");
   }
 
   const totalCorrect = Object.values(progress).reduce((s, m) => s + m.score, 0);

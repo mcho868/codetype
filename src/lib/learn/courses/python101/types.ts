@@ -25,11 +25,21 @@ export interface CodeExample {
   editable?: boolean;
 }
 
+export type VisualizerKind =
+  | 'linear-search'
+  | 'binary-search'
+  | 'selection-sort'
+  | 'bubble-sort'
+  | 'insertion-sort'
+  | 'merge-sort';
+
 export interface Lesson {
   id: string;
   title: string;
   content: string;
   codeExamples: CodeExample[];
+  /** Optional algorithm visualizer(s) to render below the lesson content */
+  visualizer?: VisualizerKind | VisualizerKind[];
 }
 
 export interface Module {

@@ -7,7 +7,7 @@ const module9: Module = {
   description: 'Achieve O(1) average-case lookup using hash functions and collision resolution strategies.',
   icon: '#️⃣',
   color: 'from-pink-500 to-rose-400',
-  locked: false,
+  locked: true,
   lessons: [
     {
       id: 'lesson-9-1',

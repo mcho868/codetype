@@ -12,6 +12,7 @@ const module2: Module = {
     {
       id: 'lesson-2-1',
       title: 'Linear & Binary Search',
+      visualizer: ['linear-search', 'binary-search'] as const,
       content: `Searching is one of the most fundamental operations in computing. Given a collection of data, find a specific item. Two classic algorithms approach this very differently: **linear search** and **binary search**.
 
 **Linear search** (also called sequential search) is the simplest possible approach: start at the beginning and check each element one by one until you find the target or exhaust the list. It requires no special setup — the list doesn't need to be sorted. Its time complexity is O(n): in the worst case (target is last or absent), you check every element. This is acceptable for small lists or when you only search once, but impractical for large, frequently-searched datasets.
@@ -20,7 +21,7 @@ const module2: Module = {
 
 The trade-off is clear: binary search is far faster, but only works on sorted data. If you search a list only once and it's unsorted, linear search may be fine. If you search repeatedly, it may be worth sorting first (O(n log n)) and then binary searching (O(log n) each time).
 
-Python's standard library includes **bisect** module for binary search on sorted lists. \`bisect.bisect_left(lst, x)\` returns the position where x would be inserted to keep the list sorted — if x is already in the list, that's its index. This is a production-quality, well-tested binary search you can rely on.`,
+Python\'s standard library includes **bisect** module for binary search on sorted lists. \`bisect.bisect_left(lst, x)\` returns the position where x would be inserted to keep the list sorted — if x is already in the list, that's its index. This is a production-quality, well-tested binary search you can rely on.`,
       codeExamples: [
         {
           language: 'python',
@@ -91,6 +92,7 @@ print(sorted_list)  # [1, 3, 5, 6, 7, 9, 11, 13]`,
     {
       id: 'lesson-2-2',
       title: 'Selection Sort & Bubble Sort',
+      visualizer: ['selection-sort', 'bubble-sort'] as const,
       content: `Sorting is the process of rearranging elements into order. There are dozens of sorting algorithms; understanding a few simple ones deeply is more valuable than skimming many. The simplest algorithms all share O(n²) time complexity — they are not used in production for large inputs, but they are excellent for learning algorithm design and the concept of invariants.
 
 **Selection sort** works by finding the minimum element in the unsorted portion of the list and swapping it into its correct position. After the first pass, the smallest element is in position 0. After the second, the second-smallest is in position 1. The "sorted portion" grows from the left. It performs exactly n-1 swaps — always — making it ideal when swaps are expensive. Its comparison count is O(n²) regardless of the input (even a sorted list!), which is a disadvantage.
@@ -146,16 +148,76 @@ print(bubble_sort([1, 2, 3, 4, 5]))  # triggers early exit`,
     },
     {
       id: 'lesson-2-3',
+      title: 'Insertion Sort',
+      visualizer: 'insertion-sort' as const,
+      content: `**Insertion sort** builds the sorted list one element at a time. Think of how you sort a hand of playing cards: you pick up one card and slot it into the correct position among the cards you're already holding. The sorted portion grows from the left, and each new element is inserted by shifting larger elements one position to the right to make room.
+
+The algorithm maintains an **invariant**: at the start of each pass \`i\`, the elements \`lst[0..i-1]\` are already in sorted order. For each new element at index \`i\`, we compare it backwards through the sorted portion, shifting elements right until we find the correct insertion point.
+
+**Time complexity**: O(n²) in the worst and average case (reverse-sorted input requires the most shifting). However, insertion sort has an excellent **best case of O(n)** — if the list is already sorted, each element just compares once to its left neighbour and no shifting is needed. This makes it the algorithm of choice for **nearly-sorted data**, which is why Python's Timsort uses insertion sort internally for small subarrays.
+
+**Space complexity**: O(1) — it sorts in-place with no extra memory beyond a single \`key\` variable.
+
+Compared to selection sort and bubble sort, insertion sort is generally faster in practice on small or nearly-sorted lists, and is also **stable** — equal elements keep their original relative order.`,
+      codeExamples: [
+        {
+          language: 'python',
+          code: `# Insertion sort: O(n²) worst case, O(n) best case
+def insertion_sort(lst):
+    for i in range(1, len(lst)):
+        key = lst[i]          # the element to insert
+        j = i - 1
+        # Shift elements that are greater than key one position right
+        while j >= 0 and lst[j] > key:
+            lst[j + 1] = lst[j]
+            j -= 1
+        lst[j + 1] = key      # insert key into its correct position
+        print(f"Step {i}: {lst}")
+    return lst
+
+print(insertion_sort([5, 2, 4, 6, 1, 3]))`,
+          caption: 'Insertion sort: each element is inserted into its correct position',
+          editable: true,
+        },
+        {
+          language: 'python',
+          code: `# Best case: nearly-sorted input — very fast!
+def insertion_sort(lst):
+    comparisons = 0
+    for i in range(1, len(lst)):
+        key = lst[i]
+        j = i - 1
+        while j >= 0 and lst[j] > key:
+            lst[j + 1] = lst[j]
+            j -= 1
+            comparisons += 1
+        comparisons += 1  # final comparison that exits the while
+        lst[j + 1] = key
+    return lst, comparisons
+
+sorted_result, c1 = insertion_sort([1, 2, 3, 4, 5])
+print(f"Already sorted:  {sorted_result} — {c1} comparisons")
+
+reversed_result, c2 = insertion_sort([5, 4, 3, 2, 1])
+print(f"Reverse sorted:  {reversed_result} — {c2} comparisons")`,
+          caption: 'Insertion sort is O(n) on already-sorted input — far fewer comparisons',
+          editable: true,
+        },
+      ],
+    },
+    {
+      id: 'lesson-2-4',
       title: 'Merge Sort (Divide & Conquer)',
-      content: `**Merge sort** is the first O(n log n) sorting algorithm you'll implement. It uses a powerful strategy called **divide and conquer**: split the problem in half, solve each half recursively, then combine the results. It is guaranteed O(n log n) in all cases — best, average, and worst — unlike quicksort which has an O(n²) worst case.
+      visualizer: 'merge-sort' as const,
+      content: `**Note: Merge sort is not typically examined in COSC 130 — this is optional material for students who want to go deeper.**
+
+**Merge sort** is an O(n log n) sorting algorithm that uses a strategy called **divide and conquer**: split the problem in half, solve each half recursively, then combine the results. It is guaranteed O(n log n) in all cases — best, average, and worst — unlike quicksort which has an O(n²) worst case.
 
 The algorithm has two phases. **Divide**: if the list has 0 or 1 elements, it's already sorted (base case, return it). Otherwise, split it down the middle into a left half and right half, and recursively sort each. **Merge**: take two sorted halves and combine them into one sorted list by repeatedly picking the smaller of the two front elements.
 
 The merge step is the heart of the algorithm. Imagine two sorted piles of cards face-up. You pick the smaller card from the front of either pile and place it on the result pile. You repeat until one pile is empty, then append the remaining pile. This linear merge pass is O(n). Since the recursion depth is O(log n) levels, and each level does O(n) total merging work, the overall complexity is O(n log n).
 
-The trade-off compared to selection/bubble sort: merge sort uses O(n) extra space for the temporary arrays created during merging. This is its main disadvantage — if memory is extremely limited, an in-place O(n²) algorithm might be preferred. In practice, the massive time savings of O(n log n) almost always outweigh the O(n) space cost.
-
-Understanding merge sort also builds intuition for **recursion** on collections and **invariants** — merge sort's invariant is "I trust that the recursive calls return sorted lists." Writing recursive algorithms requires trusting the recursion to work correctly on smaller inputs; you only need to handle the current step correctly.`,
+The trade-off compared to the O(n²) sorts: merge sort uses O(n) extra space for the temporary arrays created during merging. In practice, the massive time savings almost always outweigh this space cost.`,
       codeExamples: [
         {
           language: 'python',
@@ -289,23 +351,23 @@ merge_sort_verbose([5, 2, 8, 1, 9])`,
     },
     {
       id: 'q2-7',
-      type: 'true-false',
-      prompt: 'Merge sort uses O(n) extra space because it creates new lists during the merge step.',
-      correctAnswer: 'true',
-      explanation: 'Merge sort is not in-place. The merge function allocates a new list to hold the merged result. Across all levels of recursion, the total extra space is O(n).',
+      type: 'multiple-choice',
+      prompt: 'What is the best-case time complexity of insertion sort, and when does it occur?',
+      choices: [
+        { id: 'a', text: 'O(n²) — it is always the same regardless of input' },
+        { id: 'b', text: 'O(n log n) — when the list is half-sorted' },
+        { id: 'c', text: 'O(n) — when the list is already sorted' },
+        { id: 'd', text: 'O(1) — when the first element is already in place' },
+      ],
+      correctAnswer: 'c',
+      explanation: 'When the list is already sorted, every element only needs one comparison against its left neighbour and no shifting — the inner while loop never executes. This gives O(n) best case: one pass, n-1 comparisons.',
     },
     {
       id: 'q2-8',
-      type: 'multiple-choice',
-      prompt: 'What is the time complexity of merge sort?',
-      choices: [
-        { id: 'a', text: 'O(n) in all cases' },
-        { id: 'b', text: 'O(n log n) in all cases' },
-        { id: 'c', text: 'O(n²) worst case, O(n log n) average' },
-        { id: 'd', text: 'O(log n) in all cases' },
-      ],
-      correctAnswer: 'b',
-      explanation: 'Merge sort is O(n log n) in all cases — best, average, and worst. There is no bad input that degrades its performance, unlike quicksort which can be O(n²) in the worst case.',
+      type: 'true-false',
+      prompt: 'Insertion sort is a stable sorting algorithm — equal elements maintain their original relative order.',
+      correctAnswer: 'true',
+      explanation: 'Insertion sort only shifts elements that are strictly greater than the key (using > not >=). Equal elements are never moved past each other, so their original order is preserved. This makes insertion sort stable.',
     },
     {
       id: 'q2-9',
@@ -319,19 +381,6 @@ merge_sort_verbose([5, 2, 8, 1, 9])`,
       ],
       correctAnswer: 'b',
       explanation: 'Pay O(n log n) once to sort with an efficient algorithm, then every subsequent search is O(log n). Thousands of O(log n) searches are far cheaper than thousands of O(n) linear searches.',
-    },
-    {
-      id: 'q2-10',
-      type: 'multiple-choice',
-      prompt: 'In merge sort, what is the base case that stops the recursion?',
-      choices: [
-        { id: 'a', text: 'When the list has exactly 2 elements' },
-        { id: 'b', text: 'When the list has 0 or 1 elements — it is already sorted' },
-        { id: 'c', text: 'When all elements are in order' },
-        { id: 'd', text: 'When the recursion depth exceeds 10' },
-      ],
-      correctAnswer: 'b',
-      explanation: 'A list with 0 or 1 elements is trivially sorted — there is nothing to do. This is the base case that stops merge sort\'s recursion.',
     },
     {
       id: 'q2-11',
@@ -359,6 +408,16 @@ merge_sort_verbose([5, 2, 8, 1, 9])`,
       expectedOutput: "[11, 12, 22, 25, 64]",
       correctAnswer: '__code__',
       explanation: 'In the inner loop, update min_idx whenever lst[j] < lst[min_idx]. After the inner loop, swap lst[i] with lst[min_idx]. This places the smallest unsorted element at position i each pass.',
+    },
+    {
+      id: 'q2-14',
+      type: 'code-challenge',
+      language: 'python',
+      prompt: "Implement insertion sort. Write `insertion_sort(lst)` that sorts the list in-place and returns it. For each element, shift larger elements right and insert the element into its correct position. Test with [5, 2, 4, 6, 1, 3].",
+      starterCode: "def insertion_sort(lst):\n    for i in range(1, len(lst)):\n        key = lst[i]\n        j = i - 1\n        # Shift elements greater than key one position right\n        while j >= 0 and lst[j] > key:\n            # Your code here\n            pass\n        lst[j + 1] = key\n    return lst\n\nprint(insertion_sort([5, 2, 4, 6, 1, 3]))",
+      expectedOutput: "[1, 2, 3, 4, 5, 6]",
+      correctAnswer: '__code__',
+      explanation: 'Inside the while loop: lst[j + 1] = lst[j] shifts the element right, then j -= 1 moves the pointer left. When the loop ends, j + 1 is the correct insertion position for key.',
     },
   ],
 };

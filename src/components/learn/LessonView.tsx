@@ -1,12 +1,21 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import AuthGuard from "@/components/learn/AuthGuard";
 import CodeBlock from "@/components/learn/CodeBlock";
 import CodeEditor from "@/components/learn/CodeEditor";
+import ComplexityGraph from "@/components/learn/ComplexityGraph";
 import JavaEditor from "@/components/learn/JavaEditor";
+
+const AlgorithmVisualizer = dynamic(
+  () => import("@/components/learn/AlgorithmVisualizer"),
+  { ssr: false }
+);
 import { getModule } from "@/lib/learn/courseData";
 import { getCourse, getModuleFromCourse } from "@/lib/learn/registry";
+import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { cn } from "@/lib/utils";
 
 interface LessonViewProps {
@@ -16,14 +25,19 @@ interface LessonViewProps {
 
 export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
   const router = useRouter();
+  const { user } = useLearnAuth();
+
   const course = courseSlug ? getCourse(courseSlug) : undefined;
   const mod = courseSlug
     ? getModuleFromCourse(courseSlug, moduleId)
     : getModule(moduleId);
+
+  useEffect(() => {
+    if (mod?.locked && user?.role !== 'admin') {
+      router.replace(courseSlug ? `/learn/courses/${courseSlug}` : '/learn/dashboard');
+    }
+  }, [mod, user, router, courseSlug]);
   const courseTitle = course?.title ?? 'Python 101';
-  const lessonPath = courseSlug
-    ? `/learn/courses/${courseSlug}/${moduleId}`
-    : `/learn/${moduleId}`;
   const quizPath = courseSlug
     ? `/learn/courses/${courseSlug}/${moduleId}/quiz`
     : `/learn/${moduleId}/quiz`;
@@ -127,6 +141,16 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
                     />
                   ))}
                 </div>
+
+                {courseSlug === "python130" && mod.title === "Algorithm Complexity" && lesson.id === "lesson-1-1" && (
+                  <ComplexityGraph />
+                )}
+
+                {lesson.visualizer && (
+                  Array.isArray(lesson.visualizer)
+                    ? lesson.visualizer.map((v) => <AlgorithmVisualizer key={v} kind={v} />)
+                    : <AlgorithmVisualizer kind={lesson.visualizer} />
+                )}
 
                 {lesson.codeExamples.map((ex, ci) =>
                   ex.editable && ex.language === 'java' ? (

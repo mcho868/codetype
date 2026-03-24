@@ -9,7 +9,7 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) router.push("/learn");
+    if (!loading && !user) router.push("/learn/auth");
   }, [user, loading, router]);
 
   // Show spinner while restoring session from localStorage

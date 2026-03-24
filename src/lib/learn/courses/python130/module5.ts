@@ -7,7 +7,7 @@ const module5: Module = {
   description: 'Solve problems by having functions call themselves — understand base cases, recursive cases, and tracing.',
   icon: '🔄',
   color: 'from-indigo-500 to-blue-400',
-  locked: false,
+  locked: true,
   lessons: [
     {
       id: 'lesson-5-1',

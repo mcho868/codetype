@@ -19,10 +19,16 @@ interface QuizViewProps {
 
 export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
   const router = useRouter();
-  const { studentId } = useLearnAuth();
+  const { studentId, user } = useLearnAuth();
   const mod = courseSlug
     ? getModuleFromCourse(courseSlug, moduleId)
     : getModule(moduleId);
+
+  useEffect(() => {
+    if (mod?.locked && user?.role !== 'admin') {
+      router.replace(courseSlug ? `/learn/courses/${courseSlug}` : '/learn/dashboard');
+    }
+  }, [mod, user, router, courseSlug]);
   // Storage slug is prefixed with courseSlug to avoid collisions between courses with the same module slug numbers
   const storageSlug = courseSlug ? `${courseSlug}/${mod?.slug ?? moduleId}` : (mod?.slug ?? moduleId);
   const lessonPath = courseSlug

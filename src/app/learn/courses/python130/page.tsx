@@ -40,7 +40,7 @@ export default function Python130Page() {
 
   function handleLogout() {
     logout();
-    router.push("/learn");
+    router.push("/learn/auth");
   }
 
   const totalCorrect = Object.entries(progress)
@@ -104,12 +104,13 @@ export default function Python130Page() {
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {modules.map((mod) => {
                 const p = progress[`python130/${mod.slug}`];
+                const isLocked = user?.role === 'admin' ? false : mod.locked;
                 return (
                   <ModuleCard
                     key={mod.id}
-                    module={mod}
+                    module={{ ...mod, locked: isLocked }}
                     score={p?.score ?? 0}
-                    completed={!mod.locked && (p?.answeredCount ?? 0) >= mod.questions.length}
+                    completed={!isLocked && (p?.answeredCount ?? 0) >= mod.questions.length}
                     courseSlug="python130"
                     courseTitle="Python 130"
                   />

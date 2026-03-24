@@ -64,7 +64,7 @@ export function ResultsModal({
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Button onClick={onRestart}>Restart</Button>
-          <Link href="/" className="text-sm font-semibold text-slate-300">
+          <Link href="/type" className="text-sm font-semibold text-slate-300">
             Back to list
           </Link>
         </div>

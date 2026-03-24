@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import ReactMarkdown from "react-markdown";
 import { useRouter, useParams } from "next/navigation";
 import AuthGuard from "@/components/learn/AuthGuard";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { getStudentByUsername, loadStudentDetail, StudentAttemptDetail } from "@/lib/learn/db";
 import { COURSES } from "@/lib/learn/registry";
+import resitTest1 from "@/lib/learn/courses/python101/tests/resit-test-1";
 import { cn } from "@/lib/utils";
 import type { Question } from "@/lib/learn/courses/python101/types";
 
 const FONT = "var(--font-mono), monospace";
+const CodeMirrorEditor = dynamic(() => import("@/components/learn/CodeMirrorEditor"), { ssr: false });
 
 // Build a flat lookup: questionId → { question, courseSlug, courseTitle, moduleTitle }
 interface QuestionMeta {
@@ -35,6 +39,16 @@ for (const course of COURSES) {
   }
 }
 
+for (const q of resitTest1.questions) {
+  QUESTION_MAP.set(q.id, {
+    question: q,
+    courseSlug: "python101",
+    courseTitle: "Python 101",
+    moduleTitle: resitTest1.title,
+    moduleSlug: resitTest1.slug,
+  });
+}
+
 // Group attempts by module_slug, preserving order
 function groupByModule(attempts: StudentAttemptDetail[]) {
   const map = new Map<string, StudentAttemptDetail[]>();
@@ -45,8 +59,47 @@ function groupByModule(attempts: StudentAttemptDetail[]) {
   return map;
 }
 
+function resolveAnswerText(question: Question | undefined, answer: string) {
+  if (!question) return answer;
+  if (question.type === "multiple-choice" && question.choices) {
+    return question.choices.find((choice) => choice.id === answer)?.text ?? answer;
+  }
+  return answer;
+}
+
+function PromptMarkdown({ prompt }: { prompt: string }) {
+  return (
+    <ReactMarkdown
+      components={{
+        p: ({ children }) => (
+          <p className="text-slate-200 leading-relaxed">{children}</p>
+        ),
+        strong: ({ children }) => (
+          <strong className="text-white font-semibold">{children}</strong>
+        ),
+        code: ({ children, className }) => {
+          const isBlock = !!className;
+          return isBlock ? (
+            <code className="block text-cyan-300 text-sm" style={{ fontFamily: FONT }}>{children}</code>
+          ) : (
+            <code className="text-cyan-300 bg-slate-900 px-1.5 py-0.5 rounded text-sm" style={{ fontFamily: FONT }}>{children}</code>
+          );
+        },
+        pre: ({ children }) => (
+          <pre className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-cyan-300 overflow-x-auto my-2" style={{ fontFamily: FONT }}>{children}</pre>
+        ),
+        ul: ({ children }) => <ul className="list-disc pl-6 space-y-1 text-slate-300">{children}</ul>,
+        ol: ({ children }) => <ol className="list-decimal pl-6 space-y-1 text-slate-300">{children}</ol>,
+        li: ({ children }) => <li>{children}</li>,
+      }}
+    >
+      {prompt}
+    </ReactMarkdown>
+  );
+}
+
 export default function StudentDetailPage() {
-  const { user, logout } = useLearnAuth();
+  const { user } = useLearnAuth();
   const router = useRouter();
   const params = useParams();
   const username = params.username as string;
@@ -77,7 +130,11 @@ export default function StudentDetailPage() {
   function toggleModule(slug: string) {
     setExpandedModules((prev) => {
       const next = new Set(prev);
-      next.has(slug) ? next.delete(slug) : next.add(slug);
+      if (next.has(slug)) {
+        next.delete(slug);
+      } else {
+        next.add(slug);
+      }
       return next;
     });
   }
@@ -173,8 +230,11 @@ export default function StudentDetailPage() {
                           const meta = QUESTION_MAP.get(attempt.question_id);
                           const q = meta?.question;
                           const isCode = q?.type === "code-challenge";
-                          // For code challenges, selected_answer is the code they wrote
-                          const isCodeAnswer = isCode && attempt.selected_answer !== "__code__" && attempt.selected_answer.length > 0;
+                          const submittedAnswer = resolveAnswerText(q, attempt.selected_answer);
+                          const correctAnswer = q ? resolveAnswerText(q, q.correctAnswer) : "";
+                          const hasCodeAnswer = isCode && attempt.selected_answer !== "__code__" && attempt.selected_answer.length > 0;
+                          const lang = q?.language === "java" ? "java" : "python";
+                          const looksLikeCode = !q && /(?:\n|^\s*def\s+|^\s*class\s+|^\s*for\s+|^\s*while\s+)/m.test(attempt.selected_answer);
 
                           return (
                             <div key={attempt.question_id} className="px-6 py-4">
@@ -196,37 +256,106 @@ export default function StudentDetailPage() {
                                     {q?.type ?? "unknown"}
                                   </span>
 
-                                  {/* Question prompt (first line only) */}
-                                  <p className="text-slate-300 text-sm">
-                                    {q?.prompt.replace(/\*\*/g, "").replace(/`/g, "").split("\n")[0] ?? attempt.question_id}
-                                  </p>
-
-                                  {/* Their answer */}
-                                  {isCodeAnswer ? (
-                                    <div className="rounded-xl border border-slate-800 bg-slate-950/60 overflow-hidden">
-                                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 px-4 py-2 border-b border-slate-800">
-                                        Code submitted
+                                  {/* Question prompt */}
+                                  {q ? (
+                                    <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-4 py-4">
+                                      <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500 mb-3">
+                                        Question
                                       </p>
-                                      <pre
-                                        className="px-4 py-3 text-xs text-emerald-300 overflow-x-auto whitespace-pre-wrap"
-                                        style={{ fontFamily: FONT }}
-                                      >
-                                        {attempt.selected_answer}
-                                      </pre>
+                                      <PromptMarkdown prompt={q.prompt} />
                                     </div>
-                                  ) : !isCode && attempt.selected_answer ? (
-                                    <p className="text-xs text-slate-500">
-                                      Answered: <span className={cn(
-                                        "font-semibold",
-                                        attempt.is_correct ? "text-emerald-400" : "text-red-400"
-                                      )}>
-                                        {attempt.selected_answer}
-                                      </span>
+                                  ) : (
+                                    <p className="text-slate-300 text-sm">{attempt.question_id}</p>
+                                  )}
+
+                                  {/* Non-code answers */}
+                                  {!isCode && !looksLikeCode && attempt.selected_answer && (
+                                    <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-4 py-4 space-y-3">
+                                      <div>
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500 mb-1">
+                                          Student Answer
+                                        </p>
+                                        <p className={cn(
+                                          "text-sm font-medium",
+                                          attempt.is_correct ? "text-emerald-400" : "text-red-400"
+                                        )}>
+                                          {submittedAnswer}
+                                        </p>
+                                      </div>
                                       {!attempt.is_correct && q?.correctAnswer && (
-                                        <span className="text-slate-600"> · correct: <span className="text-slate-400">{q.correctAnswer}</span></span>
+                                        <div>
+                                          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500 mb-1">
+                                            Correct Answer
+                                          </p>
+                                          <p className="text-sm text-slate-300">{correctAnswer}</p>
+                                        </div>
                                       )}
-                                    </p>
-                                  ) : null}
+                                    </div>
+                                  )}
+
+                                  {/* Code question details */}
+                                  {(isCode || looksLikeCode) && (
+                                    <div className="space-y-3">
+                                      {q?.starterCode && (
+                                        <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 overflow-hidden">
+                                          <div className="px-4 py-2 border-b border-slate-800/70 bg-slate-900/50">
+                                            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">
+                                              Starter Code
+                                            </p>
+                                          </div>
+                                          <CodeMirrorEditor
+                                            initialCode={q.starterCode}
+                                            language={lang}
+                                            onChange={() => {}}
+                                            readOnly
+                                          />
+                                        </div>
+                                      )}
+
+                                      {hasCodeAnswer && (
+                                        <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 overflow-hidden">
+                                          <div className="px-4 py-2 border-b border-slate-800/70 bg-slate-900/50">
+                                            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">
+                                              Student Submission
+                                            </p>
+                                          </div>
+                                          <CodeMirrorEditor
+                                            initialCode={attempt.selected_answer}
+                                            language={lang}
+                                            onChange={() => {}}
+                                            readOnly
+                                          />
+                                        </div>
+                                      )}
+
+                                      {!hasCodeAnswer && looksLikeCode && (
+                                        <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 overflow-hidden">
+                                          <div className="px-4 py-2 border-b border-slate-800/70 bg-slate-900/50">
+                                            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">
+                                              Student Submission
+                                            </p>
+                                          </div>
+                                          <CodeMirrorEditor
+                                            initialCode={attempt.selected_answer}
+                                            language="python"
+                                            onChange={() => {}}
+                                            readOnly
+                                          />
+                                        </div>
+                                      )}
+
+                                      {q?.expectedOutput && (
+                                        <div className="rounded-2xl border border-slate-800/70 bg-slate-950/40 px-4 py-4">
+                                          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500 mb-2">
+                                            Expected Output
+                                          </p>
+                                          <pre className="text-sm text-slate-300 whitespace-pre-wrap" style={{ fontFamily: FONT }}>
+                                            {q.expectedOutput}
+                                          </pre>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>

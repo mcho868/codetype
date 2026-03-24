@@ -7,7 +7,7 @@ const module4: Module = {
   description: 'Master the Stack (LIFO) and Queue (FIFO) abstract data types and their real-world applications.',
   icon: '📚',
   color: 'from-orange-500 to-amber-400',
-  locked: false,
+  locked: true,
   lessons: [
     {
       id: 'lesson-4-1',

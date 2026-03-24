@@ -7,7 +7,7 @@ const module6: Module = {
   description: 'Build a dynamic data structure using nodes and pointers — the foundation of many advanced structures.',
   icon: '🔗',
   color: 'from-cyan-500 to-sky-400',
-  locked: false,
+  locked: true,
   lessons: [
     {
       id: 'lesson-6-1',
