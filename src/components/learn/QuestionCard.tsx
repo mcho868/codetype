@@ -61,16 +61,18 @@ export default function QuestionCard({
   const isJava = question.language === "java";
   const lang = isJava ? "java" : "python";
 
+  const normalise = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '');
+
   const isCorrect = submitted
     ? previousAnswer?.isCorrect ??
       (question.type === "code-challenge"
         ? runStatus === "pass"
-        : selected.toLowerCase() === question.correctAnswer.toLowerCase())
+        : normalise(selected) === normalise(question.correctAnswer))
     : false;
 
   function handleSubmit() {
     if (submitted || (question.type !== "code-challenge" && !selected)) return;
-    const correct = selected.toLowerCase() === question.correctAnswer.toLowerCase();
+    const correct = normalise(selected) === normalise(question.correctAnswer);
     setSubmitted(true);
     onAnswerSubmit({ selectedAnswer: selected, isCorrect: correct });
   }

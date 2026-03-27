@@ -7,7 +7,7 @@ const module5: Module = {
   description: 'Solve problems by having functions call themselves — understand base cases, recursive cases, and tracing.',
   icon: '🔄',
   color: 'from-indigo-500 to-blue-400',
-  locked: true,
+  locked: false,
   lessons: [
     {
       id: 'lesson-5-1',
@@ -193,7 +193,7 @@ print(fast_power(3, 8))    # 6561
       id: 'q5-4',
       type: 'fill-in-blank',
       prompt: 'Complete the recursive definition: factorial(n) = n * factorial(___)',
-      correctAnswer: 'n - 1',
+      correctAnswer: 'n-1',
       explanation: 'Each recursive call reduces n by 1, moving toward the base case of factorial(0) = 1.',
     },
     {

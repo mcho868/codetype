@@ -45,7 +45,7 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
     ? `/learn/courses/${courseSlug}`
     : '/learn/dashboard';
 
-  if (!mod || mod.locked) {
+  if (!mod || (mod.locked && user?.role !== 'admin')) {
     return (
       <AuthGuard>
         <main className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center px-6">

@@ -7,7 +7,7 @@ const module4: Module = {
   description: 'Master the Stack (LIFO) and Queue (FIFO) abstract data types and their real-world applications.',
   icon: '📚',
   color: 'from-orange-500 to-amber-400',
-  locked: true,
+  locked: false,
   lessons: [
     {
       id: 'lesson-4-1',
@@ -102,7 +102,7 @@ demonstrate_call_stack()`,
 
 The Queue's core operations are: **enqueue(item)** — add item to the back; **dequeue()** — remove and return the item from the front; **front()** (or peek) — look at the front item without removing it; **is_empty()**; and **size()**. The key distinction from a Stack: you add to one end (back) and remove from the other (front).
 
-A straightforward Python list implementation: use \`append(item)\` for enqueue (O(1) amortised, adds to back), and \`pop(0)\` for dequeue (O(n) — shifts all remaining elements left). This asymmetry is the basic queue's weakness. For small queues or infrequent dequeuing, it's fine. For high-throughput queuing, Python's \`collections.deque\` provides O(1) for both ends.
+A straightforward Python list implementation: use \`append(item)\` for enqueue (O(1) amortised, adds to back), and \`pop(0)\` for dequeue (O(n) — shifts all remaining elements left). This asymmetry is the basic queue\'s weakness. For small queues or infrequent dequeuing, it's fine. For high-throughput queuing, Python's \`collections.deque\` provides O(1) for both ends.
 
 Queues appear in many real-world and programming contexts. **Print spoolers** queue documents in order. **Web servers** queue incoming requests. **Breadth-first search (BFS)** in graphs uses a queue to explore nodes level by level. **Task scheduling** in operating systems queues processes waiting for CPU time. Whenever you need to process items in the order they arrived, a Queue is the right tool.
 
