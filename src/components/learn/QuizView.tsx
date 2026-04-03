@@ -6,7 +6,7 @@ import AuthGuard from "@/components/learn/AuthGuard";
 import QuestionCard from "@/components/learn/QuestionCard";
 import ProgressBar from "@/components/learn/ProgressBar";
 import { getModule } from "@/lib/learn/courseData";
-import { getModuleFromCourse } from "@/lib/learn/registry";
+import { getCourse, getModuleFromCourse } from "@/lib/learn/registry";
 import { QuestionAnswer, calculateScore } from "@/lib/learn/progress";
 import { saveAnswer, loadModuleAnswers, clearModuleAnswers } from "@/lib/learn/db";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
@@ -20,59 +20,70 @@ interface QuizViewProps {
 export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
   const router = useRouter();
   const { studentId, user } = useLearnAuth();
+  const course = courseSlug ? getCourse(courseSlug) : undefined;
   const mod = courseSlug
     ? getModuleFromCourse(courseSlug, moduleId)
     : getModule(moduleId);
+  const isCourseRestricted = Boolean(course?.adminOnly && user?.role !== "admin");
 
   useEffect(() => {
-    if (mod?.locked && user?.role !== 'admin') {
-      router.replace(courseSlug ? `/learn/courses/${courseSlug}` : '/learn/dashboard');
+    if (isCourseRestricted || (mod?.locked && user?.role !== 'admin')) {
+      router.replace("/learn/dashboard");
     }
-  }, [mod, user, router, courseSlug]);
+  }, [courseSlug, isCourseRestricted, mod, router, user]);
   // Storage slug is prefixed with courseSlug to avoid collisions between courses with the same module slug numbers
   const storageSlug = courseSlug ? `${courseSlug}/${mod?.slug ?? moduleId}` : (mod?.slug ?? moduleId);
   const lessonPath = courseSlug
     ? `/learn/courses/${courseSlug}/${moduleId}`
     : `/learn/${moduleId}`;
 
-  const [answers, setAnswers] = useState<Record<string, QuestionAnswer>>({});
+  const shouldLoadAnswers = Boolean(studentId && mod);
+  const [answers, setAnswers] = useState<Record<string, QuestionAnswer> | null>(
+    shouldLoadAnswers ? null : {}
+  );
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [loadingAnswers, setLoadingAnswers] = useState(true);
 
   // Load saved answers from Supabase on mount
   useEffect(() => {
+    let active = true;
     if (!studentId || !mod) {
-      setLoadingAnswers(false);
       return;
     }
     loadModuleAnswers(studentId, storageSlug).then((saved) => {
+      if (!active) return;
       setAnswers(saved);
       // Jump to first unanswered question
       const firstUnanswered = mod.questions.findIndex((q) => !saved[q.id]);
       if (firstUnanswered !== -1) setCurrentIdx(firstUnanswered);
-      setLoadingAnswers(false);
     });
-  }, [studentId, storageSlug]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      active = false;
+    };
+  }, [mod, storageSlug, studentId]);
 
-  if (!mod) {
+  if (!mod || isCourseRestricted || (mod.locked && user?.role !== "admin")) {
     return (
       <AuthGuard>
         <main className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center">
-          <p className="text-slate-400">Module not found.</p>
+          <p className="text-slate-400">
+            {!mod ? "Module not found." : isCourseRestricted ? "This course is only available to admins." : "This module is not available yet."}
+          </p>
         </main>
       </AuthGuard>
     );
   }
 
+  const resolvedAnswers = answers ?? {};
+  const loadingAnswers = shouldLoadAnswers && answers === null;
   const questions = mod.questions;
   const totalQ = questions.length;
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = Object.keys(resolvedAnswers).length;
   const allDone = answeredCount === totalQ;
-  const score = calculateScore(answers);
+  const score = calculateScore(resolvedAnswers);
   const currentQuestion = questions[Math.min(currentIdx, totalQ - 1)];
 
   async function handleAnswerSubmit(questionId: string, answer: QuestionAnswer) {
-    const updated = { ...answers, [questionId]: answer };
+    const updated = { ...resolvedAnswers, [questionId]: answer };
     setAnswers(updated);
 
     // Persist to Supabase
@@ -128,14 +139,14 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
                 </div>
                 <ProgressBar current={answeredCount} total={totalQ} size="sm" />
                 <div className="flex gap-2 flex-wrap mt-4">
-                  {questions.map((q, i) => (
-                    <button
-                      key={q.id}
-                      onClick={() => setCurrentIdx(i)}
-                      className={cn(
-                        "w-7 h-7 rounded-full text-xs font-semibold transition",
-                        answers[q.id]
-                          ? answers[q.id].isCorrect
+                {questions.map((q, i) => (
+                  <button
+                    key={q.id}
+                    onClick={() => setCurrentIdx(i)}
+                    className={cn(
+                      "w-7 h-7 rounded-full text-xs font-semibold transition",
+                        resolvedAnswers[q.id]
+                          ? resolvedAnswers[q.id].isCorrect
                             ? "bg-emerald-500 text-white"
                             : "bg-red-500 text-white"
                           : i === currentIdx
@@ -153,7 +164,7 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
                 key={currentQuestion.id}
                 question={currentQuestion}
                 onAnswerSubmit={(ans) => handleAnswerSubmit(currentQuestion.id, ans)}
-                previousAnswer={answers[currentQuestion.id]}
+                previousAnswer={resolvedAnswers[currentQuestion.id]}
               />
 
               <div className="flex justify-between">
@@ -208,7 +219,7 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
                   Question Review
                 </p>
                 {questions.map((q, i) => {
-                  const ans = answers[q.id];
+                  const ans = resolvedAnswers[q.id];
                   return (
                     <div key={q.id} className={cn(
                       "rounded-2xl border px-5 py-4 text-sm",

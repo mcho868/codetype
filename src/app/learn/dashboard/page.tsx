@@ -49,7 +49,7 @@ export default function LearnDashboard() {
               <div className="flex-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-violet-400">Admin</p>
                 <p className="text-white font-semibold">Student Monitor</p>
-                <p className="text-xs text-slate-400 mt-0.5">View all students' progress across every course.</p>
+                <p className="text-xs text-slate-400 mt-0.5">View all students&apos; progress across every course.</p>
               </div>
               <span className="text-slate-600 text-xl">→</span>
             </div>
@@ -125,6 +125,29 @@ export default function LearnDashboard() {
                 <span className="text-slate-600 text-xl shrink-0">→</span>
               </div>
             </div>
+
+            {/* SQL 101 card — admin only */}
+            {user?.role === "admin" && (
+              <div
+                onClick={() => router.push("/learn/courses/sql101")}
+                className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
+              >
+                <div className="bg-gradient-to-r from-teal-500 to-cyan-400 h-1.5" />
+                <div className="p-8 flex items-center gap-6">
+                  <span className="text-5xl">🗄️</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
+                      Beginner · 7 Modules
+                    </p>
+                    <h3 className="text-2xl font-semibold text-white mb-1">SQL 101</h3>
+                    <p className="text-sm text-slate-400">
+                      Learn SQL from scratch — SELECT, WHERE, ORDER BY, aggregate functions, JOINs, INSERT, UPDATE, DELETE, and CREATE TABLE.
+                    </p>
+                  </div>
+                  <span className="text-slate-600 text-xl shrink-0">→</span>
+                </div>
+              </div>
+            )}
           </section>
 
         </div>

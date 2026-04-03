@@ -7,7 +7,7 @@ const module6: Module = {
   description: 'Build a dynamic data structure using nodes and pointers — the foundation of many advanced structures.',
   icon: '🔗',
   color: 'from-cyan-500 to-sky-400',
-  locked: true,
+  locked: false,
   lessons: [
     {
       id: 'lesson-6-1',
@@ -158,7 +158,7 @@ print(ll.search(99))     # False`,
     },
     {
       id: 'lesson-6-3',
-      title: 'Remove & Complexity Analysis',
+      title: 'Remove',
       content: `**Removing** a node from a linked list requires a clever **two-pointer technique**: keep track of both the \`previous\` node and the \`current\` node as you traverse. When you find the node to remove, you "skip over" it by setting \`previous.next = current.next\`. This makes the removed node unreachable — Python's garbage collector will reclaim its memory automatically.
 
 There's one special case: removing the **head** node. Since there's no previous node before the head, you simply set \`head = head.next\`. Always handle this case first. If the item isn't found at all, you can raise a \`ValueError\`, similar to Python's built-in list \`.remove()\` method.

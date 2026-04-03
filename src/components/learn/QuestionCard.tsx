@@ -59,7 +59,8 @@ export default function QuestionCard({
   const { runCodeSimple, terminateWorker } = usePyodide();
 
   const isJava = question.language === "java";
-  const lang = isJava ? "java" : "python";
+  const isSQL = question.language === "sql";
+  const lang = isJava ? "java" : isSQL ? "sql" : "python";
 
   const normalise = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '');
 
@@ -97,7 +98,20 @@ export default function QuestionCard({
     let output = "";
     let error = "";
 
-    if (isJava) {
+    if (isSQL) {
+      try {
+        const res = await fetch("/api/run-sql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sql: code, contextId: question.sqlContextId ?? "" }),
+        });
+        const data = await res.json();
+        output = data.output ?? "";
+        error = data.error ?? "";
+      } catch {
+        error = "Failed to reach the SQL runner.";
+      }
+    } else if (isJava) {
       try {
         const res = await fetch("/api/run-java", {
           method: "POST",
@@ -124,7 +138,14 @@ export default function QuestionCard({
       return;
     }
 
-    const clean = (s: string) => s.trim().replace(/\r\n/g, "\n");
+    // Normalise: trim each line (removes formatter padding), collapse blank lines, ignore case for SQL output
+    const clean = (s: string) =>
+      s.replace(/\r\n/g, "\n")
+       .split("\n")
+       .map((l) => l.trim())
+       .filter((l) => l.length > 0)
+       .join("\n")
+       .toLowerCase();
     const passed =
       question.expectedOutput !== undefined
         ? clean(output) === clean(question.expectedOutput)
@@ -137,8 +158,8 @@ export default function QuestionCard({
     }
   }
 
-  const accentClass = isJava ? "bg-orange-400 hover:bg-orange-300" : "bg-cyan-400 hover:bg-cyan-300";
-  const correctColor = isJava ? "text-orange-400" : "text-cyan-400";
+  const accentClass = isJava ? "bg-orange-400 hover:bg-orange-300" : isSQL ? "bg-teal-400 hover:bg-teal-300" : "bg-cyan-400 hover:bg-cyan-300";
+  const correctColor = isJava ? "text-orange-400" : isSQL ? "text-teal-400" : "text-cyan-400";
 
   return (
     <div className="rounded-3xl border border-slate-800/70 bg-slate-900/70 overflow-hidden shadow-sm backdrop-blur">
@@ -151,6 +172,8 @@ export default function QuestionCard({
               question.type === "code-challenge"
                 ? isJava
                   ? "bg-orange-400/10 text-orange-400 border border-orange-400/20"
+                  : isSQL
+                  ? "bg-teal-400/10 text-teal-400 border border-teal-400/20"
                   : "bg-cyan-400/10 text-cyan-400 border border-cyan-400/20"
                 : "bg-slate-800 text-slate-400"
             )}

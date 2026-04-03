@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import ReactMarkdown from "react-markdown";
 import AuthGuard from "@/components/learn/AuthGuard";
 import CodeBlock from "@/components/learn/CodeBlock";
 import CodeEditor from "@/components/learn/CodeEditor";
@@ -23,6 +24,136 @@ interface LessonViewProps {
   courseSlug?: string;
 }
 
+const FONT = "var(--font-mono), monospace";
+
+const lessonMarkdownComponents = {
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p className="text-sm leading-relaxed text-slate-300">{children}</p>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-slate-300">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-slate-300">
+      {children}
+    </ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-semibold text-slate-100">{children}</strong>
+  ),
+  code: ({
+    children,
+    className,
+  }: {
+    children?: React.ReactNode;
+    className?: string;
+  }) => {
+    const isBlock = !!className;
+    return isBlock ? (
+      <code className="block text-sm text-cyan-300" style={{ fontFamily: FONT }}>
+        {children}
+      </code>
+    ) : (
+      <code
+        className="rounded-lg bg-slate-800 px-1.5 py-0.5 text-xs text-cyan-300"
+        style={{ fontFamily: FONT }}
+      >
+        {children}
+      </code>
+    );
+  },
+};
+
+const inlineMarkdownComponents = {
+  p: Fragment,
+  strong: lessonMarkdownComponents.strong,
+  code: lessonMarkdownComponents.code,
+};
+
+function isTableSeparator(line: string) {
+  return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(line.trim());
+}
+
+function parseTableRow(line: string) {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function isTableBlock(block: string) {
+  const lines = block
+    .trim()
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return lines.length >= 2 && lines[0].includes("|") && isTableSeparator(lines[1]);
+}
+
+function renderLessonBlock(block: string, key: number) {
+  if (isTableBlock(block)) {
+    const lines = block
+      .trim()
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const headers = parseTableRow(lines[0]);
+    const rows = lines.slice(2).map(parseTableRow);
+
+    return (
+      <div
+        key={key}
+        className="overflow-x-auto rounded-2xl border border-slate-800/70 bg-slate-950/40"
+      >
+        <table className="min-w-full border-collapse text-left text-sm text-slate-300">
+          <thead className="bg-slate-900/80">
+            <tr>
+              {headers.map((header, index) => (
+                <th
+                  key={`${key}-head-${index}`}
+                  className="border-b border-slate-800 px-4 py-3 font-semibold text-slate-100"
+                >
+                  <ReactMarkdown components={inlineMarkdownComponents}>
+                    {header}
+                  </ReactMarkdown>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={`${key}-row-${rowIndex}`} className="border-t border-slate-800/70">
+                {row.map((cell, cellIndex) => (
+                  <td
+                    key={`${key}-cell-${rowIndex}-${cellIndex}`}
+                    className="px-4 py-3 align-top"
+                  >
+                    <ReactMarkdown components={inlineMarkdownComponents}>
+                      {cell}
+                    </ReactMarkdown>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  return (
+    <div key={key}>
+      <ReactMarkdown components={lessonMarkdownComponents}>{block}</ReactMarkdown>
+    </div>
+  );
+}
+
 export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
   const router = useRouter();
   const { user } = useLearnAuth();
@@ -31,12 +162,13 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
   const mod = courseSlug
     ? getModuleFromCourse(courseSlug, moduleId)
     : getModule(moduleId);
+  const isCourseRestricted = Boolean(course?.adminOnly && user?.role !== "admin");
 
   useEffect(() => {
-    if (mod?.locked && user?.role !== 'admin') {
+    if (isCourseRestricted || (mod?.locked && user?.role !== 'admin')) {
       router.replace(courseSlug ? `/learn/courses/${courseSlug}` : '/learn/dashboard');
     }
-  }, [mod, user, router, courseSlug]);
+  }, [courseSlug, isCourseRestricted, mod, router, user]);
   const courseTitle = course?.title ?? 'Python 101';
   const quizPath = courseSlug
     ? `/learn/courses/${courseSlug}/${moduleId}/quiz`
@@ -45,17 +177,21 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
     ? `/learn/courses/${courseSlug}`
     : '/learn/dashboard';
 
-  if (!mod || (mod.locked && user?.role !== 'admin')) {
+  if (!mod || isCourseRestricted || (mod.locked && user?.role !== 'admin')) {
     return (
       <AuthGuard>
         <main className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center px-6">
           <div className="text-center space-y-4">
             <p className="text-4xl">🔒</p>
             <p className="text-xl font-semibold text-white">
-              {mod ? mod.title : "Module Not Found"}
+              {!mod ? "Module Not Found" : isCourseRestricted ? "Course Restricted" : mod.title}
             </p>
             <p className="text-slate-400 text-sm">
-              {mod ? "This module is not available yet." : "Module not found."}
+              {!mod
+                ? "Module not found."
+                : isCourseRestricted
+                  ? "This course is only available to admins."
+                  : "This module is not available yet."}
             </p>
             <button
               onClick={() => router.push(backPath)}
@@ -120,26 +256,11 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
               </div>
 
               <div className="px-8 py-6">
-                <div className="space-y-3 mb-2">
-                  {lesson.content.split("\n\n").map((block, i) => (
-                    <p
-                      key={i}
-                      className="text-sm text-slate-300 leading-relaxed"
-                      dangerouslySetInnerHTML={{
-                        __html: block
-                          .replace(
-                            /\*\*([^*]+)\*\*/g,
-                            '<strong class="text-slate-100 font-semibold">$1</strong>'
-                          )
-                          .replace(
-                            /'([^']+)'/g,
-                            '<code class="bg-slate-800 px-1.5 py-0.5 rounded-lg text-cyan-300 text-xs" style="font-family:var(--font-mono),monospace">$1</code>'
-                          )
-                          .split("\n")
-                          .join("<br/>"),
-                      }}
-                    />
-                  ))}
+                <div className="mb-2 space-y-4">
+                  {lesson.content
+                    .split("\n\n")
+                    .filter((block) => block.trim().length > 0)
+                    .map((block, i) => renderLessonBlock(block, i))}
                 </div>
 
                 {courseSlug === "python130" && mod.title === "Algorithm Complexity" && lesson.id === "lesson-1-1" && (

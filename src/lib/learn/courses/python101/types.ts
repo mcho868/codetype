@@ -8,17 +8,19 @@ export interface Question {
   correctAnswer: string;
   explanation: string;
   /** Language for code-challenge questions (defaults to 'python') */
-  language?: 'python' | 'java';
+  language?: 'python' | 'java' | 'sql';
   /** For code-challenge questions: starter code shown in the editor */
   starterCode?: string;
   /** For code-challenge questions: expected stdout output (trimmed) */
   expectedOutput?: string;
   /** For code-challenge questions: regex patterns the submitted code must contain */
   requiredPatterns?: { pattern: string; hint: string }[];
+  /** For SQL code-challenge questions: which seeded database context to use */
+  sqlContextId?: string;
 }
 
 export interface CodeExample {
-  language: 'python' | 'java';
+  language: 'python' | 'java' | 'sql';
   code: string;
   caption?: string;
   /** If true, the code block will be an editable runner */

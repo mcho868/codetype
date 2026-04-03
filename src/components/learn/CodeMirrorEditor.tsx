@@ -7,11 +7,12 @@ import { defaultKeymap, indentWithTab, history, historyKeymap } from "@codemirro
 import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { java } from "@codemirror/lang-java";
 import { python } from "@codemirror/lang-python";
+import { sql } from "@codemirror/lang-sql";
 import { oneDark } from "@codemirror/theme-one-dark";
 
 interface CodeMirrorEditorProps {
   initialCode: string;
-  language: "java" | "python";
+  language: "java" | "python" | "sql";
   onChange: (code: string) => void;
   readOnly?: boolean;
 }
@@ -62,7 +63,7 @@ export default function CodeMirrorEditor({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const langExtension = language === "java" ? java() : python();
+    const langExtension = language === "java" ? java() : language === "sql" ? sql() : python();
 
     const updateListener = EditorView.updateListener.of((update) => {
       if (update.docChanged) {
