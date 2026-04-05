@@ -7,7 +7,7 @@ const module8: Module = {
   description: 'Exploit the BST ordering property for O(log n) search, insertion, and deletion.',
   icon: '🔍',
   color: 'from-violet-500 to-purple-400',
-  locked: true,
+  locked: false,
   lessons: [
     {
       id: 'lesson-8-1',
