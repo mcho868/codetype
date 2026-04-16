@@ -42,6 +42,7 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
     shouldLoadAnswers ? null : {}
   );
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [reviewing, setReviewing] = useState(false);
 
   // Load saved answers from Supabase on mount
   useEffect(() => {
@@ -100,6 +101,7 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
     }
     setAnswers({});
     setCurrentIdx(0);
+    setReviewing(false);
   }
 
   return (
@@ -129,8 +131,21 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
             <div className="flex justify-center py-16">
               <div className="w-6 h-6 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
             </div>
-          ) : !allDone ? (
+          ) : !allDone || reviewing ? (
             <>
+              {/* Reviewing banner */}
+              {reviewing && (
+                <div className="flex items-center justify-between rounded-2xl border border-cyan-400/20 bg-cyan-400/5 px-5 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-400">Reviewing your answers</p>
+                  <button
+                    onClick={() => setReviewing(false)}
+                    className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 hover:text-slate-200 transition"
+                  >
+                    Back to Results →
+                  </button>
+                </div>
+              )}
+
               {/* Progress */}
               <div className="rounded-3xl border border-slate-800/70 bg-slate-900/70 px-6 py-4 backdrop-blur shadow-sm">
                 <div className="flex justify-between text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 mb-3">
@@ -244,12 +259,18 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
                 })}
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <button
                   onClick={() => router.push("/learn/dashboard")}
                   className="flex-1 rounded-full border border-slate-700 py-3 text-sm font-semibold text-slate-300 hover:border-slate-500 hover:text-white transition uppercase tracking-[0.2em]"
                 >
                   Dashboard
+                </button>
+                <button
+                  onClick={() => { setCurrentIdx(0); setReviewing(true); }}
+                  className="flex-1 rounded-full border border-slate-700 py-3 text-sm font-semibold text-slate-300 hover:border-slate-500 hover:text-white transition uppercase tracking-[0.2em]"
+                >
+                  Review Answers
                 </button>
                 <button
                   onClick={handleRetake}
