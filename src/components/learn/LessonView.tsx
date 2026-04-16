@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
@@ -69,7 +69,7 @@ const lessonMarkdownComponents = {
 };
 
 const inlineMarkdownComponents = {
-  p: Fragment,
+  p: ({ children }: { children?: import("react").ReactNode }) => <span>{children}</span>,
   strong: lessonMarkdownComponents.strong,
   code: lessonMarkdownComponents.code,
 };
