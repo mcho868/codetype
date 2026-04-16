@@ -7,7 +7,7 @@ const module7: Module = {
   description: 'Explore hierarchical data structures — trees, binary trees, and the three classic traversal algorithms.',
   icon: '🌳',
   color: 'from-green-500 to-emerald-400',
-  locked: true,
+  locked: false,
   lessons: [
     {
       id: 'lesson-7-1',

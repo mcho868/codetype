@@ -60,7 +60,8 @@ export default function QuestionCard({
 
   const isJava = question.language === "java";
   const isSQL = question.language === "sql";
-  const lang = isJava ? "java" : isSQL ? "sql" : "python";
+  const isTypeScript = question.language === "typescript";
+  const lang = isJava ? "java" : isSQL ? "sql" : isTypeScript ? "typescript" : "python";
 
   const normalise = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '');
 
@@ -124,6 +125,19 @@ export default function QuestionCard({
       } catch {
         error = "Failed to reach the Java runner.";
       }
+    } else if (isTypeScript) {
+      try {
+        const res = await fetch("/api/run-typescript", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        });
+        const data = await res.json();
+        output = data.output ?? "";
+        error = data.error ?? "";
+      } catch {
+        error = "Failed to reach the TypeScript runner.";
+      }
     } else {
       const result = await runCodeSimple(code);
       output = result.output;
@@ -158,8 +172,8 @@ export default function QuestionCard({
     }
   }
 
-  const accentClass = isJava ? "bg-orange-400 hover:bg-orange-300" : isSQL ? "bg-teal-400 hover:bg-teal-300" : "bg-cyan-400 hover:bg-cyan-300";
-  const correctColor = isJava ? "text-orange-400" : isSQL ? "text-teal-400" : "text-cyan-400";
+  const accentClass = isJava ? "bg-orange-400 hover:bg-orange-300" : isSQL ? "bg-teal-400 hover:bg-teal-300" : isTypeScript ? "bg-blue-400 hover:bg-blue-300" : "bg-cyan-400 hover:bg-cyan-300";
+  const correctColor = isJava ? "text-orange-400" : isSQL ? "text-teal-400" : isTypeScript ? "text-blue-400" : "text-cyan-400";
 
   return (
     <div className="rounded-3xl border border-slate-800/70 bg-slate-900/70 overflow-hidden shadow-sm backdrop-blur">
@@ -174,6 +188,8 @@ export default function QuestionCard({
                   ? "bg-orange-400/10 text-orange-400 border border-orange-400/20"
                   : isSQL
                   ? "bg-teal-400/10 text-teal-400 border border-teal-400/20"
+                  : isTypeScript
+                  ? "bg-blue-400/10 text-blue-400 border border-blue-400/20"
                   : "bg-cyan-400/10 text-cyan-400 border border-cyan-400/20"
                 : "bg-slate-800 text-slate-400"
             )}

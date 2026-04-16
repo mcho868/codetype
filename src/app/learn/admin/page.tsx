@@ -6,11 +6,11 @@ import AuthGuard from "@/components/learn/AuthGuard";
 import ProgressBar from "@/components/learn/ProgressBar";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { loadStudentStatuses, StudentMonitoringRow } from "@/lib/learn/db";
-import { COURSES } from "@/lib/learn/registry";
+import { STUDENT_VISIBLE_COURSES } from "@/lib/learn/registry";
 import { cn } from "@/lib/utils";
 
 // Pre-compute total questions per course using the slug prefix stored in DB
-const COURSE_META = COURSES.map((course) => ({
+const COURSE_META = STUDENT_VISIBLE_COURSES.map((course) => ({
   slug: course.slug,
   title: course.title,
   totalQ: course.modules.reduce((s, m) => s + m.questions.length, 0),

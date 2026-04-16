@@ -9,6 +9,7 @@ import CodeBlock from "@/components/learn/CodeBlock";
 import CodeEditor from "@/components/learn/CodeEditor";
 import ComplexityGraph from "@/components/learn/ComplexityGraph";
 import JavaEditor from "@/components/learn/JavaEditor";
+import TypeScriptEditor from "@/components/learn/TypeScriptEditor";
 
 const AlgorithmVisualizer = dynamic(
   () => import("@/components/learn/AlgorithmVisualizer"),
@@ -276,6 +277,12 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
                 {lesson.codeExamples.map((ex, ci) =>
                   ex.editable && ex.language === 'java' ? (
                     <JavaEditor
+                      key={ci}
+                      initialCode={ex.code}
+                      caption={ex.caption}
+                    />
+                  ) : ex.editable && ex.language === 'typescript' ? (
+                    <TypeScriptEditor
                       key={ci}
                       initialCode={ex.code}
                       caption={ex.caption}

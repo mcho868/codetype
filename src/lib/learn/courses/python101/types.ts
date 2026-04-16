@@ -8,7 +8,7 @@ export interface Question {
   correctAnswer: string;
   explanation: string;
   /** Language for code-challenge questions (defaults to 'python') */
-  language?: 'python' | 'java' | 'sql';
+  language?: 'python' | 'java' | 'sql' | 'typescript';
   /** For code-challenge questions: starter code shown in the editor */
   starterCode?: string;
   /** For code-challenge questions: expected stdout output (trimmed) */
@@ -20,7 +20,7 @@ export interface Question {
 }
 
 export interface CodeExample {
-  language: 'python' | 'java' | 'sql';
+  language: 'python' | 'java' | 'sql' | 'typescript';
   code: string;
   caption?: string;
   /** If true, the code block will be an editable runner */

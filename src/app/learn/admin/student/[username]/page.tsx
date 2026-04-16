@@ -7,13 +7,18 @@ import { useRouter, useParams } from "next/navigation";
 import AuthGuard from "@/components/learn/AuthGuard";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { getStudentByUsername, loadStudentDetail, StudentAttemptDetail } from "@/lib/learn/db";
-import { COURSES } from "@/lib/learn/registry";
+import { ADMIN_ONLY_COURSES, STUDENT_VISIBLE_COURSES } from "@/lib/learn/registry";
 import resitTest1 from "@/lib/learn/courses/python101/tests/resit-test-1";
 import { cn } from "@/lib/utils";
 import type { Question } from "@/lib/learn/courses/python101/types";
 
 const FONT = "var(--font-mono), monospace";
 const CodeMirrorEditor = dynamic(() => import("@/components/learn/CodeMirrorEditor"), { ssr: false });
+const ADMIN_ONLY_PREFIXES = ADMIN_ONLY_COURSES.map((course) => `${course.slug}/`);
+
+function isStudentVisibleAttempt(moduleSlug: string) {
+  return !ADMIN_ONLY_PREFIXES.some((prefix) => moduleSlug.startsWith(prefix));
+}
 
 // Build a flat lookup: questionId → { question, courseSlug, courseTitle, moduleTitle }
 interface QuestionMeta {
@@ -25,7 +30,7 @@ interface QuestionMeta {
 }
 
 const QUESTION_MAP = new Map<string, QuestionMeta>();
-for (const course of COURSES) {
+for (const course of STUDENT_VISIBLE_COURSES) {
   for (const mod of course.modules) {
     for (const q of mod.questions) {
       QUESTION_MAP.set(q.id, {
@@ -116,7 +121,7 @@ export default function StudentDetailPage() {
       if (!student) { setLoading(false); return; }
       setDisplayName(student.display_name);
       const data = await loadStudentDetail(student.id);
-      setAttempts(data);
+      setAttempts(data.filter((attempt) => isStudentVisibleAttempt(attempt.module_slug)));
       setLoading(false);
     }
     load();
