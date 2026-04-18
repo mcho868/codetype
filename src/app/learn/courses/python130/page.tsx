@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import AuthGuard from "@/components/learn/AuthGuard";
-import ModuleCard from "@/components/learn/ModuleCard";
-import ProgressBar from "@/components/learn/ProgressBar";
+import CoursePageLayout from "@/components/learn/CoursePageLayout";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { getAllModules } from "@/lib/learn/courses/python130/index";
 import { loadAllProgress } from "@/lib/learn/db";
 
-const modules = getAllModules();
-const totalQ = modules.reduce((s, m) => s + m.questions.length, 0);
+const allModules = getAllModules();
+const regularModules = allModules.filter((m) => !m.isMidterm);
+const midterms = allModules.filter((m) => m.isMidterm);
+const totalQ = regularModules.reduce((s, m) => s + m.questions.length, 0);
 
 interface ModuleProgress {
   score: number;
@@ -20,6 +20,7 @@ interface ModuleProgress {
 export default function Python130Page() {
   const { user, studentId, logout } = useLearnAuth();
   const router = useRouter();
+  const [tab, setTab] = useState("learn");
   const [progress, setProgress] = useState<Record<string, ModuleProgress>>({});
   const [loadingProgress, setLoadingProgress] = useState(true);
 
@@ -44,83 +45,77 @@ export default function Python130Page() {
   }
 
   const totalCorrect = Object.entries(progress)
-    .filter(([key]) => key.startsWith('python130/'))
+    .filter(([key]) => key.startsWith("python130/"))
     .reduce((s, [, m]) => s + m.score, 0);
 
-  return (
-    <AuthGuard>
-      <main className="min-h-screen bg-[var(--page-bg)] px-6 py-16 text-[var(--page-text)]">
-        <div className="mx-auto w-full max-w-6xl flex flex-col gap-10">
+  const isAdmin = user?.role === "admin";
 
-          {/* Header */}
-          <section className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
-            <div className="space-y-3">
-              <button
-                onClick={() => router.push("/learn/dashboard")}
-                className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 hover:text-slate-300 transition"
-              >
-                ← Courses
-              </button>
-              <div className="flex items-center gap-3">
-                <span className="text-4xl">🐍</span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">
-                    Intermediate · 11 Modules
-                  </p>
-                  <h1 className="text-3xl font-semibold text-white">Python 130</h1>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
+  const tabs = [
+    { id: "learn", label: "Learn" },
+    { id: "tests", label: "Tests" },
+  ];
+
+  const testsContent = (
+    <div className="flex flex-col gap-4">
+      <div className="mb-2">
+        <h2 className="text-xl font-semibold text-white mb-1">Midterm Tests</h2>
+        <p className="text-sm text-slate-400">
+          Past-exam style assessments covering key modules. Work through each question and review your answers at the end.
+        </p>
+      </div>
+      {midterms.map((mod) => {
+        const p = progress[`python130/${mod.slug}`];
+        const isLocked = isAdmin ? false : mod.locked;
+        const answered = p?.answeredCount ?? 0;
+        const completed = !isLocked && answered >= mod.questions.length;
+        return (
+          <div
+            key={mod.id}
+            onClick={() => !isLocked && router.push(`/learn/courses/python130/${mod.slug}/quiz`)}
+            className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
+          >
+            <div className={`bg-gradient-to-r ${mod.color} h-1.5`} />
+            <div className="p-7 flex items-center gap-6">
+              <span className="text-4xl">{mod.icon}</span>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
-                  Overall
+                  {mod.questions.length} Questions
+                  {completed && (
+                    <span className="ml-3 text-emerald-400">· Completed — {p?.score}/{mod.questions.length} correct</span>
+                  )}
+                  {!completed && answered > 0 && (
+                    <span className="ml-3 text-yellow-400">· In Progress — {answered}/{mod.questions.length} answered</span>
+                  )}
                 </p>
-                <p className="text-2xl font-semibold text-white">
-                  {loadingProgress ? "—" : totalCorrect}{" "}
-                  <span className="text-slate-500 text-base font-normal">/ {totalQ}</span>
-                </p>
+                <h3 className="text-xl font-semibold text-white mb-1">{mod.title}</h3>
+                <p className="text-sm text-slate-400">{mod.description}</p>
               </div>
-              <button
-                onClick={handleLogout}
-                className="rounded-full border border-slate-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 hover:text-slate-200 hover:border-slate-500 transition"
-              >
-                Sign Out
-              </button>
+              <span className="text-slate-600 text-xl shrink-0">→</span>
             </div>
-          </section>
-
-          {/* Progress bar */}
-          <div className="rounded-3xl border border-slate-800/70 bg-slate-900/70 px-8 py-5 backdrop-blur shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-3">
-              Course Progress
-            </p>
-            <ProgressBar current={totalCorrect} total={totalQ} showLabel size="md" />
           </div>
+        );
+      })}
+    </div>
+  );
 
-          {/* Module grid */}
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">Course Modules</h2>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {modules.map((mod) => {
-                const p = progress[`python130/${mod.slug}`];
-                const isLocked = user?.role === 'admin' ? false : mod.locked;
-                return (
-                  <ModuleCard
-                    key={mod.id}
-                    module={{ ...mod, locked: isLocked }}
-                    score={p?.score ?? 0}
-                    completed={!isLocked && (p?.answeredCount ?? 0) >= mod.questions.length}
-                    courseSlug="python130"
-                    courseTitle="Python 130"
-                  />
-                );
-              })}
-            </div>
-          </section>
-
-        </div>
-      </main>
-    </AuthGuard>
+  return (
+    <CoursePageLayout
+      courseSlug="python130"
+      courseTitle="Python 130"
+      courseIcon="🐍"
+      courseLevel="Intermediate"
+      moduleCount={regularModules.length}
+      totalCorrect={totalCorrect}
+      totalQ={totalQ}
+      loadingProgress={loadingProgress}
+      modules={regularModules}
+      progress={progress}
+      tabs={tabs}
+      activeTab={tab}
+      onTabChange={setTab}
+      tabContent={{ tests: testsContent }}
+      isAdmin={isAdmin}
+      onLogout={handleLogout}
+    />
   );
 }

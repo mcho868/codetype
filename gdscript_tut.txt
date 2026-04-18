@@ -1,0 +1,965 @@
+Intro
+0:00
+GDScript GDScript: A high-level, GDScript: A high-level, Object-oriented, GDScript: A high-level, Object-oriented, Imperative, GDScript: A high-level, Object-oriented, Imperative, and Gradually typed programming language
+0:05
+with syntax a lot like Python, Built specifically for Godot. I know that sounds like a lot, but today we are going to learn it.
+0:13
+While it's of course impossible to cover everything an entire programming language has to offer in just one video...
+0:19
+...We'll certainly try! In fact, we will cover everything from Variables and Conditions... ...to getting Input,
+0:25
+...to getting Input, Inheritance, ...to getting Input, Inheritance, Dictionaries, ...to getting Input, Inheritance, Dictionaries, Signals, ...to getting Input, Inheritance, Dictionaries, Signals, and the list goes on... And who knows? Perhaps we'll even figure out what "GD" stands for.
+0:33
+Gandalf Script? Green Day Script? Gadolinium!?
+0:38
+We might never know! We'll start with the things that I consider to be the most important for beginners, and then move on to more abstract programming concepts as we progress.
+0:47
+It's not as much a follow-along as it is an overview. So if you're a beginner: lean back, and know that you don't have to understand everything the first time.
+0:55
+Also, it's totally okay to stop the video and try some of these things out. You can always come back to it at a later time.
+1:01
+We've made sure to split everything into clearly named sections, so hopefully you'll be able to use this as a reference manual going forward.
+1:08
+And if you're a seasoned programmer transitioning to GDScript; this video should provide you with a nice overview of the tools at your disposal, and how to approach doing different things.
+1:18
+Keep in mind that this is a video on GDScript, not an introduction to Godot. So if you've never opened up Godot before, I suggest you begin with our video on making your very first game in Godot.
+1:27
+Alright, without further ado, let's learn GDScript. But first! This video is sponsored by CodeCrafters.
+1:33
+If you've been writing software for a while and are looking to take your skills to a whole new level: CodeCrafters is the place to be.
+1:40
+CodeCrafters allows you to practice writing complex software by challenging yourself with real-world projects.
+1:46
+You get to build your own git implementation, your own HTTP server, or even your own BitTorrent client.
+1:52
+Along the way, you will practice advanced system design and gain a greater understanding of lower level programming concepts,
+1:57
+such as Networking, OS Interaction, and Performance. And when you're done, you'll have a really impressive project to add to your portfolio.
+2:05
+On top of this, you will get to try new languages like Python, C, C++, and many, many more.
+2:11
+Also new challenges are constantly being added. I for one voted for the compiler challenge to be next.
+2:16
+So become a better software engineer today by signing up for CodeCrafters. Use the link below to get one week free and 40% OFF on all membership plans.
+Hello, World!
+2:25
+Hello, world! So here we are in an empty Godot project. I t ' s⠀r e a l l y⠀s p a c i o u s⠀i n⠀h e r e . . .
+2:30
+As it is custom, let's begin by making a script and adding some code to print a message.
+2:36
+To do that, we need a test scene so let's go and hit the [+]. I'll add in a node, rename it to "Main", and let's save this as a scene.
+2:45
+So I'll hit [Control] + [S], hit "Save". Let's add a script by pressing the scroll. We'll use the default template, and the name of the script should be "main" as well with a non-capital "m".
+2:55
+This creates a script with two functions. We'll start by focusing on the top one named "ready".
+3:00
+Think of this as the start of our game. As it says here: This function is called when the node enters the scene for the first time, which happens right when we play our game.
+3:10
+So we can put code in here that we want to happen immediately. I'll get rid of the other function for now.
+3:16
+You can zoom in by holding down [Control] while scrolling. Now, right now the only thing in our ready function is the "pass" keyword.
+3:22
+"pass" basically means do nothing, and it will appear in functions we haven't filled out yet. So let's replace it with some code that prints our message.
+3:30
+We'll write "print()". And inside the parenthesis, we'll put our message in quotation marks: "Hello, world!".
+3:38
+We can then run the game by pressing this button here or hitting [F5]. It's gonna ask us which scene we are going to run. We'll hit "Select Current".
+3:46
+And while our game isn't very exciting yet, we can now see that the console prints our message. The Output window here or the Console is where it will display prints and it's also where we check for errors.
+3:57
+Now to stop our game from running, we'll press the stop button here or press [F8]. Syntax
+Syntax
+4:03
+Now, this might have worked for you and it might not. That's because there are a few things to be aware of when writing GDScript.
+4:11
+The first is that statements like print here terminate with a new line. There's no need to add a semicolon at the end like in many C-based languages.
+4:20
+And GDScript, similar to a language like Python, uses indentation to determine the structure of your code.
+4:26
+This means that you use tabs to tell GDScript where your code belongs. In our example here: I'm using a tab to tell Godot that our print line belongs to the ready function.
+4:36
+If I delete this tab, I get an error. Also, GDScript is case-sensitive.
+4:41
+So if I write "print" with a capital "P", I will also get an error. So just a couple of things to look out for there.
+4:48
+Now printing to the console is cool, or I mean, maybe not as cool as backflips, but well, I can't teach you to do those.
+4:54
+But I can teach you how to display text in the game window instead. To do that, we'll need to modify a node through script.
+Modifying nodes 1.0
+5:00
+Modifying nodes 1.0 First, we need a node to modify. Let's use a Label.
+5:06
+So I'll add a new node, choose "Label". I will zoom in. Center it on the screen.
+5:12
+Make some more room. Let's add a default text: "THIS IS A LABEL". I will center it, and overwrite the font size.
+5:22
+Now, to edit the text of this label through script, we need two things: We need a reference to the label, and we need to access the property in the label that we want to change.
+5:31
+In this case, the Text. If we hover over Text, we can see the name of the property through script, which is "text" with a non-capital "t".
+5:39
+So in our main script, we'll first get a reference, and we can actually do this by simply taking the label and dragging it into our "ready" function.
+5:46
+Then we can access the property by going ".", and we'll type in "text" and set it equal to "Hello, world!".
+5:53
+And now we play, our label changes to "Hello, world!". And we can use this exact method to change other things as well. Such as the color of the text.
+6:02
+In fact, there's a property called "modulate" which allows us to tint sprites and other UI elements.
+6:07
+In the inspector, you can find it all the way down here under visibility. Let's change it to green.
+6:12
+So again, we'll click and drag to create a reference to the label, write ".modulate", and set it equal to "Color.".
+6:19
+Here we have a bunch of different colors. We'll choose "GREEN". And voila, our label is now green.
+6:24
+So this is how we can make changes to nodes when our game is running. But right not much is happening during our game.
+6:30
+So let's see how we can use Input to make our game respond to our actions. Input
+Input
+6:35
+Let's say we want to turn this label red when we press the space bar. To do this, we first need to set up an input action.
+6:41
+We'll go "Project", "Project Settings", "Input Map". Here we can add actions. Actions allow us to bind keys to something that we want to happen.
+6:50
+Common actions would be shoot, jump, or so on. In our case, we want to change a color.
+6:56
+I'll just go ahead and call it "my_action" so we can use it later for other things. Now let's hit "Add", and here is our action.
+7:02
+Let's find the key to it by pressing "+", It's now listening for input, I'm gonna press this space bar and hit "OK".
+7:08
+And now, our spacebar is bound to "my_action". Then in our script, we need to create an input function.
+7:15
+We'll right "func" for function, "_input", and let's hit enter to autocomplete.
+7:21
+Now just like "ready", this is one of the built-in functions of Godot. But instead of being called at the start of the game, it runs every time the game receives any input, such as when we press a button.
+7:32
+"event" is what we call the information about what triggered the function. Was it a movement of the mouse or the press of a key?
+7:38
+We need to check if the event that triggered the input was our action being pressed. So we'll write "if event.is_action_pressed()"... As you can see, our action shows up here: "my_action".
+7:51
+Then we'll put in a colon, and if we press "my_action", well then we'll then change the color. So we'll drag in the label, write ".modulate", and set it equal to "Color.RED".
+8:02
+And we can just as easily check if the action was released. We'll go "if event.is_action_released()" this time, "my_action". Well then we'll take the exact same line, and change it back to green.
+8:14
+So now when we play and I press the space bar, it turns red. And when I release it, it turns back to green.
+8:20
+That's right, we made a party... That's right, we made a party...A DISCO PARTY! That's right, we made a party...A DISCO PARTY! That's right, we made a party...A DISCO PARTY! That's right, we made a party...A DISCO PARTY!
+8:26
+That's right, we made a party...A DISCO PARTY! That's right, we made a party...A DISCO PARTY! That's right, we made a party...A DISCO PARTY! That's right, we made a party...A DISCO PARTY! That's right, we made a party...A DISCO PARTY! Now this is just one out of many ways to handle input in Godot,
+8:31
+but since we're focusing on the GDScript language, I'm not going to go further into it here. I'll make sure to provide a link to where you can learn more about input if you're interested.
+Variables 1.0
+8:38
+Variables 1.0 Variables are essentially containers that hold information.
+8:44
+In the case of a player character, we could use variables for information like the player's name, health, damage, and perhaps if the player is alive or not.
+8:53
+Let's make a "health" variable. At the top here, I'll write "var" for "variable", the name of our variable, and then we'll set it equal to a default value.
+9:02
+Now we can print this variable inside our "_ready" function, we write "print(health)",
+9:07
+And if we play, you can see that it now prints "100". Now we can easily change our variable.
+9:13
+So before printing, let's assign a new number: "health = 40".
+9:18
+We can also assign a calculation so "health = 20 + 30". We'll set our health to 50.
+9:25
+We can also add "health += " and then "20", we'll add 20 to our health.
+9:32
+And subtract "health -=". To multiply, we do " *= ".
+9:38
+And to divide, we do " /= ". So if we run this now, it will do all of these calculations from top to bottom and then print out the results.
+9:47
+Which turns out to be a 120. Let's look at an example where our player takes some damage and we want to subtract the damage from our health.
+9:55
+Let's try decreasing our "health" variable whenever we press the action we made earlier. So, in the input function, we'll check if the action was pressed...
+10:06
+and then we'll subtract from our health, and we can print the result. So now every time I press the space bar bound to "my_action", we can see that I reduced the health.
+10:17
+Really cool. But, as you can see, we can currently reduce our health below zero, and nothing happens when we do so.
+10:24
+If we were making a game, we'd probably want our player to die and the game to restart. Luckily, we can make our game react to variables by using IF statements.
+If-statements
+10:32
+If-statements If-statements (or conditionals) IF-statements are the glue that holds all of our logic together.
+10:38
+We've actually already used IF-statements to check if our action was pressed. But they can do so much more. Yet, they are really simple.
+10:46
+An IF-statement is just a condition that needs to be met in order for the code inside to be run. Let's add an IF-statement here to check if our health reaches zero.
+10:55
+So I'll make some room, write "if health <= 0", well then we'll set our health to 0, and we'll print that we died...
+11:08
+...And now, when our health gets to 0, it prints: "YOU DIED!" Now here we're using " <= " to compare our health to the value 0.
+11:17
+But there many more comparisons we can make. Here are all the comparisons we use such as " == ", " != ", and so on.
+11:25
+We can also add more conditions to one IF-statement. We use the "and" keyword to add another condition where both need to be met.
+11:33
+And the "or" keyword to add a condition where only one of them needs to be met. Now one really useful thing about IF-statements is that we cannot only define what happens when the condition is true, we can also choose what happens when it's false.
+11:46
+We do this using the "else" keyword. Let's add an "else" to print that we are still alive if our health hasn't reached 0 yet.
+11:53
+So if our "health >= 0", we died. else, we print: "YOU ARE HEALTHY!".
+12:00
+And even cooler, we can chain together IF-statements using "else-if" or "elif" for short.
+12:06
+So we check if our health reaches 0, and if not: else if/elif, our health goes below 50, well then we'll print that we are injured.
+12:19
+And if neither of these two are true, we'll go to else and say that we are healthy. And if we play, we can see that at 80, we are healthy. At 60, we are still healthy, then we are injured, and at 0, we die.
+12:30
+Very cool. Note that the IF-statement we made here is nested under another IF-statement.
+12:36
+You can easily layer IF-statements to get more and more specific functionality. However, try not to overdo it. You can quickly get lost in the ifs.
+12:45
+Actually, a lot of people don't know this but that's why programmers and philosophers have so much in common.
+12:50
+We both tend to spend a lot of time with the ifs and the what ifs. So if you get frustrated along the way, remember that
+12:57
+So if you get frustrated along the way, remember that so was Play-Doh. ˢᵐᶦʳᵏˢ Anyway, that's it for IF-statements. Comments
+Comments
+13:02
+We use comments to help explain and remember the what and the why of our code. Adding a comment is simple and can be above or after a line.
+13:11
+So if we add some code, we can make a comment above the line, and this is a comment about the code that follows.
+13:19
+Or we could make one right after, and this is a comment about this line only.
+13:24
+We can also use comments to temporarily remove parts of our code from being executed. Here we simply put a hashtag (#) in front of the code,
+13:31
+and it's good practice to emit the space here to indicate that what follows is code. We can also select multiple lines of code, right click, and toggle comment.
+13:39
+Just remember that you can't have a completely empty function. We need to add the "pass" keyword to avoid an error.
+Variables 2.0
+13:45
+Variables 2.0 When creating or declaring a variable, we need to think about where we do so.
+13:52
+If we declare a variable inside of an IF-statement for example, we can only use that variable inside of the IF-statement.
+13:59
+This is called scope, and it's something that beginners often make mistakes with. If we want to use a variable in many different places in our script, we make sure to put it at the top, outside of any functions.
+14:10
+So this is a script wide variable. This can be accessed anywhere in your script.
+14:15
+If you were to declare it inside of a function, you would only be able to use it in that function.
+14:21
+So this is a variable we can only use in "_ready()". Now, a really cool thing about variables in GDScript is that you can declare them without thinking about what type of data is inside them.
+14:31
+Here's a variable that is either true or false, and here's a variable that stores a number. As you can see, they're created in the exact same way.
+14:39
+In fact, we can even change the type of data that they hold just by reassigning them. So we can actually set our "coolness" to true and this runs completely fine.
+14:48
+That being said, we still need to be aware of what type of data we're working with. Because some parts of our game will expect a specific type of data...
+14:56
+...And we'll get an error if we try to use another type without converting. Now in GDScript, we have the four classic data types:
+15:04
+Boolean (or bool) for true and false, Integer (or int) for whole numbers,
+15:10
+Float for numbers with decimals, and String for text. Converting from one type to another is called "Casting".
+15:18
+For example, we can cast an integer into a string. So if we have a number that is equal to 42, and we have some text which is a string,
+15:28
+well then we can add the number to this text, but we convert into a string by writing "str (For String)" and then the variable inside of the parentheses.
+15:38
+And if we print this, it works fine. We can do a similar thing to say, convert a float into an integer.
+15:45
+So if we have a variable called "pi" that is equal to 3.14, then we can convert this into an integer by going "int(pi)".
+15:53
+And let's print this, and it prints "3", a whole number. Note, however, that this automatically truncates the number, it does not round. It simply gets rid of the decimals.
+16:04
+So 3.9 also results in 3. Some other data structures that are really common in GDScript are Vector 2 and 3.
+16:11
+Vector2 stores two floats: x and y. And Vector3 stores three floats: x, y, and z.
+16:20
+These are most commonly used for positions. So I can create a variable called "position" with some coordinates. I can then modify one of the components, so "position.x += 2" adds 2 to the x component...
+16:33
+...And then we can print the whole thing. And this gives a Vector3 of 5, -10, 5.
+16:39
+Now, by default, GDScript is what we call dynamically typed. This means we don't define what type of data a variable can hold when we declare it, which we have been using so far.
+16:49
+This makes it fast to create variables and flexible because we can reassign data of another type at will.
+16:54
+However, it is more prone to error, and less performant than static typing.
+16:59
+Luckily, GDScript allows us to statically type any variables we want. We can pick and choose totally based on preference.
+17:07
+To statically type a variable, we simply add the type when declaring it. So here if we have a "damage" variable, we can specify the type, and then set the value.
+17:16
+So now this variable always stay an integer. We can even have Godot automatically determine the data type by simply writing " := " and then the default value.
+17:26
+This is called "invert typing" and the result is exactly the same. The type is still static. Godot simply recognizes that 15 is a whole number and sets the variable to a type of int.
+17:36
+This also means that the variable cannot change to another type. If we try to set it to a string, we get an error.
+17:43
+Now adding "@export " in front of a variable will allow us to set it using the inspector. The value that we set in the script will just be the default value.
+17:52
+So if we save this, and select our node, we can set a value in the inspector. If we print our "damage", we can see that this updates in our game.
+18:00
+And we can always press the circular arrow to revert back to the default. Now, sometimes you want to define a variable that cannot change. For this, we can use constants.
+18:09
+So I'll write "const" for "constant", we'll call it "GRAVITY". As you can see, it's standard practice to name constants with capital letters, and we'll set it equal to -9.81.
+18:19
+Now we can use this like any other variable, but we cannot change it. If we try to do that, it throws an error.
+18:26
+And that's it for variables! Great Job! Functions Functions are the bread and butter of programming.
+Functions
+18:33
+They allow you to bundle up your code in small reusable packages. So far, we've been using some of Godot's build-in functions like "_ready()" and "_input()".
+18:42
+Notice how these are prefixed with an underscore. This is to show that they are not activated or called by us, but by the engine itself.
+18:50
+But we can actually make our own functions and use them to do really cool things. Common functions to making games are things like jump, die, shoot, and respawn.
+19:00
+And making a function is actually really easy. Let's make a function for jumping. So we'll right "func "...
+19:06
+...(Or "funk" in that case)... ...And the name of our function, open and close parentheses, and a colon.
+19:12
+And then in here, we'll put all of our code for jumping. So we could add an upwards force, play a funny sound, and a jump animation.
+19:20
+For now we'll just print "JUMP!". But nothing is currently triggering or calling our function.
+19:27
+Let's call it whenever we press the action we made earlier. So "func _input(event):", and if our function was pressed, then we call our jump function by writing "jump" followed by ().
+19:41
+And now when I press space, it displays "JUMP!". And at this point, I encourage you to add the sound effect yourself.
+19:46
+OIOING! OIOING! O- A lot of fun to be had here.
+19:51
+Now this already makes our code more readable and reusable. But right now, our function is just a simple command. We call it, and it does some things.
+20:00
+However, we can actually use functions for much more than this. They can have inputs and outputs.
+20:06
+Let me explain: I like to think of functions as machines. Take for example this coffee maker.
+20:11
+Just like the name implies, it performs a function: To make coffee. To do this, however, it needs some input: Some water, a filter, and some ground coffee.
+20:20
+With this, it performs its function and then spills out an output: Delicious Coffee.
+20:28
+In code, we call the input we give our function: Parameters. And the output is called: Returns.
+20:34
+So let's make a function that adds together two numbers. "func add()", and inside our parenthesis, we add the parameters.
+20:42
+So number one we'll call "num1", and the second number we'll call "num2".
+20:47
+Then inside our function, we can add these together and store them in a "result" variable.
+20:52
+So we'll set that " = num1 + num2", and for now, let's just print the results.
+20:58
+Then in "_ready()", let's try calling this function. So we'll call add(), we'll give it first number 3, and the second one, let's do 8.
+21:06
+And let's actually call it again. So let's do a harder one. Let's add 245 with 111.
+21:13
+And indeed, it prints "3 + 8" which is 11, and 356 which is the result of our second calculation.
+21:19
+So here we've created a function with two parameters, the numbers we want to add together. But the function actually doesn't return the results, it just prints it.
+21:28
+This means we can't actually access the result where we are calling the function, up here in "_ready()". To return the result, we replace "print()" with "return".
+21:37
+So we'll do "return result". And now up here, we can store the result in a variable, set it " = add()", and we'll add together 3 and 5, and we can print that.
+21:49
+And the result is 8. And because we have access to it up here, we can do more things, like add more numbers to it.
+21:54
+So we can say "result = add()", and pass in the result from before, and "10", and then print it.
+22:02
+And there you go, we now get 18, because 3 + 5 + 10 is 18. Really cool.
+22:08
+And just like when declaring variables, we can also statically type parameters and return types to make it clear that the function is made to work with numbers.
+22:15
+So after "num1", we'll specify that this is an integer, we'll do the same thing with num2,
+22:20
+and here we can set the return type using an arrow (->) and this is also also an integer.
+22:25
+So now this function will only work with numbers. 3468211.5
+Random numbers
+22:31
+Random numbers Getting random numbers is very easy. The function "randf()" gives a random number between 0 and 1.
+22:40
+It's great for assigning probabilities to your code. Say, we are deciding what loot to give the player and we want to make some loot more rare than other.
+22:48
+Well in this case, we could create a "roll" variable and set it " = randf()". Then we could check if the roll is >= 0.8, which means there's an 80% chance that we print: "You found a COMMON item.".
+23:03
+And if not, well then there's a 20% chance that "You found a RARE item!".
+23:09
+And if we play this, most of the time it's going to display that we found a common item. But if we keep playing,
+23:16
+If we keep playing. Keep play- [:: Did you know that 80% of programmers quit playing right before they make it BIG? ::]. ...Eventually... ...Eventually... eheheh...
+23:22
+...There's a 20% chance so... ...At some point... ...We'll eventually...
+23:27
+...We'll event- chuhahahaha- this is c- We'll eventually find a rare item. That was crazy...
+23:33
+We can also use "Randf_range" and "Randi_range" to get a random float or integer between a minimum and maximum value.
+23:41
+Say to assign a random height to a character. So, "var character_height = randi_range()" for random integer between 140 and let's do 210.
+23:53
+And we'll print that "Your character is ", then we'll insert the height (remember to convert to a string), "cm tall."
+24:03
+And, we'll roll a character, and apparently, And, we'll roll a character, and apparently, I am a 𝗚𝗜𝗔𝗡𝗧! Basketball, here I come!
+Documentation
+24:09
+Documentation GDScript is actually pretty well documented. And one of the really cool things about it is that the documentation is linked with the editor.
+24:17
+If we hold down [ctrl] and click on something we would like to know more about (such as the "randi_range" function), it opens up the documentation right here in the editor.
+24:26
+This is a really quick and easy way to check if you're using a function correctly. It also works for classes which we'll learn about later.
+Arrays
+24:34
+Arrays Sometimes you want a variable that can hold more than one thing. In fact, sometimes you might want to store a whole list of elements.
+24:42
+For this, we use arrays. Defining an array is very easy. Let's make one to hold items in an inventory.
+24:49
+So we'll create a normal variable and set it equal to open and close square brackets. This creates an empty array.
+24:55
+We can then add elements inside the square brackets. I'll add a "Potion" string, the number 3, and the number 6.
+25:02
+Notice how unlike many other languages, GDScript has no problem mixing data types within an array.
+25:08
+But if you want to constrain an array to a specific type, we can of course statically type it. So here we simply add the type.
+25:15
+This is an array and the elements inside it are going to be strings. So that's the syntax for that.
+25:21
+And now we get an error because 3 is not a string, so we'll replace this with "Feather". And 6 is also not a string, we'll replace that with "Stolen harp".
+25:31
+Now the way we access elements in an array is by using an index. When you add an element to an array, it is automatically assigned a number based on it's position in the array.
+25:41
+In this case, the first element "Potion" has an index of 0. "Feather" has an index of 1.
+25:46
+And the "Stolen harp" has an index of 2. So to access and print the first element in our array, we write "print(items[])" then we access the first element which has an index of 0.
+25:57
+And this spells out "Potion". Pretty cool. We can just as easily change elements.
+26:03
+This changes the second element to "Smelly sock", and the third element to "Staff".
+26:08
+And arrays also have functions for finding, removing, or adding new elements. So to remove at an index, we write ".remove_at()", and then the index 1.
+26:18
+This removes the "Smelly sock". And to add a new element, we write ".append()", and then we'll append an "Overpowered sword" to the end of the array.
+26:29
+Now, arrays can quickly become long and difficult to manually go over. Luckily, we can use something called "Loops" to help out.
+Loops
+26:36
+Loops for n in range(1,3) Loops for n in range(2,3) Loops for n in range(3,3) Loops allow us to repeat code a number of times with small variations.
+26:43
+They are perfect for iterating through all the elements in an array. If for example, we wanted to print out all the items in our array here, we can do that easily using a for loop.
+26:52
+So we write "for", then then the name of the item that we're currently looking at, we'll just name that "item".
+26:59
+"in" the array, so "in items"... We will print out the current item we're looking at.
+27:05
+So, "print(item)". And as you can see, it prints: Potion, Feather, and Stolen harp. This is cool because we can have any number of items in our array.
+27:13
+The code will work just fine. We can add more functionality, say to only print items that are more than 6 letters long.
+27:20
+"if item.length()", so the amount of characters in "item" is greater than let's say 6, then we're going to print that item.
+27:29
+And it prints only "Feather" and "Stolen harp", because "Potion" is exactly 6 letters. We can also create loops that run a certain amount of times.
+27:37
+If we write "for n in 8:", it creates a for loop where the variable "n" starts at 0 then goes all the way to 7.
+27:46
+So if we print "n", we can see that it runs 8 times. And "n" starts at 0, and ends at 7.
+27:54
+We say that "n" is the current iteration of the loop. Another type of loop is the "while" loop.
+28:00
+This repeats as long as a certain condition is met. Now I think most people who know me would say I'm a glass-half-full-kind of person.
+28:08
+And to those who disagree, let me go ahead and prove it by using a while loop to fill up a glass halfway.
+28:14
+So I'll create a glass variable and default it to 0.0. The glass is currently empty, no arguing about that.
+28:21
+Then we'll create a while loop that continues while glass is less than 0.5,
+28:27
+so we haven't filled it up halfway yet, in which case, we will add a certain amount to our glass.
+28:34
+We could do a constant amount like this, or in real life when I try to pour something into a glass, I'm not that precise.
+28:40
+So let's add a random number instead... So we'll add a random float between 0.01 and 0.2, and then we'll print out how much is in the glass at the current time.
+28:53
+Then when the loop is done, we get to continue down here in our code, and we print that "The glass is now half full!".
+29:02
+And if we run this, we can see that the glass slowly becomes more full with a random amount each time,
+29:07
+and then it says that "The glass is now half full!". As you can also see, it overshoots a bit because we're adding random amount each time and not climbing the value.
+29:16
+Just like when trying to hit exactly half a glass in real life. My wife says that I add too much milk when I make her coffee. I think I'll refer her to this going forward.
+29:25
+Now, we actually have to be really careful when using while loops, that we don't create an infinite loop.
+29:31
+These can be tricky to avoid and can easily crash our program. Say, if I were to remove this line that adds a little bit to our glass every time,
+29:40
+well then our glass would never become half full, and we would be stuck in this loop forever.
+29:47
+Now, I don't think this will actually crash Godot. Indeed it didn't. But we get a lot of overflow errors.
+29:53
+And as you can see, our game is definitely not responding. Not good. Finally, in both for and while loops, we can use the "break" and "continue" keywords.
+30:01
+"break", as the name suggests, breaks out of the loop and moves on to the code after. While "continue" immediately skips to the next iteration of the loop.
+30:09
+So if we were to write "if glass > 0.2", and then "break"...
+30:16
+We can see that our while loop ends way early because we exit out of the loop before we even get to print that the glass reached 0.2.
+Dictionaries
+30:24
+Dictionaries Dictionaries They sound really boring, Dictionaries They sound really boring, but they're really cool. While arrays great for storing lists of elements, it's sometimes confusing to access each element with an index.
+30:35
+Sometimes it makes more sense to use a dictionary. Dictionaries hold what we call Key-value pairs.
+30:41
+Let me explain... In real life, we use a dictionary to look up the definition of words in a language.
+30:47
+The key in this instance is the word we're looking up, and the value is the definition.
+30:52
+Dictionaries in GDScript work the exact same way. Creating an empty dictionary is really easy.
+30:58
+We write "var", I'll call this one "my_dict", and set it equal to some curly brackets.
+31:04
+This is an empty dictionary. We can then add key-value pairs inside the curly brackets. Say for example, that we have multiple players in our game.
+31:12
+We can use a dictionary to keep track of them. Each player has a username, this will be the key. And a level, this will be the value.
+31:19
+So I'll create a player called "Crook", and his level is going to be 1. I'll create another player "Villain", with a level of 35.
+31:29
+And finally, a player with the username "Boss" with the level of 100. If defining on one line is too much, you can split it up like this...
+31:39
+And it's good practice to add a comma to the last entry so you are ready for a new one. And let's name this dictionary "players".
+31:45
+Then to get the level of a player, we simply type in the username. Let's print the level of our "Villain". So "print()", and we'll write "(players)", type in "["Villain"]",
+31:55
+and this should print: 35. And you can just as easily assign a new value or add another entry.
+32:01
+So we can reassign the "Villain" here to say, 50, and add a new entry called "Dwayne"...
+32:08
+...with a whooping level of 🗲999🗲. And just like with arrays, we can loop over a dictionary with a for loop.
+32:16
+When we do this, we are actually looping over all the keys in our dictionary. So all the usernames, and "for" each "username in players",
+32:26
+we will go ahead and print out the username, I'll add a string to separate, and then the level.
+32:33
+So here we access our "players" dictionary and input the username we're currently looking on to get the value.
+32:39
+And remember to convert this into a string so "str" to cast to a string.
+32:44
+There you go, it prints our entire dictionary. Now, just like with arrays, you can have multiple data types of keys and values in the same dictionary.
+32:54
+And even cooler, you can actually have arrays or dictionaries inside another dictionary.
+33:00
+This might sound really abstract, but it's actually pretty cool, and often comes in handy. Say, for example, we don't just want to store the level of each player, but also other info like their health.
+33:11
+Well then we simply replace this value with another dictionary. So open and close some curly brackets, here we'll add a key called "Level" with a value of 1...
+33:20
+...and another key called "Health" with a value of 80. And at this point, it's a good idea to use tabs to keep our code clean.
+33:27
+Let's duplicate this...I'll assign some values...
+33:33
+And now we can access a value by using two keys. Let's print the "Health" of our "Boss", so "print(players)", we go into our "Boss", and we access the health.
+33:44
+And this prints "500", which is correct. So this way, we can start to think of ways we can structure the data about what's going on our game such as player stats, inventory, buffs, and so on.
+Enums
+33:55
+Enums Enums are convenient way to define tags or states in our game.
+34:01
+Say we're making a game with a bunch of units and we want a way to mark each one as either hostile, neutral, or ally.
+34:08
+In this case, we could create an enum that defines these tags. So at the top here, I'll write "enum" to create a new enum,
+34:15
+and then in the curly brackets, I'll write "ALLY", "NEUTRAL", and "ENEMY".
+34:21
+And now we can use these states in our game. For example, we can create a variable called "unit_alignment", and set it equal to any one of these states.
+34:30
+I'll just set it to "ALLY". And this makes it really quick and easy to then check in our code if our unit has a certain alignment.
+34:38
+Also, let's just give our enum a name here to stay organized. So I'm going to call this "Alignment",
+34:44
+And now, whenever we are accessing a state, we have to go inside of "Alignment." and here you can see our state,
+34:51
+so I'll go "Alignment.ALLY" by default. And then inside of "_ready()", we can check "if unit_alignment == Alignment.", let's check for "ENEMY",
+35:02
+and if it is, we'll print "You are not welcome here.". And if it is not, so it's not an "ENEMY",
+35:09
+we'll just write "Welcome.". And now if we run, we can see that our console displays "Welcome.", because our "unit_alignment" is currently "ALLY".
+35:19
+This is much safer than using, say, a string or an integer to represent states.
+35:25
+Because Godot will throw an error if we misspell a state. If, for example, I misspell "ENNEMY", we can see that Godot throws an error.
+35:32
+But I think one of the real powers of enums is that we can use them for exported variables.
+35:38
+To do this, we mark our variable here with "@export"...and then set the type to "Alignment".
+35:45
+And now, we can actually set our "unit_alignment" in the inspector. So I'm going to set mine to "ENEMY" here,
+35:51
+and now when we play, it prints "You are not welcome here.". Really cool. Now what is actually happening behind the scenes here is that Godot is creating a constant for each state in our enum.
+36:02
+So this code here is actually completely identical to our first line.
+36:07
+And as you can see, the value here increases from 0 to 1 to 2, kind of like an index.
+36:13
+So an enum is essentially just a bunch of constants with an increasing value. Which means that if we try to print one of these states,
+36:21
+say, you print "Alignment.ENEMY", The console simply shows the value of that constant, which is 2, Because it's the third state.
+36:31
+This is rarely something you need to take into account, but it's nice to know what our code is actually doing.
+36:36
+And we can even overwrite the default value if we want, so we could set "ALLY = 1, NEUTRAL = 0, " and "ENEMY = -1",
+36:46
+and now our console displays "-1" because that's now the value of our "ENEMY" constant.
+36:52
+Now something that pairs really nicely with enums are "match" statements, because they allow us to quickly add functionality for each state.
+Match
+36:59
+Match Match is the Godot equivalent of the switch statement from other languages,
+37:04
+and allows us to execute different code depending on the value of a variable. In this case, here we can use a match statement to add some code for the different values of our enum.
+37:13
+So I'll write "match", then the variable we are matching based on, which is "my _alignment", colon,
+37:18
+and now, we add code for each value. So in case "my_alignment" is "Alignment.ALLY", I'll print "Hello, friend!".
+37:29
+If it is "NEUTRAL", I'll print "I come in piece peace!".
+37:34
+If it is "ENEMY", "TASTE MY WRATH!". And a cool thing here is that we can actually add a default response as well.
+37:43
+To do that, we do "_:", and so if it isn't any of the cases above, we'll print "𝓦𝓱𝓸 𝓪𝓻𝓽 𝓽𝓱𝓸𝓾?".
+37:52
+And if we set my alignment to say, "ENEMY"..."TASTE MY WRATH!".
+Modifying nodes 2.0
+37:58
+Modifying nodes 2.0 So far when we need to access a node, we've done so by simply dragging it into a script,
+38:05
+which creates a dollar sign followed by the path to the node. I've created a few empty nodes here to demonstrate.
+38:11
+A "Player" node with a "Graphics" and "Weapon" node, and an "Enemy" node. So if I drag in the "Weapon" node, it creates a path that goes into the player and finds the weapon.
+38:21
+And we can actually store this reference in a variable. To do this, we simply drag it to the top, and hold down [ctrl] while releasing.
+38:29
+This automatically creates a variable with the name of the node and the correct path. And as you can see, it uses the "@onready" keyword.
+38:36
+This is because Godot has a very strict order in which nodes are created. And if we open the game and try to find the "Weapon" node before it exists, we will get an error.
+38:45
+"@onready" simply makes sure Godot waits until all child nodes have been created so we don't get any issues.
+38:50
+And just a quick note, the dollar sign here is just actually shorthand for using the "get_node" function.
+38:56
+So this is actually identical. Also, you might have noticed that the path is relative.
+39:01
+Our script is on the main node, so it starts right after that node. We can print the absolute path through script.
+39:08
+We'll "print(weapon.get_path())". This prints the absolute path starting from the root of our game all the way to "Weapon".
+39:16
+Now paths are great for many things. But sometimes, they can be a bit inflexible.
+39:21
+They break if we rename any of the nodes in the path, and it's best to only use paths when the node we want to access is the child of the node we're working on.
+39:28
+We'll talk about parent-child relationships later. Luckily, we can also use the "@export" keyword to reference other nodes.
+39:35
+So if we write "@export", and create a variable called "my_node", we can set the type to "Node".
+39:41
+And then in the inspector, we can assign whatever node we want, or simply click and drag.
+39:47
+I'll drag in the "Player". We can also check if the node is a certain type by using the "is" keyword.
+39:52
+So in "_ready", we'll check "if my_node is" of type "Node2D:", In which case, we'll print "Is 2D!".
+40:00
+And it is. We can even be specific about what type of node we want to be able to reference.
+40:06
+If, for example, we only want to reference "Sprite" nodes, we just change the type of "Sprite". So, "Sprite2D:"
+40:13
+I'll reset the variable here, and now, we can now only assign "Sprites".
+40:18
+Which in this case are the "Graphics" and "Weapon" nodes. Now if we play, it still prints that this node is a 2D node,
+40:25
+even though "Sprite2D" and "Node2D" are two different nodes. This is because "Sprite2D" inherits from "Node2D".
+40:33
+But we'll get into that in the "Inheritance" chapter. Signals! Signals are messages that nodes can sent to each other.
+Signals
+40:40
+We use them to notify that a certain event occurred. It's probably easiest to look at an example.
+40:45
+Godot has many built-in signals, take this UI button. If we select it, and go to "Node", we can see a list of all the signals on this node.
+40:55
+I'm going to connect the "pressed()" signal to our main script. So double click it, I'm going to select "Main", and hit connect.
+41:02
+As you can see, this creates a function called "_on_button_pressed():", and over here, there's a green arrow pointing to it.
+41:08
+This means that a signal is currently connected to this function. If I click on it, we can see the source, which is our button.
+41:15
+Let's just add quick a print line here, and now if we play and press the button, it prints "MONEY".
+41:22
+Get it? Now this is because whenever we press the button, it emits the "pressed()" signal, and everything connected to it gets called.
+41:29
+In this case, our own button "pressed()" function, which indeed prints "MONEY". We can connect as many functions as we want to a signal,
+41:36
+they will all be called when it gets emitted. This is really cool because it allows us to link together nodes in a way where they don't have to be aware of each other.
+41:44
+The button has no idea which functions are connected to the signal. It just tells it to emit. This makes signals great for separating different parts of our game, or "decoupling".
+41:53
+Say we're playing a character that can level up by getting enough XP. Whenever we level up, there are probably many game systems that need to update.
+42:01
+The UI, our player stats, perhaps we have spells or achievements that unlock. And updating all of these from the player can quickly become a mess.
+42:10
+Instead, we create a leveled up signal that all these systems can connect to. Then, all we have to do is have the player emit the signal whenever we level up.
+42:18
+Let's try it out. Instead of a button here, I'll create a timer. So I'll add a "Timer" node, and set it to Autostart.
+42:26
+This will count down from one, and when it reaches 0, it emits a signal called "timeout()".
+42:33
+Let's connect that to our script, and make it increase our XP. So we'll create an XP variable, default it to 0.
+42:41
+Then in our function, we increase our XP, and let's also print it.
+42:47
+If our XP then reaches, say, 20, we'll set it back to 0, we leveled up, and we can start over for the new level.
+42:54
+And if we then play, it's going to increment our XP every second, and when we reach 20, it's going back to zero.
+43:01
+Now let's create a signal that other nodes can connect to. So at the top, we'll right "signal leveled_up",
+43:07
+and if we save this and select our "Main" node, we can actually see that signal. We can connect it to other nodes but just for this example, we'll connect it back to our "Main" node.
+43:17
+This created an "_on_leveled_up():" function which is called when the signal is emitted. Let's print a message that says "DING!".
+43:23
+Now we simply have to emit the signal. Let's do that when reach 20 XP. Here we'll write "leveled_up.emit()".
+43:31
+Now when we reach 20 XP, it emits the signal, and we print: "DING!". Awesome!
+43:37
+We can also connect signals through code. I'll disconnect the signal in the editor, and instead, in a "_ready():" function...
+43:45
+...I'll write "leveled_up.connect()", and the name of the function we're connecting to: "_on_leveled_up".
+43:52
+Careful here, this will probably autocomplete with parenthesis. We don't need those, we just want the name of the function,
+43:58
+and disconnecting is just as easy: ".disconnect()". We can also pass parameters through signals.
+44:04
+This could be used to pass the level we've reached or other useful information. I'll just add a quick message that we can print.
+44:11
+So on a signal, we'll add a parameter. We'll make sure that our function supports this as well.
+44:17
+And instead of printing "DING!", we'll print whatever message was input, and then when we emit the signal, we can put in a message.
+44:23
+Let's put in: "GZ!". And voila, it displays "GZ!". And that is signals!
+Get / set
+44:29
+Get... Get... Set... Get... Set... GO! Or just Get/Set
+44:35
+Getters and Setters allow us to add code for when a variable is changed. This means we can do things like clamp a value within a certain range,
+44:43
+or emit a signal, letting other parts of our code know that the variable changed. The example that is always used for this is "health".
+44:50
+So, we'll add a "health" variable, default it to a 100, and then we'll use a colon to go and define a setter.
+44:57
+In the parenthesis, we name the value that was passed in. So this is the value that we are trying to change our variable to.
+45:05
+And now, we can decide what to do. We could, for example, set our "health = ", not the value directly, but clamp it first between 0 and 100.
+45:15
+So this makes sure that our "health" does never exceed a 100 or go below 0. We could also emit a signal here,
+45:22
+so we can create a "signal health_changed()" and we can actually input the "new_health" as a parameter,
+45:31
+and then in our setter, we can go "health_changed.emit()" and put in the new "health".
+45:37
+Of course, we need to make sure to connect this signal. We can do that through the editor.
+45:42
+And let's just print the value. So we'll print the "new_health". Then in "_ready():", let's try this out by assigning a value to "health".
+45:50
+Let's try assigning -150, and now if we play, we can see that it prints 0.
+45:55
+This is because we put in -150, it clamps this to 0, and then it emits the signal,
+46:03
+the signal then calls the "_on_health_changed():" function, and we print the "new_health", which is 0.
+46:09
+So that's a good example of adding a Setter. Getters are more commonly used to convert values.
+46:15
+So let's add two variables, we'll have a "chance" that is equal to 0.2, and then we can have another one which is our "chance_pct".
+46:23
+We'll make this of type "int", and we will add a getter. Here, whenever we try to get the "chance_pct", we'll simply return the "chance" variable " * 100".
+46:34
+And now, if we try to print this variable, "print(chance_pct)",
+46:39
+or change our chance to, let's say, 0.6, and print it again,
+46:45
+we can see that our "chance_pct" is completely based on whatever our "chance" is currently equal to.
+46:51
+And so it starts at 20% then goes to 60%. And for good measure sake, we'll add a setter also.
+46:58
+So, if we set to a new value, we will modify our "chance", and set it equal to the new value divided by 100.
+47:07
+And since our "chance" is a float, we'll make to cast that value. So now, instead of changing the "chance", we can directly change the "chance_pct", to say, 40.
+Classes
+47:19
+There we go. Classes Classes This is a good one. GDScript is an Objected-oriented programming language.
+47:25
+This means that we generally try to structure our code inside of contained objects that interact with each other.
+47:32
+We primarily do this using Classes. For now, try to think of a class as a blueprint.
+47:38
+Say, for example, we are making an RPG and we need to populate it with a bunch of characters that the player can interact with.
+47:44
+So we create a "Character" class that has some variables and logic that all the characters in the game should have.
+47:50
+So for variables, we could add things like name, health, and a line of dialogue for when you interact with them.
+47:56
+For logic, we could add functions like talk() and die(). Then we take this class and create Instances.
+48:02
+Instances are specific versions of the class. So we could create an instance named "Potion Seller" that has a health of 50 and a line that says:
+48:11
+"You can't handle my strongest potions!" And a bunch more instances, all of which have the same variables but different values.
+48:18
+And all of which can talk: "I used be an adventure like you." and die().
+48:23
+AUHHH! So that's the idea of classes. In Godot, you've actually already encountered a bunch of classes.
+48:29
+That's because all the built-in nodes in Godot are classes. Which actually makes a lot of sense if you think about it.
+48:35
+All the nodes are self-contained objects, with a bunch of variables and logic that we can create instances of.
+48:41
+If we add a Sprite node, we're instancing the Sprite class. So when we create a script, we are actually also creating a class.
+48:49
+I have to put a DISCLAIMER here that we're technically not creating a class. But for all intents and purposes, it works just like one.
+48:55
+So let's forget all about that for now. So let's abandon our main script here for now and instead create a new node.
+49:02
+So search for "Node", and let's name this node "Character", and add a script to it.
+49:09
+Now to make it more clear that our script is a class that defines a character, let's set the class name to "Character".
+49:15
+So right at the top here, we'll go "class_name Character" with a capital "C".
+49:21
+And we can now add some variables. We'll mark these with "@export" so that we can set them in the inspector for each character instance.
+49:29
+So "@export var", let's add a "profession" of type "String",
+49:35
+and give each character a "health" as well of type "int". And so we can now see that our character here has these two properties in the inspector,
+49:45
+and we can go ahead and fill out the profession. This is going to be the "Potion seller" who is going to have a health of, let's say, 40.
+49:52
+And now we can create more instances by duplicating this node. So let's duplicate it a few times.
+49:58
+The second character we'll name "Ex-adventurer", with a health of 30.
+50:04
+And the last character will be our "Knight", and we'll give him a health of, say, 150.
+50:11
+So now, we have these three instances with different properties, and we can also give them a function.
+50:16
+So let's add a "die()" function, So I'll write "func die():". And this function is going to set our health to 0, as well as print our profession, and the fact that we died.
+50:29
+And that's it for our "Character" class, but currently nothing is triggering this function.
+50:35
+So let's go into our main script now, and here we can get a reference to one of our characters and call the "die()" function.
+50:43
+We could drag simply and drop one of these nodes to get a reference, but because we have named our class, we can actually use an "@export" variable for this instead.
+50:52
+This way, we can set the connection in the editor and we don't have to worry about the path changing. So we'll "@export var", and here we'll have a "character_to_kill" of type "Character".
+51:04
+And now if we save that, we can see that, we can see that our main node now has a slot here for the "Character to Kill".
+51:10
+And we can either drag in one of these character or hit "Assign" and select one. I'm gonna choose "Character3".
+51:17
+And now in our "_ready():" method, we simply go to our "character_to_kill" and call the "die()" function.
+51:23
+And if we run this, indeed, the "die()" function is called on our "Character3" which is our Knight.
+51:29
+So it says: "Knight died.". And if we choose another character, say, the first one,
+51:36
+we are instead killing the Potion seller. Really cool. Inner Classes
+Inner classes
+51:42
+These are classes that exist inside of another class. You mostly use these for bundling together variables, and maybe add a function or two.
+51:49
+And they can be a good alternative to dictionaries because they are sometimes a bit more safe to use. Say we have this character class here, and we would like to add some equipment.
+51:58
+We could create an inner class called "Equipment". So I'll write "class Equipment:", and then we can give it a couple of variables.
+52:06
+I'll create an "armor" variable, set it to 10 by default, and a "weight" of 5.
+52:12
+Now we could can use this class around our script, so we could create some variables using it.
+52:17
+I'll create a "chest" that is equal to "Equipment.new()". Calling ".new()" will create an instance of the "Equipment" class.
+52:25
+So now we have one piece of "equipment", one instance which is a "chest". We'll also create "legs", and again, we'll call "Equipment.new()".
+52:34
+Then in the "_ready():" function, we can access these classes. So we can go into our "chest" and change the "armor", and set it equal to 20.
+52:44
+We can then print "chest.armor", or maybe print "legs.weight".
+52:50
+And this is also where you can see that this is sometimes safer than using a dictionary. Because GDScript will recognize that there is a "weight" variable inside of the "Equipment" class.
+52:59
+And if we try to access something that isn't there, we'll get an error before playing the game, not only when we reach this point in our code.
+53:06
+This is called being "type-safe". And now, if we run this, we can see that each of the instances of our character will print these two pieces of equipment.
+53:15
+And the armor of the chest is 20, and the weight of the legs is 5. Inheritance
+Inheritance
+53:21
+So we know that all nodes in Godot are classes, and we can effectively make our own using scripts.
+53:28
+But there's one more important thing we need to know to understand how Godot is structured: Inheritance.
+53:33
+Inheritance refers to the ability to derive one class from another. We've actually already been already doing this.
+53:39
+Notice how our script says: "extends Node" So our script derives from the Node class.
+53:45
+This means that all the functions and variables of the node class are also available in our script.
+53:51
+Godot actually has a very nice way of visualizing this. When adding a new node, we can see al the nodes available to us.
+53:59
+But some of these are organized under other nodes. That's because these nodes inherit from the top ones.
+54:06
+For example, both "AnimatedSprite2D" and "Camera2D" inherit from "Node2D".
+54:11
+This is because "Node2D" is a base class for all things that exist in 2D space. So since both a camera and a sprite needs a position in our world, they both inherit from it.
+54:21
+And even cooler, we can actually find our Character class on this list as well.
+54:26
+That's because when we create a Character class, we're essentially defining a new node type. And we can see that it inherits from "Node".
+54:34
+Really cool. Now, all of this probably sounds a bit abstract. Because,
+54:39
+Because, it is. But what it means in most cases is simply that we need to make sure we inherit from, or "extend", the right class for what we're working with.
+54:47
+If, for example, we are making a script that moves around our player, we would create a "CharacterBody" node, and add a script to that node.
+54:55
+We could name it, say, "player". And as you can see, the script then automatically "extends CharacterBody2D".
+55:02
+And now, we have access to all the functionality in it, such as the "velocity", and the "move_and_slide()" function which moves the node around.
+Composition
+55:11
+Composition Now even though Godot uses Inheritance for it's nodes, there are often better ways to structure your code.
+55:17
+Godot actually leans itself really well to another way called Composition. I'm not going to explain that here since there's already a really good video on this subject by a channel called "Bitlytic".
+55:28
+But I definitely recommend you to check that out. Call down, signal up When writing GDScript, there are of course many best practices that we can choose to adhere to.
+Call down, signal up
+55:37
+Going all over them is a video of it's own. But one that is particularly important is call down, signal up,
+55:44
+which we use as a rule of thumb when communicating between nodes. Every scene in Godot is a tree of nodes, and the beginning of the tree is called the "Root" node, which is the highest in the hierarchy.
+55:54
+When looking at two nodes, where one is right above the other, we say that they have a parent-child relationship.
+56:00
+The node that is above is the "Parent", and the node that is below is the "Child", And that child might also have a child and so on.
+56:08
+Call down, signal up means that nodes are fine to call functions on the nodes below them in the hierarchy, but not nice versa.
+56:14
+Instead, nodes below should use signals to communicate that something has happened. The nodes above can then connect to these signals as they choose, and act accordingly.
+56:24
+Think of it like real life. Parents are allowed to tell their children what to do, but children shouldn't directly command their parents to do things.
+56:31
+Instead, children signal their needs to the parents and the parents decide the next step. I'll keep in mind that this is a way to remember a good coding practice, it is definitely not a parenting advice.
+56:41
+But what if we need to communicate between two nodes that are on the same level? You guessed it, these are called siblings.
+56:47
+Well, here the common parent is in charge of connecting the signal from one sibling to the function on the other.
+56:54
+This is most often done in the "_ready()" function right at the beginning. So, that's the idea of the rule. But of course, always implementing this concept correctly requires some practice.
+57:03
+I'll have a link to a good article with some nice examples. Styyyle During this video, I've tried my best to adhere to the official GDScript style guide.
+Style
+57:12
+These are the conventions we use for naming and order to keep our code elegant and readable for others.
+57:18
+I won't go into further detail here, but I'll have a link to the official guide. PHHFFFFFFFUUUUHH.
+Puuuh, good job!
+57:24
+That was a lot of code for one video! Tehuhuhu- heheHUHAHAHAHAHA
+57:29
+Of course, I haven't covered everything you are ever going to need in GDScript. But I hope this served as a nice overview of the most important aspects.
+57:36
+Also, don't forget to check out CodeCrafters. Become a better software engineer today by using the link below and get a free week and 40% OFF on your CodeCrafters membership.
+57:46
+So, this is the last video we've prepared for now. If you liked our new videos on Godot, and have a topic that you would like to see covered, please let us know.
+57:53
+While we don't know what the future holds, we've a had BLAST making these videos, and I hope you've enjoyed watching them.
+57:59
+So, until next time. Stay Awesome! And func-ky!

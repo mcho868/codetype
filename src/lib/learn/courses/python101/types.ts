@@ -54,4 +54,6 @@ export interface Module {
   locked: boolean;
   lessons: Lesson[];
   questions: Question[];
+  /** If true, this module is a midterm/exam rather than a regular lesson module */
+  isMidterm?: boolean;
 }
