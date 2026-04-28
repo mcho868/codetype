@@ -7,7 +7,7 @@ const midterm3: Module = {
   description: 'Covers Exceptions, Testing & Debugging, Big O, Sorting & Searching (no merge sort), Classes & OOP, and Stacks & Queues.',
   icon: '🎯',
   color: 'from-sky-500 to-blue-400',
-  locked: true,
+  locked: false,
   isMidterm: true,
   lessons: [],
   questions: [
@@ -39,34 +39,6 @@ const midterm3: Module = {
       explanation: 'Accessing a dictionary with a key that does not exist raises a KeyError. IndexError is for out-of-range list indices. ValueError is for wrong value types. AttributeError is for missing attributes on objects.',
     },
 
-    // ── Testing & Debugging MCQ (2) ───────────────────────────────────────
-    {
-      id: 'mt3-q3',
-      type: 'multiple-choice',
-      prompt: 'Which of the following correctly tests that `add(2, 3)` returns `5` inside a `unittest.TestCase` class?',
-      choices: [
-        { id: 'a', text: 'def test_add(self):\n    assertEqual(add(2, 3), 5)' },
-        { id: 'b', text: 'def test_add(self):\n    self.assertEqual(add(2, 3), 5)' },
-        { id: 'c', text: 'def check_add(self):\n    self.assertEqual(add(2, 3), 5)' },
-        { id: 'd', text: 'def test_add():\n    self.assertEqual(add(2, 3), 5)' },
-      ],
-      correctAnswer: 'b',
-      explanation: 'In unittest, test methods must start with "test_" and must accept self as the first parameter. Assertions are called on self — e.g. self.assertEqual(). Calling assertEqual() without self is a NameError, and methods named "check_..." are not auto-discovered by the test runner.',
-    },
-    {
-      id: 'mt3-q4',
-      type: 'multiple-choice',
-      prompt: 'What does the `setUp()` method do in a `unittest.TestCase` class?',
-      choices: [
-        { id: 'a', text: 'It runs once before all tests in the class to prepare shared fixtures' },
-        { id: 'b', text: 'It runs before each individual test method, giving every test a fresh state' },
-        { id: 'c', text: 'It replaces assert statements for checking expected values' },
-        { id: 'd', text: 'It runs after each test method to clean up resources' },
-      ],
-      correctAnswer: 'b',
-      explanation: 'setUp() is called automatically before every individual test method. This ensures each test starts with a clean, predictable state and cannot be affected by side effects from other tests. tearDown() (not setUp) handles post-test cleanup.',
-    },
-
     // ── Big O MCQ (2) ─────────────────────────────────────────────────────
     {
       id: 'mt3-q5',
@@ -95,6 +67,63 @@ const midterm3: Module = {
       explanation: 'Halving the problem at every step produces a depth of log₂(n) levels — classic O(log n) logarithmic complexity. Binary search is the canonical example: a list of 1,000,000 elements needs at most 20 steps.',
     },
 
+    // ── Sorting & Searching MCQ (3) ───────────────────────────────────────
+    {
+      id: 'mt3-q3',
+      type: 'multiple-choice',
+      prompt: 'Which sorting algorithm has a best-case time complexity of O(n) when the list is already sorted?',
+      choices: [
+        { id: 'a', text: 'Selection sort' },
+        { id: 'b', text: 'Insertion sort' },
+        { id: 'c', text: 'Bubble sort without early-exit optimisation' },
+        { id: 'd', text: 'Both B and C' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'Insertion sort is O(n) on already-sorted data — each element just compares once to its left neighbour and no shifting occurs. Selection sort is always O(n²) regardless of input. Bubble sort is only O(n) best-case when it has the early-exit (swapped flag) optimisation.',
+    },
+    {
+      id: 'mt3-q4',
+      type: 'multiple-choice',
+      prompt: 'What is the key requirement for binary search to work correctly?',
+      choices: [
+        { id: 'a', text: 'The list must contain only integers' },
+        { id: 'b', text: 'The list must be sorted' },
+        { id: 'c', text: 'The list must have an even number of elements' },
+        { id: 'd', text: 'The list must have no duplicate values' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'Binary search works by eliminating half the remaining elements at each step based on a comparison with the middle element. This logic is only valid when the data is sorted — on an unsorted list, discarding half the elements would miss the target.',
+    },
+    {
+      id: 'mt3-q5a',
+      type: 'multiple-choice',
+      prompt: 'Which of the following correctly describes what bubble sort does in each pass?',
+      choices: [
+        { id: 'a', text: 'Finds the minimum and swaps it to the front' },
+        { id: 'b', text: 'Inserts the next element into its correct position among sorted elements' },
+        { id: 'c', text: 'Swaps adjacent elements that are out of order, bubbling the largest to the end' },
+        { id: 'd', text: 'Splits the list in half and sorts each half recursively' },
+      ],
+      correctAnswer: 'c',
+      explanation: 'Bubble sort walks through the list swapping adjacent pairs that are in the wrong order. After each full pass, the next-largest unsorted element "bubbles up" to its correct position at the end of the unsorted section.',
+    },
+
+    // ── Sorting & Searching True/False (2) ────────────────────────────────
+    {
+      id: 'mt3-q5b',
+      type: 'true-false',
+      prompt: 'Selection sort always performs exactly n−1 swaps regardless of the input.',
+      correctAnswer: 'true',
+      explanation: 'Selection sort does exactly one swap per pass (swapping the minimum into position i). With n elements there are n passes, giving exactly n−1 swaps. This makes it efficient when swaps are expensive, even though its comparison count is always O(n²).',
+    },
+    {
+      id: 'mt3-q5c',
+      type: 'true-false',
+      prompt: 'Linear search requires the list to be sorted before it can be used.',
+      correctAnswer: 'false',
+      explanation: 'Linear search scans each element one by one from start to finish — it works on any list, sorted or not. Binary search is the algorithm that requires sorted data.',
+    },
+
     // ── Sorting & Searching Code Challenges (2) ────────────────────────────
     {
       id: 'mt3-q7',
@@ -115,6 +144,48 @@ const midterm3: Module = {
       expectedOutput: '5\n-1',
       correctAnswer: '__code__',
       explanation: 'Base case: if low > high return -1. Compute mid = (low+high)//2. If lst[mid]==target return mid. If lst[mid]<target recurse with low=mid+1. Else recurse with high=mid-1. For 23 in the list: mid lands on index 5 (value 23) → return 5. For 15: search narrows until low>high → -1.',
+    },
+
+    // ── Sorting & Searching Code Challenges — Extra (4) ──────────────────
+    {
+      id: 'mt3-q7b',
+      type: 'code-challenge',
+      language: 'python',
+      prompt: 'Write `count_passes(lst)` that runs bubble sort on a copy of the list and returns how many passes were needed before it was fully sorted (use the early-exit optimisation — stop as soon as a pass makes no swaps). Print `count_passes([3, 1, 2])` and `count_passes([1, 2, 3, 4])`.',
+      starterCode: '',
+      expectedOutput: '2\n1',
+      correctAnswer: '__code__',
+      explanation: 'arr = lst[:]. passes = 0. while True: swapped = False. for j in range(len(arr)-1-passes): if arr[j]>arr[j+1]: swap and set swapped=True. passes += 1. if not swapped: break. return passes. passes increments before the break check, so every iteration counts. [3,1,2] needs 2 passes. [1,2,3,4] is already sorted — the first pass makes no swaps but passes is still incremented to 1 before breaking.',
+    },
+    {
+      id: 'mt3-q7c',
+      type: 'code-challenge',
+      language: 'python',
+      prompt: 'Write `insertion_sort_descending(lst)` that sorts a copy of the list in descending order using insertion sort (largest first) and returns it. Do not use `sort`, `sorted`, or `reverse`. Print `insertion_sort_descending([3, 1, 4, 1, 5, 9, 2, 6])`.',
+      starterCode: '',
+      expectedOutput: '[9, 6, 5, 4, 3, 2, 1, 1]',
+      correctAnswer: '__code__',
+      explanation: 'arr = lst[:]. for i in range(1, len(arr)): key = arr[i]; j = i-1. Change the condition to arr[j] < key (shift smaller elements right instead of larger ones). while j>=0 and arr[j]<key: arr[j+1]=arr[j]; j-=1. arr[j+1]=key. return arr.',
+    },
+    {
+      id: 'mt3-q7d',
+      type: 'code-challenge',
+      language: 'python',
+      prompt: 'Write `search_rotated(lst, target)` that uses linear search to find `target` in a list and returns its index, or `-1` if not found. The list may or may not be sorted — do not assume order. Print `search_rotated([4, 5, 6, 7, 0, 1, 2], 0)` and `search_rotated([4, 5, 6, 7, 0, 1, 2], 3)`.',
+      starterCode: '',
+      expectedOutput: '4\n-1',
+      correctAnswer: '__code__',
+      explanation: 'def search_rotated(lst, target): for i, val in enumerate(lst): if val == target: return i. return -1. Linear search works on any unsorted or rotated list — just scan each element. 0 is at index 4; 3 is not present so return -1.',
+    },
+    {
+      id: 'mt3-q7e',
+      type: 'code-challenge',
+      language: 'python',
+      prompt: 'Write `median_of_three(a, b, c)` that returns the median value of three numbers using only comparisons and swaps — no sorting functions, no list. Then print `median_of_three(3, 1, 2)` and `median_of_three(9, 5, 7)`.',
+      starterCode: '',
+      expectedOutput: '2\n7',
+      correctAnswer: '__code__',
+      explanation: 'Sort three variables with at most 3 comparisons (selection/insertion logic on variables): if a > b: a, b = b, a. if b > c: b, c = c, b. if a > b: a, b = b, a. Now a <= b <= c, so b is the median. return b. median(3,1,2)→2, median(9,5,7)→7.',
     },
 
     // ── Classes & OOP Code Challenges (2) ────────────────────────────────
