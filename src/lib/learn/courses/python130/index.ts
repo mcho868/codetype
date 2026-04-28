@@ -13,9 +13,10 @@ import module9 from './module9';
 import module10 from './module10';
 import midterm1 from './midterm1';
 import midterm2 from './midterm2';
+import midterm3 from './midterm3';
 import type { Module } from './types';
 
-export const MODULES: Module[] = [module0, module1, module2, module3, module4, module5, module6, module7, module8, module9, module10, midterm1, midterm2];
+export const MODULES: Module[] = [module0, module1, module2, module3, module4, module5, module6, module7, module8, module9, module10, midterm1, midterm2, midterm3];
 
 export function getAllModules(): Module[] {
   return MODULES;
