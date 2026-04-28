@@ -171,6 +171,29 @@ export default function LearnDashboard() {
                 </div>
               </div>
             )}
+            {/* Leetcode card — admin only */}
+            {user?.role === "admin" && (
+              <div
+                onClick={() => router.push("/learn/courses/leetcode")}
+                className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
+              >
+                <div className="bg-gradient-to-r from-yellow-500 to-amber-400 h-1.5" />
+                <div className="p-8 flex items-center gap-6">
+                  <span className="text-5xl">🧩</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
+                      Practice · 1 Module
+                    </p>
+                    <h3 className="text-2xl font-semibold text-white mb-1">Leetcode</h3>
+                    <p className="text-sm text-slate-400">
+                      Walkthroughs of Leetcode problems — explanations plus Python and TypeScript solutions at every complexity.
+                    </p>
+                  </div>
+                  <span className="text-slate-600 text-xl shrink-0">→</span>
+                </div>
+              </div>
+            )}
+
             {/* GDScript 101 card — admin only */}
             {user?.role === "admin" && (
               <div

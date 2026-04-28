@@ -5,6 +5,7 @@ import { getAllModules as getPython130Modules } from './courses/python130/index'
 import { getAllModules as getSql101Modules } from './courses/sql101/index';
 import { getAllModules as getTypescript101Modules } from './courses/typescript101/index';
 import { getAllModules as getGdscript101Modules } from './courses/gdscript101/index';
+import { getAllModules as getLeetcodeModules } from './courses/leetcode/index';
 
 export interface CourseInfo {
   slug: string;
@@ -20,6 +21,7 @@ export const COURSES: CourseInfo[] = [
   { slug: 'sql101', title: 'SQL 101', modules: getSql101Modules(), adminOnly: true },
   { slug: 'typescript101', title: 'TypeScript 101', modules: getTypescript101Modules(), adminOnly: true },
   { slug: 'gdscript101', title: 'GDScript 101', modules: getGdscript101Modules(), adminOnly: true },
+  { slug: 'leetcode', title: 'Leetcode', modules: getLeetcodeModules(), adminOnly: true },
 ];
 
 export const STUDENT_VISIBLE_COURSES = COURSES.filter((course) => !course.adminOnly);

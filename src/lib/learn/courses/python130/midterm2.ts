@@ -54,7 +54,7 @@ const midterm2: Module = {
     {
       id: 'mt2-q4',
       type: 'multiple-choice',
-      prompt: 'What is the output?\n\n```python\nfrom collections import deque\n\nq = deque()\nq.append("a")\nq.append("b")\nq.append("c")\nq.popleft()\nq.append("d")\nprint(q[0])\n```',
+      prompt: 'What is the output?\n\n```python\nfrom collections import deque\n\nq = deque()\nq.append("a")\nq.append("b")\nq.append("c")\nq.dequeue()\nq.append("d")\nprint(q[0])\n```',
       choices: [
         { id: 'a', text: 'a' },
         { id: 'b', text: 'b' },
@@ -93,7 +93,7 @@ const midterm2: Module = {
       id: 'mt2-q7',
       type: 'code-challenge',
       language: 'python',
-      prompt: 'Create a `BankAccount` class with `__init__(self, owner, balance=0)`. Add `deposit(amount)`, `withdraw(amount)` (reject if insufficient funds — print `"Insufficient funds"` and do not change the balance), and `__str__` returning `"owner: $balance"`. Deposit 1000, withdraw 300, withdraw 800, then print the account.',
+      prompt: 'Create a `BankAccount` class with `__init__(self, owner, balance=0)`. Add `deposit(amount)`, `withdraw(amount)` (reject if insufficient funds — print `"Insufficient funds"` and do not change the balance), and `__str__` returning `"owner: $balance"`. Create bank account with owner Alice, Deposit 1000, withdraw 300, withdraw 800, then print the account.',
       starterCode: '',
       expectedOutput: 'Insufficient funds\nAlice: $700',
       correctAnswer: '__code__',
