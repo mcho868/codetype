@@ -9,6 +9,7 @@ const module0: Module = {
   icon: '➕',
   color: 'from-yellow-500 to-amber-400',
   locked: false,
+  section: 'Arrays & Hashing',
   lessons: [
     {
       id: 'lesson-two-sum-problem',

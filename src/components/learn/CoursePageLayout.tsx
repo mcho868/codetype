@@ -131,14 +131,39 @@ export default function CoursePageLayout({
                 <ProgressBar current={totalCorrect} total={totalQ} showLabel size="md" />
               </div>
 
-              <section className="space-y-6">
+              <section className="space-y-10">
                 <h2 className="text-xl font-semibold text-white">Course Modules</h2>
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {modules.map((mod) => {
+                {(() => {
+                  const elements: React.ReactNode[] = [];
+                  let currentSection: string | null = null;
+                  let groupCards: React.ReactNode[] = [];
+
+                  const flushGroup = () => {
+                    if (groupCards.length > 0) {
+                      elements.push(
+                        <div key={`group-${currentSection ?? 'default'}`} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                          {groupCards}
+                        </div>
+                      );
+                      groupCards = [];
+                    }
+                  };
+
+                  for (const mod of modules) {
+                    if (mod.section && mod.section !== currentSection) {
+                      flushGroup();
+                      currentSection = mod.section;
+                      elements.push(
+                        <div key={`section-${mod.section}`} className="flex items-center gap-4 pt-2">
+                          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">{mod.section}</span>
+                          <div className="flex-1 h-px bg-slate-700/60" />
+                        </div>
+                      );
+                    }
                     const key = courseSlug ? `${courseSlug}/${mod.slug}` : mod.slug;
                     const p = progress[key];
                     const isLocked = isAdmin ? false : mod.locked;
-                    return (
+                    groupCards.push(
                       <ModuleCard
                         key={mod.id}
                         module={{ ...mod, locked: isLocked }}
@@ -148,8 +173,10 @@ export default function CoursePageLayout({
                         courseTitle={courseTitle}
                       />
                     );
-                  })}
-                </div>
+                  }
+                  flushGroup();
+                  return elements;
+                })()}
               </section>
             </>
           )}
