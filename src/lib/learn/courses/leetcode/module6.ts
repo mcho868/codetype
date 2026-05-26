@@ -50,6 +50,116 @@ Explanation: There are two 1's in the top-left 3×3 sub-box.
       codeExamples: [],
     },
     {
+      id: 'lesson-valid-sudoku-your-solution',
+      title: 'Your Solution — Single Hash Set with String Keys',
+      content: `Your approach encodes every constraint into a **single flat set** using formatted string keys, avoiding the need for separate row/col/box structures.
+
+**How it works**
+1. Iterate every cell (i, j). Skip cells containing \`"."\`.
+2. For each digit, encode three facts as strings and check/add them to \`single_large_hash_map\`:
+   - \`"{val} in col {j}"\` — this digit has been seen in column j.
+   - \`"{val} in row {i}"\` — this digit has been seen in row i.
+   - \`"{val} in {i//3}-{j//3}"\` — this digit has been seen in the box at grid position (i//3, j//3).
+3. If any key is already present before insertion, the board is invalid.
+
+**Complexity**
+- Time: **O(1)** — always 81 cells; each set operation is O(1) average.
+- Space: **O(1)** — at most 3 × 81 = 243 string keys in the set.
+
+**Trade-off vs. separate sets:** The single-set approach is slightly more memory-compact and needs only one data structure, but string formatting adds a small constant overhead per cell compared to direct set lookups with integer indices.`,
+      codeExamples: [
+        {
+          language: 'python',
+          code: `from typing import List
+
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        single_large_hash_map = set()
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] != ".":
+                    if f"{board[i][j]} in col {j}" in single_large_hash_map:
+                        return False
+                    single_large_hash_map.add(f"{board[i][j]} in col {j}")
+                    if f"{board[i][j]} in row {i}" in single_large_hash_map:
+                        return False
+                    single_large_hash_map.add(f"{board[i][j]} in row {i}")
+                    if f"{board[i][j]} in {i // 3}-{j // 3}" in single_large_hash_map:
+                        return False
+                    single_large_hash_map.add(f"{board[i][j]} in {i // 3}-{j // 3}")
+        return True
+
+# Try it out — press Run
+sol = Solution()
+board1 = [
+    ["1","2",".",".","3",".",".",".","."],
+    ["4",".",".","5",".",".",".",".","."],
+    [".","9","8",".",".",".",".",".","3"],
+    ["5",".",".",".","6",".",".",".","4"],
+    [".",".",".","8",".","3",".",".","5"],
+    ["7",".",".",".","2",".",".",".","6"],
+    [".",".",".",".",".",".","2",".","."],
+    [".",".",".","4","1","9",".",".","8"],
+    [".",".",".",".","8",".",".","7","9"],
+]
+print(sol.isValidSudoku(board1))  # True
+
+board2 = [row[:] for row in board1]
+board2[2][2] = "1"  # creates duplicate 1 in top-left box
+print(sol.isValidSudoku(board2))  # False`,
+          caption: 'Your solution — single flat set with string-encoded constraint keys',
+          editable: true,
+        },
+        {
+          language: 'typescript',
+          code: `function isValidSudoku(board: string[][]): boolean {
+  const truth = new Set<string>();
+
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      if (board[i][j] !== '.') {
+        const row_string = \`\${board[i][j]} in row \${i}\`;
+        if (truth.has(row_string)) return false;
+
+        const col_string = \`\${board[i][j]} in col \${j}\`;
+        if (truth.has(col_string)) return false;
+
+        const quad_string = \`\${board[i][j]} in quad \${Math.floor(i / 3)} - \${Math.floor(j / 3)}\`;
+        if (truth.has(quad_string)) return false;
+
+        truth.add(row_string);
+        truth.add(col_string);
+        truth.add(quad_string);
+      }
+    }
+  }
+
+  return true;
+}
+
+// Try it out — press Run
+const board1 = [
+  ["1","2",".",".","3",".",".",".","."],
+  ["4",".",".","5",".",".",".",".","."],
+  [".","9","8",".",".",".",".",".","3"],
+  ["5",".",".",".","6",".",".",".","4"],
+  [".",".",".","8",".","3",".",".","5"],
+  ["7",".",".",".","2",".",".",".","6"],
+  [".",".",".",".",".",".","2",".","."],
+  [".",".",".","4","1","9",".",".","8"],
+  [".",".",".",".","8",".",".","7","9"],
+];
+console.log(isValidSudoku(board1)); // true
+
+const board2 = board1.map(r => [...r]);
+board2[2][2] = "1";
+console.log(isValidSudoku(board2)); // false`,
+          caption: 'Your solution — single flat set with string-encoded constraint keys',
+          editable: true,
+        },
+      ],
+    },
+    {
       id: 'lesson-valid-sudoku-hash-sets',
       title: 'Hash Sets — O(1) (fixed 81-cell board)',
       content: `We maintain three collections of sets — one per row, one per column, one per 3×3 box — and scan the board once. Any duplicate digit within a set immediately means the board is invalid.

@@ -16,26 +16,108 @@ const module7: Module = {
       title: 'The Problem',
       content: `**128. Longest Consecutive Sequence** — Medium
 
-Given an array of integers **nums**, return the length of the **longest consecutive sequence** of elements.
-
-A consecutive sequence is a sequence where each element is exactly 1 greater than the previous. The elements do not have to be consecutive in the original array.
+Given an unsorted array of integers **nums**, return the length of the **longest consecutive elements sequence**.
 
 You must write an algorithm that runs in **O(n)** time.
 
 **Example 1**
-Input: nums = [2,20,4,10,3,4,5]
+Input: nums = [100,4,200,1,3,2]
 Output: 4
-Explanation: The longest consecutive sequence is [2,3,4,5].
+Explanation: The longest consecutive elements sequence is [1, 2, 3, 4]. Therefore its length is 4.
 
 **Example 2**
-Input: nums = [0,3,2,5,4,6,1,1]
-Output: 7
-Explanation: [0,1,2,3,4,5,6].
+Input: nums = [0,3,7,2,5,8,4,6,0,1]
+Output: 9
+
+**Example 3**
+Input: nums = [1,0,1,2]
+Output: 3
 
 **Constraints**
-- 0 <= nums.length <= 1000
+- 0 <= nums.length <= 10^5
 - -10^9 <= nums[i] <= 10^9`,
       codeExamples: [],
+    },
+    {
+      id: 'lesson-longest-consecutive-your-solution',
+      title: 'Your Solution — Hash Set with Sequence Starts',
+      content: `Your approach puts every number into a hash set, then only starts counting from the **beginning** of a consecutive run — when \`num - 1\` is not in the set.
+
+**How it works**
+1. Return 0 immediately if \`nums\` is empty.
+2. Build a set \`h_nums\` from all values (deduplicates duplicates like the two 0s in Example 2).
+3. For each \`num\` in the set, skip it unless \`num - 1\` is absent — that means \`num\` is the start of a sequence.
+4. From that start, increment \`i\` while \`num + i\` exists in the set, tracking \`count\`.
+5. Update \`max_count\` with the longest run found.
+
+**Complexity**
+- Time: **O(n)** — each number is visited at most twice across all inner while loops.
+- Space: **O(n)** — the hash set.`,
+      codeExamples: [
+        {
+          language: 'python',
+          code: `from typing import List
+
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        if not nums:
+            return 0
+
+        h_nums = set(nums)
+
+        max_count = 1
+
+        for num in h_nums:
+            if num - 1 not in h_nums:
+                count = 1
+                i = 1
+                while num + i in h_nums:
+                    count += 1
+                    i += 1
+                max_count = max(count, max_count)
+
+        return max_count
+
+# Try it out — press Run
+sol = Solution()
+print(sol.longestConsecutive([100, 4, 200, 1, 3, 2]))  # 4
+print(sol.longestConsecutive([0, 3, 7, 2, 5, 8, 4, 6, 0, 1]))  # 9
+print(sol.longestConsecutive([1, 0, 1, 2]))  # 3
+print(sol.longestConsecutive([]))  # 0`,
+          caption: 'Your solution — hash set, only count from sequence starts',
+          editable: true,
+        },
+        {
+          language: 'typescript',
+          code: `function longestConsecutive(nums: number[]): number {
+  const h_num = new Set<number>(nums);
+  let max_count = 1;
+  if (nums.length === 0) {
+    return 0;
+  }
+  for (const num of h_num) {
+    if (!h_num.has(num - 1)) {
+      let count = 1;
+      let i = 1;
+      while (h_num.has(num + i)) {
+        count++;
+        i++;
+      }
+      max_count = Math.max(count, max_count);
+    }
+  }
+  return max_count;
+}
+
+// Try it out — press Run
+console.log(longestConsecutive([100, 4, 200, 1, 3, 2])); // 4
+console.log(longestConsecutive([0, 3, 7, 2, 5, 8, 4, 6, 0, 1])); // 9
+console.log(longestConsecutive([1, 0, 1, 2])); // 3
+console.log(longestConsecutive([])); // 0`,
+          caption: 'Your solution — hash set, only count from sequence starts',
+          editable: true,
+        },
+      ],
     },
     {
       id: 'lesson-longest-consecutive-hash-set',
@@ -75,9 +157,9 @@ class Solution:
 
 # Try it out — press Run
 sol = Solution()
-print(sol.longestConsecutive([2,20,4,10,3,4,5]))  # 4
-print(sol.longestConsecutive([0,3,2,5,4,6,1,1]))  # 7
-print(sol.longestConsecutive([]))                  # 0`,
+print(sol.longestConsecutive([100, 4, 200, 1, 3, 2]))  # 4
+print(sol.longestConsecutive([0, 3, 7, 2, 5, 8, 4, 6, 0, 1]))  # 9
+print(sol.longestConsecutive([]))  # 0`,
           caption: 'Python — O(n) hash set, only count from sequence starts',
           editable: true,
         },
@@ -102,9 +184,9 @@ print(sol.longestConsecutive([]))                  # 0`,
 }
 
 // Try it out — press Run
-console.log(longestConsecutive([2,20,4,10,3,4,5])); // 4
-console.log(longestConsecutive([0,3,2,5,4,6,1,1])); // 7
-console.log(longestConsecutive([]));                  // 0`,
+console.log(longestConsecutive([100, 4, 200, 1, 3, 2])); // 4
+console.log(longestConsecutive([0, 3, 7, 2, 5, 8, 4, 6, 0, 1])); // 9
+console.log(longestConsecutive([])); // 0`,
           caption: 'TypeScript — O(n) hash set, only count from sequence starts',
           editable: true,
         },
