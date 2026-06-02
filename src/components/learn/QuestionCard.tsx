@@ -45,6 +45,17 @@ export default function QuestionCard({
   const [submitted, setSubmitted] = useState(!!previousAnswer);
   const [code, setCode] = useState(savedCode ?? draftCode ?? question.starterCode ?? "");
 
+  // Reset all state when the question changes (e.g. after content updates)
+  useEffect(() => {
+    setSelected(previousAnswer?.selectedAnswer ?? "");
+    setSubmitted(!!previousAnswer);
+    setCode(savedCode ?? draftCode ?? question.starterCode ?? "");
+    setCodeOutput("");
+    setCodeError("");
+    setPatternError("");
+    setRunStatus("idle");
+  }, [question.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Persist draft to localStorage while typing (only when not yet submitted)
   const handleCodeChange = useCallback((v: string) => {
     if (!submitted) {
@@ -402,9 +413,26 @@ export default function QuestionCard({
                 : "border-red-500/30 bg-red-500/5 text-red-300"
             )}
           >
-            <p className="font-semibold uppercase tracking-[0.2em] text-xs mb-2">
-              {isCorrect ? "✓ Correct" : "✗ Incorrect"}
-            </p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="font-semibold uppercase tracking-[0.2em] text-xs">
+                {isCorrect ? "✓ Correct" : "✗ Incorrect"}
+              </p>
+              {!isCorrect && (
+                <button
+                  onClick={() => {
+                    setSubmitted(false);
+                    setSelected("");
+                    setCodeOutput("");
+                    setCodeError("");
+                    setPatternError("");
+                    setRunStatus("idle");
+                  }}
+                  className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400 hover:text-slate-200 transition"
+                >
+                  ↩ Change Answer
+                </button>
+              )}
+            </div>
             <p className="text-slate-300 text-sm leading-relaxed">{question.explanation}</p>
           </div>
         )}

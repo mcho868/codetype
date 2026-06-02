@@ -41,6 +41,89 @@ Explanation: Brackets are not closed in the correct order.
       codeExamples: [],
     },
     {
+      id: 'lesson-valid-parens-your-solution',
+      title: 'Your Solution — Stack with Close-to-Open Map',
+      content: `Your approach uses a stack plus a **close-to-open map** (\`pair\` in Python, \`bracketspair\` in TypeScript). When you hit a closing bracket, you pop the top of the stack and check it matches the expected open.
+
+**How it works**
+1. Build a map from each close bracket to its corresponding open: \`")" → "("\`, etc.
+2. Walk through each character:
+   - If it's a **close** bracket: return false if the stack is empty; otherwise pop and compare to the map.
+   - If it's an **open** bracket: push it onto the stack.
+3. Return true only if the stack is **empty** at the end.
+
+**Why the stack is the right tool:** Brackets must be matched in LIFO order — the most recently opened bracket must be the next one closed.
+
+**Complexity**
+- Time: **O(n)** — single pass, each character pushed and popped at most once.
+- Space: **O(n)** — worst case all opens (e.g. \`"((((("\`).`,
+      codeExamples: [
+        {
+          language: 'python',
+          code: `class Solution:
+    def isValid(self, s: str) -> bool:
+        stack = []
+        pair = {")": "(", "}": "{", "]": "["}
+
+        for char in s:
+            if char in pair:
+                if stack == []:
+                    return False
+                if stack.pop() != pair[char]:
+                    return False
+            else:
+                stack.append(char)
+        return stack == []
+
+# Try it out — press Run
+sol = Solution()
+print(sol.isValid("[]"))      # True
+print(sol.isValid("([{}])"))  # True
+print(sol.isValid("[(])"))    # False
+print(sol.isValid("(]"))      # False`,
+          caption: 'Your solution — stack with close-to-open mapping',
+          editable: true,
+        },
+        {
+          language: 'typescript',
+          code: `interface bracketsPair {
+  [key: string]: string;
+}
+
+const bracketspair: bracketsPair = {
+  "}": "{",
+  "]": "[",
+  ")": "(",
+};
+
+function isValid(s: string): boolean {
+  const stack: string[] = [];
+  for (const char of s) {
+    if (char in bracketspair) {
+      if (stack.length === 0) {
+        return false;
+      }
+      if (stack.pop() !== bracketspair[char]) {
+        return false;
+      }
+    } else {
+      stack.push(char);
+    }
+  }
+  return stack.length === 0;
+}
+
+// Try it out — press Run
+console.log(isValid("[]"));      // true
+console.log(isValid("([{}])")); // true
+console.log(isValid("[(])"));   // false
+console.log(isValid("(]"));     // false`,
+          caption: 'Your solution — stack with close-to-open mapping',
+          editable: true,
+        },
+      ],
+    },
+    {
       id: 'lesson-valid-parens-stack',
       title: 'Stack — O(n)',
       content: `Use a stack to track unmatched open brackets. When you see a close bracket, the top of the stack must be its matching open bracket — otherwise the string is invalid.
