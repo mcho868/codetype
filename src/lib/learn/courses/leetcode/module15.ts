@@ -34,18 +34,18 @@ Explanation: ((1 + 2) * 3) - 4 = 5
     },
     {
       id: 'lesson-rpn-stack',
-      title: 'Stack — O(n)',
-      content: `The stack is the natural data structure for RPN evaluation: numbers go on the stack; operators consume the top two numbers and push the result.
+      title: 'Your Solution — Stack',
+      content: `Your approach walks each token and uses an \`operands\` set to detect operators. Numbers get pushed; operators pop the top two values and push the result back.
 
 **How it works**
 1. For each token:
-   - If it's a **number**, push it onto the stack.
-   - If it's an **operator**, pop the top two values (\`b\` then \`a\`), apply the operator, and push the result.
-2. After processing all tokens, the stack has exactly one element — the answer.
+   - If it's in \`operands\`, pop \`right\` then \`left\` (first pop is the right operand) and apply the operator.
+   - Otherwise push \`int(token)\` onto the stack.
+2. Return the last value on the stack.
 
-**Pop order matters:** The first pop gives the **right** operand, the second pop gives the **left** operand. For \`+\` and \`*\` this doesn't matter (commutative), but for \`-\` and \`/\` it does: \`a - b\` not \`b - a\`.
+**Pop order matters:** For \`-\` and \`/\`, you compute \`left - right\` and \`int(left / right)\` — not the reverse.
 
-**Truncation toward zero:** Python's \`//\` floors (negative results round away from zero), so use \`int(a / b)\` instead for correct RPN semantics.
+**Truncation toward zero:** Use \`int(left / right)\` in Python and \`Math.trunc(nTwo / nOne)\` in TypeScript — not \`//\` or \`Math.floor\`, which behave differently on negatives.
 
 **Complexity**
 - Time: **O(n)** — single pass, each token pushed/popped once.
@@ -58,59 +58,66 @@ Explanation: ((1 + 2) * 3) - 4 = 5
 class Solution:
     def evalRPN(self, tokens: List[str]) -> int:
         stack = []
-        ops = {'+', '-', '*', '/'}
+        operands = {"+", "-", "/", "*"}
 
         for token in tokens:
-            if token in ops:
-                b = stack.pop()
-                a = stack.pop()
-                if token == '+':
-                    stack.append(a + b)
-                elif token == '-':
-                    stack.append(a - b)
-                elif token == '*':
-                    stack.append(a * b)
-                else:
-                    stack.append(int(a / b))  # truncate toward zero
+            if token in operands:
+                right = stack.pop()
+                left = stack.pop()
+                if token == "+":
+                    stack.append(left + right)
+                elif token == "-":
+                    stack.append(left - right)
+                elif token == "/":
+                    stack.append(int(left / right))
+                elif token == "*":
+                    stack.append(left * right)
             else:
                 stack.append(int(token))
 
-        return stack[0]
+        return stack.pop()
 
 # Try it out — press Run
 sol = Solution()
 print(sol.evalRPN(["1","2","+","3","*","4","-"]))  # 5
 print(sol.evalRPN(["4","13","5","/","+"]))          # 6
 print(sol.evalRPN(["10","6","9","3","+","-11","*","/","*","17","+","5","+"]))  # 22`,
-          caption: 'Python — O(n) stack evaluation, truncates toward zero',
+          caption: 'Your solution — stack with operands set, truncate toward zero',
           editable: true,
         },
         {
           language: 'typescript',
           code: `function evalRPN(tokens: string[]): number {
   const stack: number[] = [];
-  const ops = new Set(['+', '-', '*', '/']);
+  const operands = new Set(["+", "-", "/", "*"]);
 
   for (const token of tokens) {
-    if (ops.has(token)) {
-      const b = stack.pop()!;
-      const a = stack.pop()!;
-      if (token === '+') stack.push(a + b);
-      else if (token === '-') stack.push(a - b);
-      else if (token === '*') stack.push(a * b);
-      else stack.push(Math.trunc(a / b)); // truncate toward zero
+    if (operands.has(token)) {
+      const nOne = stack.pop()!;
+      const nTwo = stack.pop()!;
+
+      if (token === "+") {
+        stack.push(nTwo + nOne);
+      } else if (token === "-") {
+        stack.push(nTwo - nOne);
+      } else if (token === "/") {
+        stack.push(Math.trunc(nTwo / nOne));
+      } else if (token === "*") {
+        stack.push(nTwo * nOne);
+      }
     } else {
       stack.push(Number(token));
     }
   }
 
-  return stack[0];
+  return stack.pop()!;
 }
 
 // Try it out — press Run
 console.log(evalRPN(["1","2","+","3","*","4","-"])); // 5
-console.log(evalRPN(["4","13","5","/","+"]));         // 6`,
-          caption: 'TypeScript — O(n) stack evaluation using Math.trunc',
+console.log(evalRPN(["4","13","5","/","+"]));         // 6
+console.log(evalRPN(["10","6","9","3","+","-11","*","/","*","17","+","5","+"])); // 22`,
+          caption: 'Your solution — stack with operands set, Math.trunc for division',
           editable: true,
         },
       ],

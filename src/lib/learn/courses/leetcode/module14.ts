@@ -35,6 +35,105 @@ Output: [null,null,null,null,0,null,2,1]
       codeExamples: [],
     },
     {
+      id: 'lesson-min-stack-your-solution',
+      title: 'Your Solution — Dual Stack',
+      content: `Your approach keeps two stacks in sync: a main \`stack\` for values and a \`min_stack\` that records the minimum at each depth.
+
+**How it works**
+- \`push(val)\`: append to main stack; if \`min_stack\` is empty push \`val\`, otherwise push \`min(val, min_stack[-1])\`.
+- \`pop()\`: pop both stacks together.
+- \`top()\`: return the top of the main stack.
+- \`getMin()\`: return the top of \`min_stack\`.
+
+**Complexity**
+- Time: **O(1)** for all four operations.
+- Space: **O(n)** — the min stack mirrors the main stack.`,
+      codeExamples: [
+        {
+          language: 'python',
+          code: `class MinStack:
+    def __init__(self):
+        self.stack = []
+        self.min_stack = []
+
+    def push(self, val: int) -> None:
+        self.stack.append(val)
+        if not self.min_stack:
+            self.min_stack.append(val)
+        else:
+            self.min_stack.append(min(val, self.min_stack[-1]))
+
+    def pop(self) -> None:
+        self.stack.pop()
+        self.min_stack.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.min_stack[-1]
+
+# Try it out — press Run
+ms = MinStack()
+ms.push(1)
+ms.push(2)
+ms.push(0)
+print(ms.getMin())  # 0
+ms.pop()
+print(ms.top())     # 2
+print(ms.getMin())  # 1`,
+          caption: 'Your solution — parallel min stack kept in sync on push/pop',
+          editable: true,
+        },
+        {
+          language: 'typescript',
+          code: `class MinStack {
+  private stack: number[];
+  private minStack: number[];
+
+  constructor() {
+    this.stack = [];
+    this.minStack = [];
+  }
+
+  push(value: number): void {
+    this.stack.push(value);
+    if (this.minStack.length === 0) {
+      this.minStack.push(value);
+    } else {
+      this.minStack.push(Math.min(value, this.minStack[this.minStack.length - 1]));
+    }
+  }
+
+  pop(): void {
+    this.stack.pop();
+    this.minStack.pop();
+  }
+
+  top(): number {
+    return this.stack[this.stack.length - 1];
+  }
+
+  getMin(): number {
+    return this.minStack[this.minStack.length - 1];
+  }
+}
+
+// Try it out — press Run
+const ms = new MinStack();
+ms.push(1);
+ms.push(2);
+ms.push(0);
+console.log(ms.getMin()); // 0
+ms.pop();
+console.log(ms.top());    // 2
+console.log(ms.getMin()); // 1`,
+          caption: 'Your solution — parallel min stack kept in sync on push/pop',
+          editable: true,
+        },
+      ],
+    },
+    {
       id: 'lesson-min-stack-dual-stack',
       title: 'Dual Stack — O(1) all operations',
       content: `The challenge is \`getMin\` in O(1) — a plain stack can't do this because popping an element might change the minimum, and we can't recompute it without scanning.

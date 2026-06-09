@@ -64,14 +64,20 @@ Output: 3
 
 class Solution:
     def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
-        pairs = sorted(zip(position, speed), reverse=True)
+        combined = [
+            [position[i], speed[i], (target - position[i]) / speed[i]]
+            for i in range(len(position))
+        ]
+
+        sorted_cars = sorted(combined, key=lambda x: x[0])
+
         stack = []
 
-        for pos, spd in pairs:
-            time = (target - pos) / spd
-            if not stack or time > stack[-1]:
-                stack.append(time)
-            # else: this car catches the fleet ahead — same arrival time, don't push
+        for i in range(len(position) - 1, -1, -1):
+            car = sorted_cars[i]
+
+            if len(stack) == 0 or stack[-1][2] < car[2]:
+                stack.append(car)
 
         return len(stack)
 
@@ -79,33 +85,33 @@ class Solution:
 sol = Solution()
 print(sol.carFleet(10, [1,4], [3,2]))       # 1
 print(sol.carFleet(10, [4,1,0,7], [2,2,1,1]))  # 3`,
-          caption: 'Python — O(n log n) sort by position desc + arrival-time stack',
+          caption: 'Python — O(n log n) sort by position + stack of cars with arrival time',
           editable: true,
         },
         {
           language: 'typescript',
           code: `function carFleet(target: number, position: number[], speed: number[]): number {
-  const pairs = position
-    .map((pos, i) => [pos, speed[i]] as [number, number])
-    .sort((a, b) => b[0] - a[0]); // descending by position
+    let combined: [number, number, number][] = position.map((pos, index) => [pos, speed[index], (target - pos) / speed[index] ]);
 
-  const stack: number[] = [];
+    // 0 = position, 1 = speed, 2 = time
+    combined.sort((a, b) => b[0] - a[0]);
 
-  for (const [pos, spd] of pairs) {
-    const time = (target - pos) / spd;
-    if (stack.length === 0 || time > stack[stack.length - 1]) {
-      stack.push(time);
+    let stack: [number,number,number][] = [];
+
+    for (let i: number = 0; i < position.length; i ++) {
+        let car = combined[i];
+        if (stack.length == 0 || stack[stack.length - 1][2] < car[2]) {
+            stack.push(car);
+        }
     }
-    // else: merges with the fleet ahead
-  }
 
-  return stack.length;
-}
+    return stack.length;
+};
 
 // Try it out — press Run
 console.log(carFleet(10, [1,4], [3,2]));          // 1
 console.log(carFleet(10, [4,1,0,7], [2,2,1,1]));  // 3`,
-          caption: 'TypeScript — O(n log n) sort by position desc + arrival-time stack',
+          caption: 'TypeScript — O(n log n) sort by position desc + stack of cars with arrival time',
           editable: true,
         },
       ],

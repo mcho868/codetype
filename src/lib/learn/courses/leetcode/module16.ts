@@ -16,42 +16,42 @@ const module16: Module = {
       title: 'The Problem',
       content: `**739. Daily Temperatures** — Medium
 
-You are given an array of integers **temperatures** where \`temperatures[i]\` is the temperature on day i.
-
-Return an array **result** where \`result[i]\` is the number of days after day i before a **warmer** temperature appears. If no warmer day exists in the future, set \`result[i] = 0\`.
+Given an array of integers **temperatures** representing daily temperatures, return an array **answer** such that \`answer[i]\` is the number of days you have to wait after the i-th day to get a warmer temperature. If there is no future day for which this is possible, keep \`answer[i] == 0\`.
 
 **Example 1**
-Input: temperatures = [30,38,30,36,35,40,28]
-Output: [1,4,1,2,1,0,0]
+Input: temperatures = [73,74,75,71,69,72,76,73]
+Output: [1,1,4,2,1,1,0,0]
 
 **Example 2**
-Input: temperatures = [22,21,20]
-Output: [0,0,0]
+Input: temperatures = [30,40,50,60]
+Output: [1,1,1,0]
+
+**Example 3**
+Input: temperatures = [30,60,90]
+Output: [1,1,0]
 
 **Constraints**
-- 1 <= temperatures.length <= 1000
-- 1 <= temperatures[i] <= 100`,
+- 1 <= temperatures.length <= 10^5
+- 30 <= temperatures[i] <= 100`,
       codeExamples: [],
     },
     {
-      id: 'lesson-daily-temperatures-monotonic-stack',
-      title: 'Monotonic Decreasing Stack — O(n)',
-      content: `This is the classic **next greater element** pattern. We maintain a stack of indices whose "warmer day" we haven't found yet. The stack stays in **decreasing order of temperature** — whenever a new temperature is warmer than the top, we've found the answer for that index.
+      id: 'lesson-daily-temperatures-your-solution',
+      title: 'Your Solution — Monotonic Stack with (temp, index)',
+      content: `Your approach uses a **monotonic decreasing stack** that stores \`(temperature, index)\` pairs. Whenever the current day is warmer than the temperature at the top of the stack, you pop and record how many days that earlier index had to wait.
 
 **How it works**
-1. Initialize \`result = [0] * n\` and an empty stack.
+1. Initialize \`outputTemp = [0] * n\` and an empty \`tempStack\`.
 2. For each index \`i\`:
-   - While the stack is not empty and \`temperatures[i] > temperatures[stack[-1]]\`:
-     - Pop index \`j\` from the stack.
-     - \`result[j] = i - j\` (i is the next warmer day after j).
-   - Push \`i\` onto the stack.
-3. Any indices remaining in the stack have no warmer day (result stays 0).
+   - While the stack is not empty and \`temperatures[i]\` is warmer than the top pair's temperature, pop \`(temp, j)\` and set \`outputTemp[j] = i - j\`.
+   - Push \`(temperatures[i], i)\` onto the stack.
+3. Any pairs left in the stack have no warmer day ahead (output stays 0).
 
-**Why monotonic?** We never push an index whose temperature is higher than the current — that would mean we skipped finding its answer. The stack always holds a decreasing sequence of temperatures (indices of days still waiting for a warmer day).
+**Why it works:** The stack stays in decreasing temperature order. When a warmer day arrives, it resolves every colder day still waiting on top of the stack — the classic **next greater element** pattern.
 
 **Complexity**
 - Time: **O(n)** — each index is pushed and popped at most once.
-- Space: **O(n)** — the stack holds at most n indices.`,
+- Space: **O(n)** — the stack holds at most n pairs.`,
       codeExamples: [
         {
           language: 'python',
@@ -59,47 +59,52 @@ Output: [0,0,0]
 
 class Solution:
     def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
-        n = len(temperatures)
-        result = [0] * n
-        stack = []  # stores indices
-
-        for i in range(n):
-            while stack and temperatures[i] > temperatures[stack[-1]]:
-                j = stack.pop()
-                result[j] = i - j
-            stack.append(i)
-
-        return result
+        tempStack = []
+        outputTemp = [0 for _ in range(len(temperatures))]
+        for i in range(len(temperatures)):
+            if len(tempStack) > 0:
+                while (
+                    len(tempStack) > 0
+                    and temperatures[i] > tempStack[len(tempStack) - 1][0]
+                ):
+                    temp = tempStack.pop()
+                    outputTemp[temp[1]] = i - temp[1]
+            tempStack.append((temperatures[i], i))
+        return outputTemp
 
 # Try it out — press Run
 sol = Solution()
-print(sol.dailyTemperatures([30,38,30,36,35,40,28]))  # [1,4,1,2,1,0,0]
-print(sol.dailyTemperatures([22,21,20]))               # [0,0,0]`,
-          caption: 'Python — O(n) monotonic decreasing stack (next greater element)',
+print(sol.dailyTemperatures([73,74,75,71,69,72,76,73]))  # [1,1,4,2,1,1,0,0]
+print(sol.dailyTemperatures([30,40,50,60]))               # [1,1,1,0]
+print(sol.dailyTemperatures([30,60,90]))                  # [1,1,0]`,
+          caption: 'Your solution — O(n) monotonic stack storing (temperature, index) pairs',
           editable: true,
         },
         {
           language: 'typescript',
           code: `function dailyTemperatures(temperatures: number[]): number[] {
-  const n = temperatures.length;
-  const result = new Array(n).fill(0);
-  const stack: number[] = []; // stores indices
-
-  for (let i = 0; i < n; i++) {
-    while (stack.length > 0 && temperatures[i] > temperatures[stack[stack.length - 1]]) {
-      const j = stack.pop()!;
-      result[j] = i - j;
+    let tempStack: [number, number][] = [];
+    let outputTemp: number[] = Array(temperatures.length).fill(0)
+    for (let i: number = 0; i < temperatures.length; i ++){
+        if (tempStack.length === 0){
+            tempStack.push([temperatures[i], i]);
+        }
+        else{
+            while (tempStack.length > 0 && temperatures[i] > tempStack[tempStack.length - 1][0]) {
+                let temp: [number, number] = tempStack.pop();
+                outputTemp[temp[1]] = i - temp[1];
+            }
+            tempStack.push([temperatures[i], i]);
+        }
     }
-    stack.push(i);
-  }
-
-  return result;
-}
+    return outputTemp
+};
 
 // Try it out — press Run
-console.log(dailyTemperatures([30,38,30,36,35,40,28])); // [1,4,1,2,1,0,0]
-console.log(dailyTemperatures([22,21,20]));              // [0,0,0]`,
-          caption: 'TypeScript — O(n) monotonic decreasing stack',
+console.log(dailyTemperatures([73,74,75,71,69,72,76,73])); // [1,1,4,2,1,1,0,0]
+console.log(dailyTemperatures([30,40,50,60]));              // [1,1,1,0]
+console.log(dailyTemperatures([30,60,90]));                 // [1,1,0]`,
+          caption: 'Your solution — O(n) monotonic stack storing [temperature, index] pairs',
           editable: true,
         },
       ],
