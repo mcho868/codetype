@@ -61,33 +61,49 @@ Output: [[0,0,0]]
           code: `from typing import List
 
 class Solution:
-    def threeSum(self, nums: List[int]) -> List[List[int]]:
-        nums.sort()
-        result = []
+    def threeSum(self, nums: list[int]) -> list[list[int]]:
 
+        # o(nlogn)
+        nums.sort()
+
+        # [-4, -1, -1, 0, 1, 2]
+        output = []
+        # print(nums)
         for i in range(len(nums) - 2):
-            if nums[i] > 0:
-                break
             if i > 0 and nums[i] == nums[i - 1]:
                 continue
+            target = nums[i]
+            output += self.twoSum(nums, target, i + 1, len(nums) - 1)
+        return output
 
-            left, right = i + 1, len(nums) - 1
-            while left < right:
-                total = nums[i] + nums[left] + nums[right]
-                if total == 0:
-                    result.append([nums[i], nums[left], nums[right]])
-                    while left < right and nums[left] == nums[left + 1]:
-                        left += 1
-                    while left < right and nums[right] == nums[right - 1]:
-                        right -= 1
-                    left += 1
-                    right -= 1
-                elif total < 0:
-                    left += 1
-                else:
-                    right -= 1
+    def twoSum(
+        self, numbers: List[int], target: int, left: int, right: int
+    ) -> List[int]:
 
-        return result
+        # print(f"current target: {target}")
+        # print(f"current left: {numbers[left]}, right: {numbers[right]}")
+        output = []
+
+        while left < right:
+            total = numbers[left] + numbers[right] + target
+            # print(total)
+            if total == 0:
+                output.append([target, numbers[left], numbers[right]])
+                left += 1
+                right -= 1
+
+                while left < right and numbers[left] == numbers[left - 1]:
+                    left += 1
+                while left < right and numbers[right] == numbers[right + 1]:
+                    right -= 1
+            elif total < 0:
+                left += 1
+            else:
+                right -= 1
+
+        # print(output)
+
+        return output
 
 # Try it out — press Run
 sol = Solution()
@@ -95,45 +111,6 @@ print(sol.threeSum([-1,0,1,2,-1,-4]))  # [[-1,-1,2],[-1,0,1]]
 print(sol.threeSum([0,1,1]))           # []
 print(sol.threeSum([0,0,0]))           # [[0,0,0]]`,
           caption: 'Python — O(n²) sort + two-pointer with duplicate skipping',
-          editable: true,
-        },
-        {
-          language: 'typescript',
-          code: `function threeSum(nums: number[]): number[][] {
-  nums.sort((a, b) => a - b);
-  const result: number[][] = [];
-
-  for (let i = 0; i < nums.length - 2; i++) {
-    if (nums[i] > 0) break;
-    if (i > 0 && nums[i] === nums[i - 1]) continue;
-
-    let left = i + 1;
-    let right = nums.length - 1;
-
-    while (left < right) {
-      const total = nums[i] + nums[left] + nums[right];
-      if (total === 0) {
-        result.push([nums[i], nums[left], nums[right]]);
-        while (left < right && nums[left] === nums[left + 1]) left++;
-        while (left < right && nums[right] === nums[right - 1]) right--;
-        left++;
-        right--;
-      } else if (total < 0) {
-        left++;
-      } else {
-        right--;
-      }
-    }
-  }
-
-  return result;
-}
-
-// Try it out — press Run
-console.log(threeSum([-1,0,1,2,-1,-4])); // [[-1,-1,2],[-1,0,1]]
-console.log(threeSum([0,1,1]));           // []
-console.log(threeSum([0,0,0]));           // [[0,0,0]]`,
-          caption: 'TypeScript — O(n²) sort + two-pointer with duplicate skipping',
           editable: true,
         },
       ],

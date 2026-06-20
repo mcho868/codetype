@@ -19,6 +19,7 @@ import module15 from './module15';
 import module16 from './module16';
 import module17 from './module17';
 import module18 from './module18';
+import module19 from './module19';
 import type { Module } from '../python101/types';
 
 export const MODULES: Module[] = [
@@ -26,6 +27,7 @@ export const MODULES: Module[] = [
   module5, module6, module7,
   module8, module9, module10, module11, module12,
   module13, module14, module15, module16, module17, module18,
+  module19,
 ];
 
 export function getAllModules(): Module[] {

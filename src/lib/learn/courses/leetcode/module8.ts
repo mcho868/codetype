@@ -59,20 +59,17 @@ Explanation: "tabacat" is not a palindrome.
           language: 'python',
           code: `class Solution:
     def isPalindrome(self, s: str) -> bool:
-        left, right = 0, len(s) - 1
+        import re
 
+        s = re.sub(r"[^a-zA-Z0-9]", "", s).lower()
+
+        left = 0
+        right = len(s) - 1
         while left < right:
-            while left < right and not s[left].isalnum():
-                left += 1
-            while left < right and not s[right].isalnum():
-                right -= 1
-
-            if s[left].lower() != s[right].lower():
+            if s[left] != s[right]:
                 return False
-
             left += 1
             right -= 1
-
         return True
 
 # Try it out — press Run
@@ -80,23 +77,21 @@ sol = Solution()
 print(sol.isPalindrome("Was it a car or a cat I saw?"))  # True
 print(sol.isPalindrome("tab a cat"))                     # False
 print(sol.isPalindrome("A man, a plan, a canal: Panama")) # True`,
-          caption: 'Python — O(n) two-pointer, O(1) space',
+          caption: 'Python — clean then two-pointer, O(n) space',
           editable: true,
         },
         {
           language: 'typescript',
           code: `function isPalindrome(s: string): boolean {
-  let left = 0;
-  let right = s.length - 1;
+  const cleaned: string = s.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
-  const isAlnum = (c: string) => /[a-zA-Z0-9]/.test(c);
+  let left: number = 0;
+  let right: number = cleaned.length - 1;
 
   while (left < right) {
-    while (left < right && !isAlnum(s[left])) left++;
-    while (left < right && !isAlnum(s[right])) right--;
-
-    if (s[left].toLowerCase() !== s[right].toLowerCase()) return false;
-
+    if (cleaned[left] != cleaned[right]) {
+      return false;
+    }
     left++;
     right--;
   }
@@ -108,7 +103,7 @@ print(sol.isPalindrome("A man, a plan, a canal: Panama")) # True`,
 console.log(isPalindrome("Was it a car or a cat I saw?")); // true
 console.log(isPalindrome("tab a cat"));                    // false
 console.log(isPalindrome("A man, a plan, a canal: Panama")); // true`,
-          caption: 'TypeScript — O(n) two-pointer, O(1) space',
+          caption: 'TypeScript — clean then two-pointer, O(n) space',
           editable: true,
         },
       ],
