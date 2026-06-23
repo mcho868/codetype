@@ -186,6 +186,7 @@ export default function CodeRunnerCard({
   const [inputValue, setInputValue] = useState("");
   const termRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastSubmittedRef = useRef<{ questionId: string; code: string } | null>(null);
 
   const { runCode, runCodeSimple, submitInput, terminateWorker } = usePyodide();
 
@@ -198,9 +199,25 @@ export default function CodeRunnerCard({
   const showSubmitResults = !examMode && serverResults !== null;
 
   useEffect(() => {
-    const saved =
+    const previousSelected =
       previousAnswer?.selectedAnswer && previousAnswer.selectedAnswer !== "__code__"
         ? previousAnswer.selectedAnswer
+        : null;
+    const lastSubmitted = lastSubmittedRef.current;
+
+    if (
+      !examMode &&
+      previousSelected &&
+      lastSubmitted?.questionId === question.id &&
+      lastSubmitted.code === previousSelected
+    ) {
+      setRestoreLoading(false);
+      return;
+    }
+
+    const saved =
+      previousSelected
+        ? previousSelected
         : typeof window !== "undefined"
         ? localStorage.getItem(draftKey)
         : null;
@@ -228,10 +245,10 @@ export default function CodeRunnerCard({
     setAllPassed(previousAnswer.isCorrect);
     setRestoreLoading(true);
 
-    gradeCodeRunnerQuestion(question, previousAnswer.selectedAnswer)
-      .then((data) => {
-        setServerResults(data.results);
-        setAllPassed(data.allPassed);
+    runTestCasesLocally(testCases, previousAnswer.selectedAnswer)
+      .then((results) => {
+        setServerResults(results);
+        setAllPassed(results.length > 0 && results.every((r) => r.passed));
       })
       .catch(() => {
         setSubmitError("Could not reload test results.");
@@ -261,6 +278,76 @@ export default function CodeRunnerCard({
     },
     [examLocked, draftKey]
   );
+
+  async function runTestCasesLocally(
+    cases: TestCase[],
+    submittedCode: string
+  ): Promise<CaseResult[]> {
+    const results: CaseResult[] = [];
+
+    const filePreamble = (tc: TestCase): string => {
+      if (tc.fileContent === undefined || tc.fileContent === null) return "";
+      const name = tc.fileName ?? "input.txt";
+      return `with open(${JSON.stringify(name)}, "w") as __f:\n    __f.write(${JSON.stringify(tc.fileContent)})\n`;
+    };
+
+    const stdoutPreamble = (tc: TestCase): string => {
+      const stdin = tc.stdin ?? "";
+      return `import builtins as __builtins\n__inputs = iter(${JSON.stringify(stdin.split(/\r?\n/))})\n__builtins.input = lambda prompt="": next(__inputs, "")\n`;
+    };
+
+    for (const tc of cases) {
+      try {
+        if (gradeMode === "function" && tc.funcName) {
+          const argsJson = JSON.stringify(tc.args ?? []);
+          const wrapped = `${filePreamble(tc)}${submittedCode}\n\n__result = ${tc.funcName}(*${argsJson})`;
+          const { output, error } = await runCodeSimple(
+            `${wrapped}\nprint(__import__("json").dumps(__result))`
+          );
+          if (error) {
+            results.push({ caseId: tc.id, passed: false, error });
+            continue;
+          }
+          const line = output.trim().split("\n").pop() ?? "null";
+          let actual: unknown;
+          try {
+            actual = JSON.parse(line);
+          } catch {
+            actual = line;
+          }
+          const passed = JSON.stringify(actual) === JSON.stringify(tc.expectedReturn);
+          results.push({
+            caseId: tc.id,
+            passed,
+            expected: tc.expectedReturn,
+            actual,
+          });
+        } else {
+          const wrapped = `${stdoutPreamble(tc)}${filePreamble(tc)}${submittedCode}`;
+          const { output, error } = await runCodeSimple(wrapped);
+          if (error) {
+            results.push({ caseId: tc.id, passed: false, error });
+            continue;
+          }
+          const passed = cleanStdout(output) === cleanStdout(tc.expectedStdout ?? "");
+          results.push({
+            caseId: tc.id,
+            passed,
+            expected: tc.expectedStdout,
+            actual: output,
+          });
+        }
+      } catch (err) {
+        results.push({
+          caseId: tc.id,
+          passed: false,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    return results;
+  }
 
   async function handleInteractiveRun() {
     if (examLocked) return;
@@ -315,69 +402,12 @@ export default function CodeRunnerCard({
     setServerResults(null);
     setSubmitError("");
 
-    const results: CaseResult[] = [];
-
-    // Write a case's fileContent into the runner's filesystem before the
-    // student code runs, so open(fileName) reads the same data the backend uses.
-    const filePreamble = (tc: TestCase): string => {
-      if (tc.fileContent === undefined || tc.fileContent === null) return "";
-      const name = tc.fileName ?? "input.txt";
-      return `with open(${JSON.stringify(name)}, "w") as __f:\n    __f.write(${JSON.stringify(tc.fileContent)})\n`;
-    };
-
-    for (const tc of visibleCases) {
-      try {
-        if (gradeMode === "function" && tc.funcName) {
-          const argsJson = JSON.stringify(tc.args ?? []);
-          const wrapped = `${filePreamble(tc)}${code}\n\n__result = ${tc.funcName}(*${argsJson})`;
-          const { output, error } = await runCodeSimple(
-            `${wrapped}\nprint(__import__("json").dumps(__result))`
-          );
-          if (error) {
-            results.push({ caseId: tc.id, passed: false, error });
-            continue;
-          }
-          const line = output.trim().split("\n").pop() ?? "null";
-          let actual: unknown;
-          try {
-            actual = JSON.parse(line);
-          } catch {
-            actual = line;
-          }
-          const passed = JSON.stringify(actual) === JSON.stringify(tc.expectedReturn);
-          results.push({
-            caseId: tc.id,
-            passed,
-            expected: tc.expectedReturn,
-            actual,
-          });
-        } else {
-          const stdin = tc.stdin ?? "";
-          const wrapped = `import io, sys\nsys.stdin = io.StringIO(${JSON.stringify(stdin)})\n${filePreamble(tc)}${code}`;
-          const { output, error } = await runCodeSimple(wrapped);
-          if (error) {
-            results.push({ caseId: tc.id, passed: false, error });
-            continue;
-          }
-          const passed = cleanStdout(output) === cleanStdout(tc.expectedStdout ?? "");
-          results.push({
-            caseId: tc.id,
-            passed,
-            expected: tc.expectedStdout,
-            actual: output,
-          });
-        }
-      } catch (err) {
-        results.push({
-          caseId: tc.id,
-          passed: false,
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
+    try {
+      const results = await runTestCasesLocally(visibleCases, code);
+      setLocalResults(results);
+    } finally {
+      setTestRunLoading(false);
     }
-
-    setLocalResults(results);
-    setTestRunLoading(false);
   }
 
   function handleRunClick() {
@@ -418,30 +448,14 @@ export default function CodeRunnerCard({
     setLocalResults(null);
 
     try {
-      const res = await fetch("/api/run-python-tests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          studentCode: code,
-          testCases,
-          gradeMode,
-          timeoutMs: question.timeoutMs ?? 8000,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setSubmitError(data.error ?? `Server error (${res.status})`);
-        return;
-      }
-
-      const data = (await res.json()) as {
-        results: CaseResult[];
-        allPassed: boolean;
+      const results = await runTestCasesLocally(testCases, code);
+      const data = {
+        results,
+        allPassed: results.length > 0 && results.every((r) => r.passed),
       };
-
       setServerResults(data.results);
       setAllPassed(data.allPassed);
+      lastSubmittedRef.current = { questionId: question.id, code };
       onAnswerSubmit({ selectedAnswer: code, isCorrect: data.allPassed });
     } catch {
       setSubmitError("Failed to reach the Python test runner.");
