@@ -28,28 +28,30 @@ export default function LearnLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-bg)] flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
+    <main className="min-h-dvh bg-[var(--page-bg)] flex items-center justify-center px-4 py-8 sm:px-6">
+      <div className="w-full max-w-[22rem] sm:max-w-sm">
         {/* Header */}
-        <div className="text-center mb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500 mb-4">
+        <div className="text-center mb-7 sm:mb-10">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.32em] sm:tracking-[0.4em] text-slate-500 mb-3 sm:mb-4">
             CodeType
           </p>
-          <h1 className="text-3xl font-semibold text-white mb-2">Learn Programming</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-[2rem] leading-tight sm:text-3xl font-semibold text-white mb-2">
+            Learn Programming
+          </h1>
+          <p className="text-sm leading-6 text-slate-400">
             Interactive lessons and quizzes for beginners
           </p>
         </div>
 
         {/* Card */}
-        <div className="rounded-3xl border border-slate-800/70 bg-slate-900/70 p-8 shadow-sm backdrop-blur">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400 mb-6">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-sm backdrop-blur sm:p-8">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.24em] sm:tracking-[0.3em] text-slate-400 mb-5 sm:mb-6">
             Sign In
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] text-slate-500 mb-2">
                 Username
               </label>
               <input
@@ -58,13 +60,13 @@ export default function LearnLoginPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 autoFocus
-                className="w-full rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 outline-none focus:border-cyan-400/40 transition"
+                className="w-full rounded-xl sm:rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-base sm:text-sm text-slate-100 placeholder:text-slate-600 outline-none focus:border-cyan-400/40 transition"
                 style={{ fontFamily: "var(--font-mono), monospace" }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] sm:tracking-[0.25em] text-slate-500 mb-2">
                 Password
               </label>
               <input
@@ -72,13 +74,13 @@ export default function LearnLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 outline-none focus:border-cyan-400/40 transition"
+                className="w-full rounded-xl sm:rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-base sm:text-sm text-slate-100 placeholder:text-slate-600 outline-none focus:border-cyan-400/40 transition"
                 style={{ fontFamily: "var(--font-mono), monospace" }}
               />
             </div>
 
             {error && (
-              <p className="text-xs text-red-400 font-semibold uppercase tracking-[0.2em] text-center">
+              <p className="text-[0.68rem] leading-5 text-red-400 font-semibold uppercase tracking-[0.12em] sm:tracking-[0.2em] text-center break-words">
                 {error}
               </p>
             )}
@@ -86,7 +88,7 @@ export default function LearnLoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl py-3 mt-2"
+              className="w-full rounded-xl sm:rounded-2xl py-3 mt-2 text-sm sm:text-base"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">

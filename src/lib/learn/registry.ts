@@ -6,6 +6,8 @@ import { getAllModules as getSql101Modules } from './courses/sql101/index';
 import { getAllModules as getTypescript101Modules } from './courses/typescript101/index';
 import { getAllModules as getGdscript101Modules } from './courses/gdscript101/index';
 import { getAllModules as getLeetcodeModules } from './courses/leetcode/index';
+import { getAllModules as getCompsci101Modules } from './courses/compsci101/index';
+import { getAllModules as getPythonIntermediateModules } from './courses/python-intermediate/index';
 
 export interface CourseInfo {
   slug: string;
@@ -16,6 +18,8 @@ export interface CourseInfo {
 
 export const COURSES: CourseInfo[] = [
   { slug: 'python101', title: 'Python 101', modules: getPython101Modules() },
+  { slug: 'compsci101', title: 'Python Essentials', modules: getCompsci101Modules() },
+  { slug: 'python-intermediate', title: 'Python Intermediate', modules: getPythonIntermediateModules() },
   { slug: 'java-oop', title: 'OOP in Java', modules: getJavaOopModules() },
   { slug: 'python130', title: 'Python 130', modules: getPython130Modules() },
   { slug: 'sql101', title: 'SQL 101', modules: getSql101Modules(), adminOnly: true },

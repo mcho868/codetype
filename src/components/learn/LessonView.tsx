@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
@@ -18,6 +18,10 @@ const AlgorithmVisualizer = dynamic(
 import { getModule } from "@/lib/learn/courseData";
 import { getCourse, getModuleFromCourse } from "@/lib/learn/registry";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
+import { loadAttemptHistory } from "@/lib/learn/db";
+import type { QuizAttemptSummary } from "@/lib/learn/db";
+import QuizAttemptHistory from "@/components/learn/QuizAttemptHistory";
+import LessonAttachments from "@/components/learn/LessonAttachments";
 import { cn } from "@/lib/utils";
 
 interface LessonViewProps {
@@ -157,23 +161,48 @@ function renderLessonBlock(block: string, key: number) {
 
 export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
   const router = useRouter();
-  const { user } = useLearnAuth();
+  const { user, studentId } = useLearnAuth();
+  const [attemptHistory, setAttemptHistory] = useState<QuizAttemptSummary[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const course = courseSlug ? getCourse(courseSlug) : undefined;
   const mod = courseSlug
     ? getModuleFromCourse(courseSlug, moduleId)
     : getModule(moduleId);
   const isCourseRestricted = Boolean(course?.adminOnly && user?.role !== "admin");
+  const storageSlug = courseSlug ? `${courseSlug}/${mod?.slug ?? moduleId}` : (mod?.slug ?? moduleId);
+  const quizPath = courseSlug
+    ? `/learn/courses/${courseSlug}/${moduleId}/quiz`
+    : `/learn/${moduleId}/quiz`;
 
   useEffect(() => {
     if (isCourseRestricted || (mod?.locked && user?.role !== 'admin')) {
       router.replace(courseSlug ? `/learn/courses/${courseSlug}` : '/learn/dashboard');
     }
   }, [courseSlug, isCourseRestricted, mod, router, user]);
+
+  useEffect(() => {
+    if (!studentId || !mod || mod.questions.length === 0) {
+      setAttemptHistory([]);
+      setHistoryLoading(false);
+      return;
+    }
+
+    let active = true;
+    setHistoryLoading(true);
+    loadAttemptHistory(studentId, storageSlug).then((rows) => {
+      if (!active) return;
+      setAttemptHistory(rows);
+      setHistoryLoading(false);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [studentId, storageSlug, mod]);
+
+  const hasInProgress = attemptHistory.some((a) => a.inProgress);
   const courseTitle = course?.title ?? 'Python 101';
-  const quizPath = courseSlug
-    ? `/learn/courses/${courseSlug}/${moduleId}/quiz`
-    : `/learn/${moduleId}/quiz`;
   const backPath = courseSlug
     ? `/learn/courses/${courseSlug}`
     : '/learn/dashboard';
@@ -264,8 +293,12 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
                     .map((block, i) => renderLessonBlock(block, i))}
                 </div>
 
-                {courseSlug === "python130" && mod.title === "Algorithm Complexity" && lesson.id === "lesson-1-1" && (
+                {(courseSlug === "python130" || courseSlug === "python-intermediate") && mod.title === "Algorithm Complexity" && lesson.id === "lesson-1-1" && (
                   <ComplexityGraph />
+                )}
+
+                {lesson.attachments && lesson.attachments.length > 0 && (
+                  <LessonAttachments attachments={lesson.attachments} />
                 )}
 
                 {lesson.visualizer && (
@@ -307,20 +340,36 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
           ))}
 
           {/* Quiz CTA */}
-          <section className="rounded-3xl border border-slate-800/70 bg-slate-900/70 px-8 py-6 flex items-center justify-between shadow-sm backdrop-blur">
-            <div>
-              <p className="font-semibold text-white mb-1">Ready to test your knowledge?</p>
-              <p className="text-sm text-slate-400">
-                {mod.questions.length} questions — takes about 5 minutes
-              </p>
-            </div>
-            <button
-              onClick={() => router.push(quizPath)}
-              className="rounded-full bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-300 transition whitespace-nowrap"
-            >
-              Take the Quiz →
-            </button>
-          </section>
+          {mod.questions.length > 0 && (
+            <>
+              <section className="rounded-3xl border border-slate-800/70 bg-slate-900/70 px-8 py-6 flex items-center justify-between shadow-sm backdrop-blur">
+                <div>
+                  <p className="font-semibold text-white mb-1">
+                    {hasInProgress ? "Continue where you left off?" : "Ready to test your knowledge?"}
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    {mod.questions.length} questions — takes about 5 minutes
+                  </p>
+                </div>
+                <button
+                  onClick={() => router.push(quizPath)}
+                  className="rounded-full bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-300 transition whitespace-nowrap"
+                >
+                  {hasInProgress ? "Continue Quiz →" : "Take the Quiz →"}
+                </button>
+              </section>
+
+              <QuizAttemptHistory
+                attempts={attemptHistory}
+                totalQuestions={mod.questions.length}
+                loading={historyLoading}
+                onOpenAttempt={(attemptNumber) => {
+                  const sep = quizPath.includes("?") ? "&" : "?";
+                  router.push(`${quizPath}${sep}attempt=${attemptNumber}`);
+                }}
+              />
+            </>
+          )}
         </div>
       </main>
     </AuthGuard>

@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import ReactMarkdown from "react-markdown";
 import { Question } from "@/lib/learn/courseData";
 import { QuestionAnswer } from "@/lib/learn/progress";
 import { usePyodide } from "@/lib/learn/usePyodide";
 import { cn } from "@/lib/utils";
+import CodeRunnerCard from "./CodeRunnerCard";
+import LearnMarkdown from "./LearnMarkdown";
 
 const CodeMirrorEditor = dynamic(() => import("./CodeMirrorEditor"), { ssr: false });
 
@@ -14,6 +15,11 @@ interface QuestionCardProps {
   question: Question;
   onAnswerSubmit: (answer: QuestionAnswer) => void;
   previousAnswer?: QuestionAnswer;
+  /** Timed exam: hide correctness until exam ends */
+  examMode?: boolean;
+  examFinished?: boolean;
+  /** Attempt number — passed to code-runner so drafts are scoped per attempt */
+  attemptNumber?: number | null;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -21,6 +27,7 @@ const TYPE_LABELS: Record<string, string> = {
   "fill-in-blank": "Fill in the Blank",
   "true-false": "True / False",
   "code-challenge": "Code Challenge",
+  "code-runner": "Coding Exercise",
 };
 
 const FONT = "var(--font-mono), monospace";
@@ -29,9 +36,14 @@ export default function QuestionCard({
   question,
   onAnswerSubmit,
   previousAnswer,
+  examMode = false,
+  examFinished = false,
+  attemptNumber,
 }: QuestionCardProps) {
   const isCodeChallenge = question.type === "code-challenge";
+  const isCodeRunner = question.type === "code-runner";
   const draftKey = `code-draft:${question.id}`;
+  const hideReveal = examMode && !examFinished;
 
   // Priority: submitted code from Supabase > localStorage draft > starter code
   const savedCode = isCodeChallenge && previousAnswer?.selectedAnswer && previousAnswer.selectedAnswer !== "__code__"
@@ -42,7 +54,7 @@ export default function QuestionCard({
     : null;
 
   const [selected, setSelected] = useState(previousAnswer?.selectedAnswer ?? "");
-  const [submitted, setSubmitted] = useState(!!previousAnswer);
+  const [submitted, setSubmitted] = useState(!!previousAnswer && (!examMode || examFinished));
   const [code, setCode] = useState(savedCode ?? draftCode ?? question.starterCode ?? "");
 
   // Reset all state when the question changes (e.g. after content updates)
@@ -76,16 +88,22 @@ export default function QuestionCard({
 
   const normalise = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '');
 
-  const isCorrect = submitted
+  const isCorrect = hideReveal
+    ? false
+    : submitted || (examMode && examFinished)
     ? previousAnswer?.isCorrect ??
-      (question.type === "code-challenge"
+      (question.type === "code-challenge" || question.type === "code-runner"
         ? runStatus === "pass"
         : normalise(selected) === normalise(question.correctAnswer))
     : false;
 
   function handleSubmit() {
-    if (submitted || (question.type !== "code-challenge" && !selected)) return;
+    if ((submitted && !examMode) || (question.type !== "code-challenge" && question.type !== "code-runner" && !selected)) return;
     const correct = normalise(selected) === normalise(question.correctAnswer);
+    if (examMode) {
+      onAnswerSubmit({ selectedAnswer: selected, isCorrect: correct });
+      return;
+    }
     setSubmitted(true);
     onAnswerSubmit({ selectedAnswer: selected, isCorrect: correct });
   }
@@ -194,7 +212,7 @@ export default function QuestionCard({
           <span
             className={cn(
               "text-xs font-semibold uppercase tracking-[0.3em] px-3 py-1 rounded-full",
-              question.type === "code-challenge"
+              question.type === "code-challenge" || question.type === "code-runner"
                 ? isJava
                   ? "bg-orange-400/10 text-orange-400 border border-orange-400/20"
                   : isSQL
@@ -209,29 +227,9 @@ export default function QuestionCard({
           </span>
         </div>
         <div className="space-y-2">
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => (
-                <p className="text-slate-200 leading-relaxed">{children}</p>
-              ),
-              strong: ({ children }) => (
-                <strong className="text-white font-semibold">{children}</strong>
-              ),
-              code: ({ children, className }) => {
-                const isBlock = !!className;
-                return isBlock ? (
-                  <code className="block text-cyan-300 text-sm" style={{ fontFamily: FONT }}>{children}</code>
-                ) : (
-                  <code className="text-cyan-300 bg-slate-900 px-1.5 py-0.5 rounded text-sm" style={{ fontFamily: FONT }}>{children}</code>
-                );
-              },
-              pre: ({ children }) => (
-                <pre className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-cyan-300 overflow-x-auto my-2" style={{ fontFamily: FONT }}>{children}</pre>
-              ),
-            }}
-          >
+          <LearnMarkdown className="[&_p]:text-slate-200 [&_p]:leading-relaxed [&_p]:mb-0">
             {question.prompt}
-          </ReactMarkdown>
+          </LearnMarkdown>
         </div>
       </div>
 
@@ -242,7 +240,11 @@ export default function QuestionCard({
           <div className="space-y-2">
             {question.choices.map((choice) => {
               let cls = "w-full text-left px-4 py-3 rounded-2xl border text-sm transition ";
-              if (!submitted) {
+              if (hideReveal) {
+                cls += selected === choice.id
+                  ? "border-cyan-400/50 bg-cyan-400/10 text-cyan-200"
+                  : "border-slate-800 text-slate-300 hover:border-slate-600 hover:bg-slate-800/50";
+              } else if (!submitted) {
                 cls += selected === choice.id
                   ? "border-cyan-400/50 bg-cyan-400/10 text-cyan-200"
                   : "border-slate-800 text-slate-300 hover:border-slate-600 hover:bg-slate-800/50";
@@ -259,11 +261,16 @@ export default function QuestionCard({
                 <button
                   key={choice.id}
                   className={cls}
-                  onClick={() => !submitted && setSelected(choice.id)}
-                  disabled={submitted}
+                  onClick={() => (!submitted || examMode) && !examFinished && setSelected(choice.id)}
+                  disabled={submitted && !examMode}
                 >
                   <span className="font-semibold mr-2 uppercase tracking-wider">{choice.id}.</span>
-                  {choice.text}
+                  <span
+                    className={choice.text.includes("\n") ? "whitespace-pre-wrap" : undefined}
+                    style={choice.text.includes("\n") ? { fontFamily: FONT } : undefined}
+                  >
+                    {choice.text}
+                  </span>
                 </button>
               );
             })}
@@ -296,7 +303,11 @@ export default function QuestionCard({
           <div className="flex gap-3">
             {["true", "false"].map((opt) => {
               let cls = "flex-1 py-3 rounded-2xl border text-sm font-semibold uppercase tracking-[0.2em] transition ";
-              if (!submitted) {
+              if (hideReveal) {
+                cls += selected === opt
+                  ? "border-cyan-400/50 bg-cyan-400/10 text-cyan-200"
+                  : "border-slate-800 text-slate-400 hover:border-slate-600";
+              } else if (!submitted) {
                 cls += selected === opt
                   ? "border-cyan-400/50 bg-cyan-400/10 text-cyan-200"
                   : "border-slate-800 text-slate-400 hover:border-slate-600";
@@ -310,12 +321,24 @@ export default function QuestionCard({
                 }
               }
               return (
-                <button key={opt} className={cls} onClick={() => !submitted && setSelected(opt)} disabled={submitted}>
+                <button key={opt} className={cls} onClick={() => (!submitted || examMode) && !examFinished && setSelected(opt)} disabled={submitted && !examMode}>
                   {opt}
                 </button>
               );
             })}
           </div>
+        )}
+
+        {/* Code runner (backend test cases) */}
+        {question.type === "code-runner" && (
+          <CodeRunnerCard
+            question={question}
+            onAnswerSubmit={onAnswerSubmit}
+            previousAnswer={previousAnswer}
+            examMode={examMode}
+            examLocked={examFinished}
+            attemptNumber={attemptNumber}
+          />
         )}
 
         {/* Code challenge */}
@@ -393,7 +416,7 @@ export default function QuestionCard({
         )}
 
         {/* Submit for non-code */}
-        {question.type !== "code-challenge" && !submitted && (
+        {question.type !== "code-challenge" && question.type !== "code-runner" && !submitted && !hideReveal && (
           <button
             onClick={handleSubmit}
             disabled={!selected}
@@ -403,8 +426,19 @@ export default function QuestionCard({
           </button>
         )}
 
-        {/* Explanation */}
-        {submitted && (
+        {examMode && !examFinished && question.type !== "code-runner" && selected && (
+          <button
+            onClick={handleSubmit}
+            className="mt-1 w-full rounded-full border border-cyan-400/50 py-2.5 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-400/10 uppercase tracking-[0.2em]"
+          >
+            Save Answer
+          </button>
+        )}
+
+        {/* Explanation — code-runner shows results inside CodeRunnerCard */}
+        {(submitted || (examMode && examFinished && previousAnswer)) &&
+          !hideReveal &&
+          question.type !== "code-runner" && (
           <div
             className={cn(
               "mt-1 px-4 py-4 rounded-2xl border text-sm",
@@ -433,7 +467,7 @@ export default function QuestionCard({
                 </button>
               )}
             </div>
-            <p className="text-slate-300 text-sm leading-relaxed">{question.explanation}</p>
+            <LearnMarkdown>{question.explanation}</LearnMarkdown>
           </div>
         )}
       </div>

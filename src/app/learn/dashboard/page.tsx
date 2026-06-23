@@ -61,6 +61,48 @@ export default function LearnDashboard() {
               Available Courses
             </h2>
 
+            {/* COMPSCI 101 card */}
+            <div
+              onClick={() => router.push("/learn/courses/compsci101")}
+              className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
+            >
+              <div className="bg-gradient-to-r from-indigo-500 to-violet-400 h-1.5" />
+              <div className="p-8 flex items-center gap-6">
+                <span className="text-5xl">📘</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
+                    Beginner · 10 Weeks
+                  </p>
+                  <h3 className="text-2xl font-semibold text-white mb-1">Python Essentials</h3>
+                  <p className="text-sm text-slate-400">
+                    A 10-week Python curriculum with coding exercises graded by hidden test cases — variables, control flow, data structures, and more.
+                  </p>
+                </div>
+                <span className="text-slate-600 text-xl shrink-0">→</span>
+              </div>
+            </div>
+
+            {/* Python Intermediate card */}
+            <div
+              onClick={() => router.push("/learn/courses/python-intermediate")}
+              className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
+            >
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5" />
+              <div className="p-8 flex items-center gap-6">
+                <span className="text-5xl">🐍</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
+                    Intermediate · 11 Weeks
+                  </p>
+                  <h3 className="text-2xl font-semibold text-white mb-1">Python Intermediate</h3>
+                  <p className="text-sm text-slate-400">
+                    A weekly version of Python 130 covering testing, complexity, sorting, classes, recursion, linked lists, trees, and hash tables.
+                  </p>
+                </div>
+                <span className="text-slate-600 text-xl shrink-0">→</span>
+              </div>
+            </div>
+
             {/* Python 101 card */}
             <div
               onClick={() => router.push("/learn/courses/python101")}

@@ -5,6 +5,24 @@ importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js");
 
 let pyodide = null;
 
+// Sample files seeded into Pyodide's virtual filesystem so lessons that teach
+// open()/read can actually be Run in the browser (Week 9 — Files). Keep the
+// names and contents in sync with what the lesson examples reference.
+const SAMPLE_FILES = {
+  "data.txt": "apple\nbanana\ncherry\ndate\n",
+  "numbers.txt": "10\n20\n30\n40\n50\n",
+};
+
+function seedSampleFiles() {
+  for (const [name, content] of Object.entries(SAMPLE_FILES)) {
+    try {
+      pyodide.FS.writeFile(name, content);
+    } catch (_) {
+      // ignore — re-seeding an existing file is fine
+    }
+  }
+}
+
 async function ensurePyodide() {
   if (pyodide) return;
   pyodide = await self.loadPyodide({
@@ -43,6 +61,10 @@ self.onmessage = async (e) => {
     inputLenBuffer = new Int32Array(ilb);
 
     await ensurePyodide();
+
+    // Refresh sample files before every run so reads are reproducible even if a
+    // previous run overwrote them (writes share the worker's filesystem).
+    seedSampleFiles();
 
     pyodide.setStdout({
       batched: (s) => self.postMessage({ type: "stdout", text: s }),

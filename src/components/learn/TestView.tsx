@@ -10,6 +10,7 @@ import { QuestionAnswer, calculateScore } from "@/lib/learn/progress";
 import { saveAnswer, loadModuleAnswers, clearModuleAnswers } from "@/lib/learn/db";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { cn } from "@/lib/utils";
+import LearnMarkdown from "@/components/learn/LearnMarkdown";
 import type { CourseTest } from "@/lib/learn/courses/python101/tests/resit-test-1";
 
 // Pass threshold: student must score ≥ this fraction to pass
@@ -32,7 +33,7 @@ export default function TestView({ test, courseSlug, backPath }: TestViewProps) 
 
   useEffect(() => {
     if (!studentId) { setLoadingAnswers(false); return; }
-    loadModuleAnswers(studentId, storageSlug).then((saved) => {
+    loadModuleAnswers(studentId, storageSlug, 1).then((saved) => {
       setAnswers(saved);
       const firstUnanswered = test.questions.findIndex((q) => !saved[q.id]);
       if (firstUnanswered !== -1) setCurrentIdx(firstUnanswered);
@@ -52,7 +53,7 @@ export default function TestView({ test, courseSlug, backPath }: TestViewProps) 
     const updated = { ...answers, [questionId]: answer };
     setAnswers(updated);
     if (studentId) {
-      await saveAnswer(studentId, storageSlug, questionId, answer);
+      await saveAnswer(studentId, storageSlug, questionId, answer, 1);
     }
   }
 
@@ -206,7 +207,11 @@ export default function TestView({ test, courseSlug, backPath }: TestViewProps) 
                             Q{i + 1}: {q.prompt.replace(/\*\*/g, '').split('\n')[0]}
                           </p>
                           {!ans?.isCorrect && (
-                            <p className="text-slate-500 text-xs mt-1">{q.explanation}</p>
+                            <div className="mt-1">
+                              <LearnMarkdown className="text-xs [&_p]:text-slate-500 [&_p]:text-xs">
+                                {q.explanation}
+                              </LearnMarkdown>
+                            </div>
                           )}
                         </div>
                       </div>

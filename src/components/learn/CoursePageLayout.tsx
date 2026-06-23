@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthGuard from "@/components/learn/AuthGuard";
 import ModuleCard from "@/components/learn/ModuleCard";
@@ -38,6 +39,9 @@ interface CoursePageLayoutProps {
   /** Auth */
   isAdmin: boolean;
   onLogout: () => void;
+
+  /** Optional link to a public course-overview page, shown in the header when provided */
+  overviewHref?: string;
 }
 
 export default function CoursePageLayout({
@@ -57,6 +61,7 @@ export default function CoursePageLayout({
   tabContent,
   isAdmin,
   onLogout,
+  overviewHref,
 }: CoursePageLayoutProps) {
   const router = useRouter();
 
@@ -83,6 +88,14 @@ export default function CoursePageLayout({
                   <h1 className="text-3xl font-semibold text-white">{courseTitle}</h1>
                 </div>
               </div>
+              {overviewHref && (
+                <Link
+                  href={overviewHref}
+                  className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.3em] text-cyan-400 hover:text-cyan-300 transition"
+                >
+                  Course overview →
+                </Link>
+              )}
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">

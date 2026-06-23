@@ -20,8 +20,28 @@ export interface QuizAttemptRow {
   id: string;
   student_id: string;
   module_slug: string;
+  attempt_number: number;
   question_id: string;
   selected_answer: string;
   is_correct: boolean;
   answered_at: string;
+}
+
+export interface ModuleQuizSessionRow {
+  student_id: string;
+  module_slug: string;
+  attempt_number: number;
+  started_at: string;
+  completed_at: string | null;
+  score: number;
+  question_count: number;
+}
+
+export interface QuizAttemptSummary {
+  attemptNumber: number;
+  score: number;
+  questionCount: number;
+  startedAt: string;
+  completedAt: string | null;
+  inProgress: boolean;
 }

@@ -1,4 +1,4 @@
-export type { QuestionType, Question, CodeExample, Lesson, Module } from './types';
+export type { QuestionType, Question, CodeExample, Lesson, Module, TestCase } from './types';
 
 import module0 from './module0';
 import module1 from './module1';
