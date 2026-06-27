@@ -8,6 +8,7 @@ import { getAllModules } from "@/lib/learn/courses/python-intermediate/index";
 import { loadAllProgress } from "@/lib/learn/db";
 
 const modules = getAllModules();
+const learnModules = modules.filter((m) => !m.isMidterm);
 const totalQ = modules.reduce((s, m) => s + m.questions.length, 0);
 const COURSE_SLUG = "python-intermediate";
 
@@ -57,7 +58,7 @@ export default function PythonIntermediatePage() {
       courseTitle="Python Intermediate"
       courseIcon="🐍"
       courseLevel="Intermediate · 11 Weeks"
-      moduleCount={modules.length}
+      moduleCount={learnModules.length}
       totalCorrect={totalCorrect}
       totalQ={totalQ}
       loadingProgress={loadingProgress}

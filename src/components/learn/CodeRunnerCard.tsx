@@ -22,6 +22,55 @@ function extractModelSolution(explanation: string): string | null {
   return code.length > 0 ? code : null;
 }
 
+/**
+ * Extract a top-level `def <name>(...):` block (header + indented body) from
+ * source. Used to recover a test "driver" function from the starter code.
+ * Returns null if not found.
+ */
+function extractTopLevelDef(source: string, name: string): string | null {
+  const lines = source.split("\n");
+  const headerRe = new RegExp(`^def\\s+${name}\\s*\\(`);
+  let start = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (headerRe.test(lines[i])) {
+      start = i;
+      break;
+    }
+  }
+  if (start === -1) return null;
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    const line = lines[i];
+    // A non-blank, non-indented line ends the def block.
+    if (line.trim() !== "" && !/^\s/.test(line)) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(start, end).join("\n").trimEnd();
+}
+
+/**
+ * Build the code to load when an admin clicks "Model solution". Driver-based
+ * questions keep a test harness function (e.g. run_account, check_*) in the
+ * STARTER that the grader calls but the model solution omits. If the graded
+ * funcName is such a driver and the model solution doesn't define it, append
+ * the driver from the starter so the loaded solution actually passes.
+ */
+function buildModelSolutionCode(
+  modelSolution: string,
+  starterCode: string | undefined,
+  funcName: string | undefined
+): string {
+  if (!funcName || !starterCode) return modelSolution;
+  if (new RegExp(`def\\s+${funcName}\\s*\\(`).test(modelSolution)) {
+    return modelSolution; // model already defines the driver
+  }
+  const driver = extractTopLevelDef(starterCode, funcName);
+  if (!driver) return modelSolution;
+  return `${modelSolution.trimEnd()}\n\n\n${driver}\n`;
+}
+
 const CodeMirrorEditor = dynamic(() => import("./CodeMirrorEditor"), { ssr: false });
 
 interface CaseResult {
@@ -299,8 +348,11 @@ export default function CodeRunnerCard({
     for (const tc of cases) {
       try {
         if (gradeMode === "function" && tc.funcName) {
+          // Decode args via json.loads inside Python rather than inlining raw
+          // JSON as Python source — JSON `false`/`true`/`null` are not valid
+          // Python literals (they'd raise NameError). This matches the backend.
           const argsJson = JSON.stringify(tc.args ?? []);
-          const wrapped = `${filePreamble(tc)}${submittedCode}\n\n__result = ${tc.funcName}(*${argsJson})`;
+          const wrapped = `${filePreamble(tc)}${submittedCode}\n\n__args = __import__("json").loads(${JSON.stringify(argsJson)})\n__result = ${tc.funcName}(*__args)`;
           const { output, error } = await runCodeSimple(
             `${wrapped}\nprint(__import__("json").dumps(__result))`
           );
@@ -419,10 +471,14 @@ export default function CodeRunnerCard({
   }
 
   // Admin-only: drop the model solution into the editor so it can be run/submitted.
+  // For driver-based questions, re-attach the harness function from the starter
+  // (the model solution omits it) so the loaded code actually passes the tests.
   function loadModelSolution() {
     if (!modelSolution) return;
-    setCode(modelSolution);
-    localStorage.setItem(draftKey, modelSolution);
+    const driverFn = testCases.find((tc) => tc.funcName)?.funcName;
+    const full = buildModelSolutionCode(modelSolution, question.starterCode, driverFn);
+    setCode(full);
+    localStorage.setItem(draftKey, full);
     setCodeRevision((r) => r + 1);
   }
 

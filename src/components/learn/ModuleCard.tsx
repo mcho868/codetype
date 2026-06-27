@@ -24,7 +24,9 @@ export default function ModuleCard({
   const total = module.questions.length;
   const locked = module.locked;
   const modulePath = courseSlug
-    ? `/learn/courses/${courseSlug}/${module.slug}`
+    ? module.isMidterm
+      ? `/learn/courses/${courseSlug}/${module.slug}/quiz`
+      : `/learn/courses/${courseSlug}/${module.slug}`
     : `/learn/${module.slug}`;
 
   let statusLabel = "Not Started";

@@ -1,4 +1,6 @@
 import type { Module } from './types';
+import { module5Questions } from './questions/module5Questions';
+
 
 const module5: Module = {
   id: 'module-5',
@@ -155,141 +157,7 @@ print(fast_power(3, 8))    # 6561
       ],
     },
   ],
-  questions: [
-    {
-      id: 'q5-1',
-      type: 'multiple-choice',
-      prompt: 'What are the two required parts of every recursive function?',
-      choices: [
-        { id: 'a', text: 'A loop and a return statement' },
-        { id: 'b', text: 'A base case and a recursive case' },
-        { id: 'c', text: 'An input and an output' },
-        { id: 'd', text: 'A condition and an assignment' },
-      ],
-      correctAnswer: 'b',
-      explanation: 'Every recursive function needs a base case (where it stops and returns directly) and a recursive case (where it calls itself with a simpler input).',
-    },
-    {
-      id: 'q5-2',
-      type: 'true-false',
-      prompt: 'A recursive function without a base case will run forever (or until Python raises a RecursionError).',
-      correctAnswer: 'true',
-      explanation: 'Without a base case, the function never stops calling itself. Python enforces a recursion limit (default 1000) and raises RecursionError: maximum recursion depth exceeded.',
-    },
-    {
-      id: 'q5-3',
-      type: 'multiple-choice',
-      prompt: 'What does factorial(0) return according to the standard recursive definition?',
-      choices: [
-        { id: 'a', text: '0' },
-        { id: 'b', text: '-1' },
-        { id: 'c', text: '1' },
-        { id: 'd', text: 'None' },
-      ],
-      correctAnswer: 'c',
-      explanation: 'factorial(0) = 1 is the base case. This is mathematically correct (0! = 1 by definition) and stops the recursion.',
-    },
-    {
-      id: 'q5-4',
-      type: 'fill-in-blank',
-      prompt: 'Complete the recursive definition: factorial(n) = n * factorial(___)',
-      correctAnswer: 'n-1',
-      explanation: 'Each recursive call reduces n by 1, moving toward the base case of factorial(0) = 1.',
-    },
-    {
-      id: 'q5-5',
-      type: 'multiple-choice',
-      prompt: 'What is the time complexity of naive recursive Fibonacci (fib(n) = fib(n-1) + fib(n-2))?',
-      choices: [
-        { id: 'a', text: 'O(n)' },
-        { id: 'b', text: 'O(n log n)' },
-        { id: 'c', text: 'O(2^n)' },
-        { id: 'd', text: 'O(n^2)' },
-      ],
-      correctAnswer: 'c',
-      explanation: 'Each call to fib(n) makes two calls, each of those makes two more, creating an exponential tree of calls. Many subproblems are recomputed repeatedly, giving O(2^n) time.',
-    },
-    {
-      id: 'q5-6',
-      type: 'true-false',
-      prompt: 'Every problem that can be solved recursively can also be solved iteratively.',
-      correctAnswer: 'true',
-      explanation: 'Recursion and iteration are equally powerful — any recursive solution can be rewritten with loops (often using an explicit stack). The choice is usually about clarity and performance.',
-    },
-    {
-      id: 'q5-7',
-      type: 'multiple-choice',
-      prompt: 'What is Python\'s default recursion depth limit?',
-      choices: [
-        { id: 'a', text: '100' },
-        { id: 'b', text: '500' },
-        { id: 'c', text: '1000' },
-        { id: 'd', text: '10000' },
-      ],
-      correctAnswer: 'c',
-      explanation: 'Python\'s default recursion limit is 1000, which you can check with sys.getrecursionlimit(). You can change it with sys.setrecursionlimit(), but this is rarely a good idea.',
-    },
-    {
-      id: 'q5-8',
-      type: 'multiple-choice',
-      prompt: 'Tracing factorial(3), what is the correct sequence of return values unwinding back up?',
-      choices: [
-        { id: 'a', text: '1 → 2 → 6' },
-        { id: 'b', text: '3 → 2 → 1' },
-        { id: 'c', text: '1 → 3 → 6' },
-        { id: 'd', text: '6 → 3 → 1' },
-      ],
-      correctAnswer: 'a',
-      explanation: 'factorial(0) returns 1, then factorial(1) returns 1×1=1, then factorial(2) returns 2×1=2, then factorial(3) returns 3×2=6. The values unwind as 1 → 1 → 2 → 6.',
-    },
-    {
-      id: 'q5-9',
-      type: 'fill-in-blank',
-      prompt: 'The Fibonacci base cases are: fib(0) = 0 and fib(1) = ___',
-      correctAnswer: '1',
-      explanation: 'fib(0) = 0 and fib(1) = 1 are the two base cases. From these, fib(2) = 0+1 = 1, fib(3) = 1+1 = 2, and so on.',
-    },
-    {
-      id: 'q5-10',
-      type: 'true-false',
-      prompt: 'Recursion is always more efficient than iteration because it uses less memory.',
-      correctAnswer: 'false',
-      explanation: 'Recursion is often less memory-efficient than iteration because each recursive call creates a new stack frame. Iteration reuses the same frame. Recursion can also be slower due to function-call overhead.',
-    },
-    {
-      id: 'q5-11',
-      type: 'multiple-choice',
-      prompt: 'Which type of problem is recursion MOST naturally suited for?',
-      choices: [
-        { id: 'a', text: 'Simple loops over a flat list' },
-        { id: 'b', text: 'Reading user input repeatedly' },
-        { id: 'c', text: 'Problems with hierarchical or self-similar structure, like trees' },
-        { id: 'd', text: 'Sorting a list of numbers' },
-      ],
-      correctAnswer: 'c',
-      explanation: 'Recursion shines on problems that have a naturally recursive structure — trees, nested data, divide-and-conquer algorithms. For simple flat iteration, a loop is usually cleaner and more efficient.',
-    },
-    {
-      id: 'q5-12',
-      type: 'code-challenge',
-      language: 'python',
-      prompt: 'Write a recursive function `power(base, exp)` that computes base^exp without using ** or math.pow. Base case: exp==0 returns 1. Recursive case: base * power(base, exp-1). Print power(2, 10) and power(3, 4).',
-      starterCode: "def power(base, exp):\n    # Base case: anything^0 = 1\n    # Recursive case: base * power(base, exp-1)\n    pass\n\nprint(power(2, 10))\nprint(power(3, 4))",
-      expectedOutput: "1024\n81",
-      correctAnswer: '__code__',
-      explanation: 'The base case is exp==0, returning 1. The recursive case multiplies base by power(base, exp-1). power(2,10) = 2*power(2,9) = ... = 1024. power(3,4) = 3*3*3*3 = 81.',
-    },
-    {
-      id: 'q5-13',
-      type: 'code-challenge',
-      language: 'python',
-      prompt: 'Write a recursive function `flatten(lst)` that takes a nested list and returns a flat list. E.g., flatten([1, [2, [3, 4], 5], 6]) returns [1, 2, 3, 4, 5, 6]. If an element is a list, recurse into it; otherwise add it to the result. Print the result.',
-      starterCode: "def flatten(lst):\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            # Recursively flatten and extend result\n            pass\n        else:\n            result.append(item)\n    return result\n\nprint(flatten([1, [2, [3, 4], 5], 6]))",
-      expectedOutput: "[1, 2, 3, 4, 5, 6]",
-      correctAnswer: '__code__',
-      explanation: 'When you encounter a list element, call flatten() on it and extend result with the returned flat list. For non-list elements, just append them. This handles any depth of nesting.',
-    },
-  ],
+  questions: module5Questions,
 };
 
 export default module5;

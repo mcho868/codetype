@@ -58,9 +58,9 @@ export default function Python130Page() {
   const testsContent = (
     <div className="flex flex-col gap-4">
       <div className="mb-2">
-        <h2 className="text-xl font-semibold text-white mb-1">Midterm Tests</h2>
+        <h2 className="text-xl font-semibold text-white mb-1">Module Tests</h2>
         <p className="text-sm text-slate-400">
-          Past-exam style assessments covering key modules. Work through each question and review your answers at the end.
+          Paired assessments after each module. Work through each question and review your answers at the end.
         </p>
       </div>
       {midterms.map((mod) => {

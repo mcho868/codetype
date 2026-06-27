@@ -1,4 +1,5 @@
 import type { Module } from './types';
+import { cr, mc, tf, funcCases, ms } from './authoring';
 
 const module0: Module = {
   id: 'module-0',
@@ -186,139 +187,249 @@ print("All tests passed!")`,
     },
   ],
   questions: [
-    {
-      id: 'q0-1',
-      type: 'multiple-choice',
-      prompt: 'What happens when Python encounters a ZeroDivisionError inside a try block?',
-      choices: [
+    cr(
+      'm0-c1',
+      'Write `safe_divide(a, b)` that returns `a / b`, or `0` when `b` is zero (catch `ZeroDivisionError`).',
+      'def safe_divide(a, b):\n    # Your code here\n    pass\n',
+      'function',
+      funcCases(
+        'safe_divide',
+        [
+          { id: 's1', description: 'Normal division', args: [10, 2], expectedReturn: 5.0 },
+          { id: 's2', description: 'Another valid division', args: [9, 3], expectedReturn: 3.0 },
+        ],
+        [
+          { id: 'h1', args: [5, 0], expectedReturn: 0 },
+          { id: 'h2', args: [0, 5], expectedReturn: 0.0 },
+          { id: 'h3', args: [-10, 2], expectedReturn: -5.0 },
+          { id: 'h4', args: [7, 0], expectedReturn: 0 },
+        ]
+      ),
+      ms(
+        'def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return 0',
+        'Catch ZeroDivisionError and return 0 instead of crashing.'
+      )
+    ),
+    cr(
+      'm0-c2',
+      'Write `parse_int(s)` that returns `int(s)`, or `-1` when the string is not a valid integer (catch `ValueError`).',
+      'def parse_int(s):\n    # Your code here\n    pass\n',
+      'function',
+      funcCases(
+        'parse_int',
+        [
+          { id: 's1', description: 'Valid integer string', args: ['42'], expectedReturn: 42 },
+          { id: 's2', description: 'Non-numeric string', args: ['hello'], expectedReturn: -1 },
+        ],
+        [
+          { id: 'h1', args: ['0'], expectedReturn: 0 },
+          { id: 'h2', args: ['-7'], expectedReturn: -7 },
+          { id: 'h3', args: ['3.5'], expectedReturn: -1 },
+          { id: 'h4', args: [''], expectedReturn: -1 },
+        ]
+      ),
+      ms(
+        'def parse_int(s):\n    try:\n        return int(s)\n    except ValueError:\n        return -1',
+        'Wrap int(s) in try/except ValueError and return -1 on failure.'
+      )
+    ),
+    cr(
+      'm0-c3',
+      'Write `safe_get(lst, i)` that returns `lst[i]`, or `None` when the index is out of range (catch `IndexError`).',
+      'def safe_get(lst, i):\n    # Your code here\n    pass\n',
+      'function',
+      funcCases(
+        'safe_get',
+        [
+          { id: 's1', description: 'Valid index', args: [[1, 2, 3], 0], expectedReturn: 1 },
+          { id: 's2', description: 'Out-of-range index', args: [[1, 2, 3], 10], expectedReturn: null },
+        ],
+        [
+          { id: 'h1', args: [[1, 2, 3], -1], expectedReturn: 3 },
+          { id: 'h2', args: [[], 0], expectedReturn: null },
+          { id: 'h3', args: [[5], 0], expectedReturn: 5 },
+        ]
+      ),
+      ms(
+        'def safe_get(lst, i):\n    try:\n        return lst[i]\n    except IndexError:\n        return None',
+        'Catch IndexError when the index is out of range.'
+      )
+    ),
+    cr(
+      'm0-c4',
+      'Write `lookup(d, key)` that returns `d[key]`, or the string `"missing"` when the key is absent (catch `KeyError`).',
+      'def lookup(d, key):\n    # Your code here\n    pass\n',
+      'function',
+      funcCases(
+        'lookup',
+        [
+          { id: 's1', description: 'Present key', args: [{ a: 1 }, 'a'], expectedReturn: 1 },
+          { id: 's2', description: 'Absent key', args: [{ a: 1 }, 'b'], expectedReturn: 'missing' },
+        ],
+        [
+          { id: 'h1', args: [{}, 'x'], expectedReturn: 'missing' },
+          { id: 'h2', args: [{ name: 'Ada' }, 'name'], expectedReturn: 'Ada' },
+        ]
+      ),
+      ms(
+        'def lookup(d, key):\n    try:\n        return d[key]\n    except KeyError:\n        return "missing"',
+        'Catch KeyError for absent dictionary keys.'
+      )
+    ),
+    cr(
+      'm0-c5',
+      'Write `validate_age(age)` that **raises `ValueError`** when `age` is below 0 or above 150, otherwise returns `age`.\n\nThe starter includes `check_validate_age` — **do not edit it**. Tests call that helper, which returns `"ok:<age>"` on success or `"error"` when `ValueError` is raised.',
+      'def validate_age(age):\n    # Your code here\n    pass\n\n\ndef check_validate_age(age):\n    try:\n        result = validate_age(age)\n        return f"ok:{result}"\n    except ValueError:\n        return "error"\n',
+      'function',
+      funcCases(
+        'check_validate_age',
+        [
+          { id: 's1', description: 'Valid age', args: [25], expectedReturn: 'ok:25' },
+          { id: 's2', description: 'Negative age', args: [-1], expectedReturn: 'error' },
+        ],
+        [
+          { id: 'h1', args: [151], expectedReturn: 'error' },
+          { id: 'h2', args: [0], expectedReturn: 'ok:0' },
+          { id: 'h3', args: [150], expectedReturn: 'ok:150' },
+        ]
+      ),
+      ms(
+        'def validate_age(age):\n    if age < 0 or age > 150:\n        raise ValueError("invalid age")\n    return age',
+        'Raise ValueError for out-of-range ages; valid ages pass through.'
+      )
+    ),
+    cr(
+      'm0-c6',
+      'Write `count_passes(results)` that returns how many scores in the list are **≥ 50**.',
+      'def count_passes(results):\n    # Your code here\n    pass\n',
+      'function',
+      funcCases(
+        'count_passes',
+        [
+          { id: 's1', description: 'Mixed scores', args: [[50, 49, 80]], expectedReturn: 2 },
+          { id: 's2', description: 'Single pass', args: [[100]], expectedReturn: 1 },
+        ],
+        [
+          { id: 'h1', args: [[]], expectedReturn: 0 },
+          { id: 'h2', args: [[30, 40]], expectedReturn: 0 },
+          { id: 'h3', args: [[50, 50, 50]], expectedReturn: 3 },
+        ]
+      ),
+      ms(
+        'def count_passes(results):\n    count = 0\n    for score in results:\n        if score >= 50:\n            count += 1\n    return count',
+        'Loop once and count scores that meet the pass threshold.'
+      )
+    ),
+    mc(
+      'q0-1',
+      'What happens when Python encounters a ZeroDivisionError inside a try block?',
+      [
         { id: 'a', text: 'The program crashes immediately' },
         { id: 'b', text: 'Python skips the rest of the try block and runs the matching except block' },
         { id: 'c', text: 'Python ignores the error and continues' },
         { id: 'd', text: 'Python restarts from the beginning of the try block' },
       ],
-      correctAnswer: 'b',
-      explanation: 'When an exception occurs in a try block, Python immediately jumps to the matching except clause. The remaining code in the try block is skipped.',
-    },
-    {
-      id: 'q0-2',
-      type: 'multiple-choice',
-      prompt: 'Which exception does int("hello") raise?',
-      choices: [
+      'b',
+      'When an exception occurs in a try block, Python immediately jumps to the matching except clause. The remaining code in the try block is skipped.'
+    ),
+    mc(
+      'q0-2',
+      'Which exception does int("hello") raise?',
+      [
         { id: 'a', text: 'TypeError' },
         { id: 'b', text: 'IndexError' },
         { id: 'c', text: 'ValueError' },
         { id: 'd', text: 'RuntimeError' },
       ],
-      correctAnswer: 'c',
-      explanation: 'int("hello") raises ValueError because "hello" has the right type (string) but is not a valid integer value. TypeError would occur if you passed the wrong type entirely, like int([1,2,3]).',
-    },
-    {
-      id: 'q0-3',
-      type: 'true-false',
-      prompt: 'The finally block only runs if no exception was raised in the try block.',
-      correctAnswer: 'false',
-      explanation: 'The finally block always runs, regardless of whether an exception occurred. It is used for cleanup code that must execute no matter what.',
-    },
-    {
-      id: 'q0-4',
-      type: 'fill-in-blank',
-      prompt: 'To capture an exception object and store it in variable e, you write: except ValueError ___ e:',
-      correctAnswer: 'as',
-      explanation: 'The "as" keyword binds the exception object to a variable: except ValueError as e: — you can then call str(e) to get the error message.',
-    },
-    {
-      id: 'q0-5',
-      type: 'multiple-choice',
-      prompt: 'You want to handle ValueError and TypeError the same way. Which is the most concise correct syntax?',
-      choices: [
-        { id: 'a', text: 'except ValueError or TypeError:' },
-        { id: 'b', text: 'except (ValueError, TypeError):' },
-        { id: 'c', text: 'except ValueError, TypeError:' },
-        { id: 'd', text: 'except [ValueError, TypeError]:' },
-      ],
-      correctAnswer: 'b',
-      explanation: 'Use a tuple of exception types: except (ValueError, TypeError): — this catches either type and handles them with the same code.',
-    },
-    {
-      id: 'q0-6',
-      type: 'multiple-choice',
-      prompt: 'What does the raise statement do?',
-      choices: [
-        { id: 'a', text: 'It silences an exception so the program continues normally' },
-        { id: 'b', text: 'It deliberately triggers an exception' },
-        { id: 'c', text: 'It prints the exception message to the screen' },
-        { id: 'd', text: 'It re-runs the try block' },
-      ],
-      correctAnswer: 'b',
-      explanation: 'raise deliberately triggers an exception. You use it to signal that an error condition has been detected, for example when a function receives an invalid argument.',
-    },
-    {
-      id: 'q0-7',
-      type: 'true-false',
-      prompt: 'Catching "Exception" as a base class will also catch ValueError and TypeError, since they are subclasses of Exception.',
-      correctAnswer: 'true',
-      explanation: 'Because of the exception hierarchy, catching a parent class catches all subclasses. ValueError and TypeError both inherit from Exception, so "except Exception:" catches them both.',
-    },
-    {
-      id: 'q0-8',
-      type: 'multiple-choice',
-      prompt: 'Which exception would accessing my_list[99] raise when my_list has only 3 elements?',
-      choices: [
-        { id: 'a', text: 'KeyError' },
-        { id: 'b', text: 'ValueError' },
-        { id: 'c', text: 'IndexError' },
-        { id: 'd', text: 'TypeError' },
-      ],
-      correctAnswer: 'c',
-      explanation: 'Accessing a list with an out-of-range index raises IndexError. KeyError is raised for missing dictionary keys, not list indices.',
-    },
-    {
-      id: 'q0-9',
-      type: 'multiple-choice',
-      prompt: 'In unit testing, what does an "edge case" refer to?',
-      choices: [
+      'c',
+      'int("hello") raises ValueError because "hello" has the right type (string) but is not a valid integer value. TypeError would occur if you passed the wrong type entirely, like int([1,2,3]).'
+    ),
+    tf(
+      'q0-3',
+      'The finally block only runs if no exception was raised in the try block.',
+      'false',
+      'The finally block always runs, regardless of whether an exception occurred. It is used for cleanup code that must execute no matter what.'
+    ),
+    tf(
+      'q0-7',
+      'Catching "Exception" as a base class will also catch ValueError and TypeError, since they are subclasses of Exception.',
+      'true',
+      'Because of the exception hierarchy, catching a parent class catches all subclasses. ValueError and TypeError both inherit from Exception, so "except Exception:" catches them both.'
+    ),
+    mc(
+      'q0-9',
+      'In unit testing, what does an "edge case" refer to?',
+      [
         { id: 'a', text: 'A test that always fails' },
         { id: 'b', text: 'A typical, everyday input to the function' },
         { id: 'c', text: 'A boundary or unusual input like zero, empty list, or very large number' },
         { id: 'd', text: 'A test that checks for syntax errors' },
       ],
-      correctAnswer: 'c',
-      explanation: 'Edge cases are boundary or unusual inputs — zero, empty collections, negative numbers, very large values. They often reveal bugs that normal cases miss.',
-    },
-    {
-      id: 'q0-10',
-      type: 'true-false',
-      prompt: 'assert 5 == 5 raises an AssertionError.',
-      correctAnswer: 'false',
-      explanation: 'assert raises AssertionError only when the condition is False. Since 5 == 5 is True, assert 5 == 5 does nothing and execution continues normally.',
-    },
-    {
-      id: 'q0-11',
-      type: 'fill-in-blank',
-      prompt: 'To access the message text from a caught exception e, you call: ___(e)',
-      correctAnswer: 'str',
-      explanation: 'str(e) converts the exception object to its string representation, giving you the human-readable error message.',
-    },
-    {
-      id: 'q0-12',
-      type: 'code-challenge',
-      language: 'python',
-      prompt: "Write a function `safe_divide(a, b)` that returns `a / b`, but returns 0 if b is 0. Then call `safe_divide(10, 2)` and `safe_divide(5, 0)` and print each result.",
-      starterCode: "def safe_divide(a, b):\n    # Your code here\n    pass\n\nprint(safe_divide(10, 2))\nprint(safe_divide(5, 0))",
-      expectedOutput: "5.0\n0",
-      correctAnswer: '__code__',
-      explanation: 'Use a try/except block: try to return a / b, and in an except ZeroDivisionError block, return 0.',
-    },
-    {
-      id: 'q0-13',
-      type: 'code-challenge',
-      language: 'python',
-      prompt: "Write a function `parse_int(s)` that converts a string to int. If the string is not a valid integer, catch the ValueError and return -1. Test it: print parse_int('42'), parse_int('hello'), parse_int('0').",
-      starterCode: "def parse_int(s):\n    # Your code here\n    pass\n\nprint(parse_int('42'))\nprint(parse_int('hello'))\nprint(parse_int('0'))",
-      expectedOutput: "42\n-1\n0",
-      correctAnswer: '__code__',
-      explanation: 'Wrap int(s) in a try block. In the except ValueError block, return -1. This pattern is extremely common for safe user input parsing.',
-    },
+      'c',
+      'Edge cases are boundary or unusual inputs — zero, empty collections, negative numbers, very large values. They often reveal bugs that normal cases miss.'
+    ),
+    cr(
+      'm0-c7',
+      'Write `safe_index(lst, i)` that returns `lst[i]`, but returns `-1` if the index is out of range (catch `IndexError`).',
+      'def safe_index(lst, i):\n    # Your code here\n    pass\n',
+      'function',
+      funcCases(
+        'safe_index',
+        [
+          { id: 's1', description: 'Valid index', args: [[1, 2, 3], 1], expectedReturn: 2 },
+          { id: 's2', description: 'Out of range', args: [[1, 2, 3], 9], expectedReturn: -1 },
+        ],
+        [
+          { id: 'h1', args: [[], 0], expectedReturn: -1 },
+          { id: 'h2', args: [[5], -1], expectedReturn: 5 },
+          { id: 'h3', args: [[10, 20], 2], expectedReturn: -1 },
+        ]
+      ),
+      ms(
+        'def safe_index(lst, i):\n    try:\n        return lst[i]\n    except IndexError:\n        return -1',
+        'Out-of-range indexing raises IndexError; catch it and return the -1 sentinel. Negative indices that are still in range (like -1) work normally.'
+      )
+    ),
+    cr(
+      'm0-c8',
+      'Write `to_float(s)` that converts a string to a float, returning `0.0` if the string is not a valid number (catch `ValueError`).',
+      'def to_float(s):\n    # Your code here\n    pass\n',
+      'function',
+      funcCases(
+        'to_float',
+        [
+          { id: 's1', description: 'Valid float', args: ['3.5'], expectedReturn: 3.5 },
+          { id: 's2', description: 'Invalid', args: ['x'], expectedReturn: 0.0 },
+        ],
+        [
+          { id: 'h1', args: ['0'], expectedReturn: 0.0 },
+          { id: 'h2', args: ['-2.5'], expectedReturn: -2.5 },
+          { id: 'h3', args: ['hello'], expectedReturn: 0.0 },
+        ]
+      ),
+      ms(
+        'def to_float(s):\n    try:\n        return float(s)\n    except ValueError:\n        return 0.0',
+        'float() raises ValueError on non-numeric text; catch it and fall back to 0.0. This mirrors safe input parsing.'
+      )
+    ),
+    tf(
+      'q0-13',
+      'A single `try` block can be followed by multiple `except` clauses, each handling a different exception type.',
+      'true',
+      'You can chain except clauses; Python runs the first one whose type matches the raised exception. Order specific types before general ones.'
+    ),
+    mc(
+      'q0-14',
+      'What does `raise ValueError("bad input")` do if it is NOT inside a try block?',
+      [
+        { id: 'a', text: 'Nothing — raise only works inside try' },
+        { id: 'b', text: 'It propagates up and, if uncaught, crashes the program with a traceback' },
+        { id: 'c', text: 'It prints "bad input" and continues' },
+        { id: 'd', text: 'It returns the string "bad input"' },
+      ],
+      'b',
+      'A raised exception travels up the call stack looking for a matching except; if none is found, the program stops with a traceback.'
+    ),
   ],
 };
 
