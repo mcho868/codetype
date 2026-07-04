@@ -3,10 +3,14 @@
 import { useRouter } from "next/navigation";
 import AuthGuard from "@/components/learn/AuthGuard";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
+import { getCourse, isCourseHiddenForUsername } from "@/lib/learn/registry";
 
 export default function LearnDashboard() {
   const { user, logout } = useLearnAuth();
   const router = useRouter();
+  const isAdmin = user?.role === "admin";
+  const hidePython101 = !isAdmin && isCourseHiddenForUsername(getCourse("python101"), user?.username);
+  const hidePython130 = !isAdmin && isCourseHiddenForUsername(getCourse("python130"), user?.username);
 
   function handleLogout() {
     logout();
@@ -104,6 +108,7 @@ export default function LearnDashboard() {
             </div>
 
             {/* Python 101 card */}
+            {!hidePython101 && (
             <div
               onClick={() => router.push("/learn/courses/python101")}
               className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
@@ -123,6 +128,7 @@ export default function LearnDashboard() {
                 <span className="text-slate-600 text-xl shrink-0">→</span>
               </div>
             </div>
+            )}
 
             {/* Java OOP card — admin only */}
             {user?.role === "admin" && (
@@ -148,6 +154,7 @@ export default function LearnDashboard() {
             )}
 
             {/* Python 130 card */}
+            {!hidePython130 && (
             <div
               onClick={() => router.push("/learn/courses/python130")}
               className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
@@ -167,6 +174,7 @@ export default function LearnDashboard() {
                 <span className="text-slate-600 text-xl shrink-0">→</span>
               </div>
             </div>
+            )}
 
             {/* SQL 101 card — admin only */}
             {user?.role === "admin" && (

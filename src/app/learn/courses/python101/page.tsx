@@ -6,6 +6,7 @@ import CoursePageLayout from "@/components/learn/CoursePageLayout";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { getAllModules } from "@/lib/learn/courseData";
 import { loadAllProgress } from "@/lib/learn/db";
+import { getCourse, isCourseHiddenForUsername } from "@/lib/learn/registry";
 
 const modules = getAllModules();
 const totalQ = modules.reduce((s, m) => s + m.questions.length, 0);
@@ -22,6 +23,14 @@ export default function Python101Page() {
   const [progress, setProgress] = useState<Record<string, ModuleProgress>>({});
   const [loadingProgress, setLoadingProgress] = useState(true);
 
+  const isRestricted = Boolean(
+    user?.role !== "admin" && isCourseHiddenForUsername(getCourse("python101"), user?.username)
+  );
+
+  useEffect(() => {
+    if (isRestricted) router.replace("/learn/dashboard");
+  }, [isRestricted, router]);
+
   useEffect(() => {
     let active = true;
     async function load() {
@@ -36,6 +45,8 @@ export default function Python101Page() {
     load();
     return () => { active = false; };
   }, [studentId]);
+
+  if (isRestricted) return null;
 
   function handleLogout() {
     logout();

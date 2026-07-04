@@ -6,7 +6,7 @@ import AuthGuard from "@/components/learn/AuthGuard";
 import QuestionCard from "@/components/learn/QuestionCard";
 import ProgressBar from "@/components/learn/ProgressBar";
 import { getModule } from "@/lib/learn/courseData";
-import { getCourse, getModuleFromCourse } from "@/lib/learn/registry";
+import { getCourse, getModuleFromCourse, isCourseHiddenForUsername } from "@/lib/learn/registry";
 import { QuestionAnswer, calculateScore } from "@/lib/learn/progress";
 import {
   saveAnswer,
@@ -49,7 +49,10 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
   const mod = courseSlug
     ? getModuleFromCourse(courseSlug, moduleId)
     : getModule(moduleId);
-  const isCourseRestricted = Boolean(course?.adminOnly && user?.role !== "admin");
+  const isCourseRestricted = Boolean(
+    (course?.adminOnly && user?.role !== "admin") ||
+    (user?.role !== "admin" && isCourseHiddenForUsername(course, user?.username))
+  );
 
   useEffect(() => {
     if (isCourseRestricted || (mod?.locked && user?.role !== 'admin')) {

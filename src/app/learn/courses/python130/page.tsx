@@ -6,6 +6,7 @@ import CoursePageLayout from "@/components/learn/CoursePageLayout";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { getAllModules } from "@/lib/learn/courses/python130/index";
 import { loadAllProgress } from "@/lib/learn/db";
+import { getCourse, isCourseHiddenForUsername } from "@/lib/learn/registry";
 
 const allModules = getAllModules();
 const regularModules = allModules.filter((m) => !m.isMidterm);
@@ -24,6 +25,14 @@ export default function Python130Page() {
   const [progress, setProgress] = useState<Record<string, ModuleProgress>>({});
   const [loadingProgress, setLoadingProgress] = useState(true);
 
+  const isRestricted = Boolean(
+    user?.role !== "admin" && isCourseHiddenForUsername(getCourse("python130"), user?.username)
+  );
+
+  useEffect(() => {
+    if (isRestricted) router.replace("/learn/dashboard");
+  }, [isRestricted, router]);
+
   useEffect(() => {
     let active = true;
     async function load() {
@@ -38,6 +47,8 @@ export default function Python130Page() {
     load();
     return () => { active = false; };
   }, [studentId]);
+
+  if (isRestricted) return null;
 
   function handleLogout() {
     logout();

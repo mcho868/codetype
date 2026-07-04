@@ -52,8 +52,9 @@ def binary_search(lst, target):
     while low <= high:
         steps += 1
         mid = (low + high) // 2
+        print(f"  step {steps}: window [{low}, {high}] -> mid={mid} (value={lst[mid]})")
         if lst[mid] == target:
-            print(f"Found in {steps} steps!")
+            print(f"Found {target} at index {mid} in {steps} steps!")
             return mid
         elif lst[mid] < target:
             low = mid + 1    # target is in the right half
@@ -62,11 +63,19 @@ def binary_search(lst, target):
     print(f"Not found after {steps} steps")
     return -1
 
-sorted_data = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
-binary_search(sorted_data, 23)   # in the middle
-binary_search(sorted_data, 91)   # at the end
-binary_search(sorted_data, 10)   # not present`,
-          caption: 'Binary search: O(log n) but requires sorted data',
+# 20 sorted elements — enough steps to see the search space actually shrink
+sorted_data = [1, 4, 7, 9, 12, 15, 18, 22, 26, 31,
+               35, 40, 44, 49, 53, 58, 63, 67, 71, 76]
+
+print("Searching for 58 (should take just a few steps):")
+binary_search(sorted_data, 58)
+
+print("\\nSearching for 1 (worst case — far left):")
+binary_search(sorted_data, 1)
+
+print("\\nSearching for 100 (not present — falls off the right edge):")
+binary_search(sorted_data, 100)`,
+          caption: 'Binary search: watch the [low, high] window cut in half every step',
           editable: true,
         },
         {

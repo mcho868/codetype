@@ -9,7 +9,7 @@ const test3: Module = {
     'Transfer-level practice: special methods and composition — a Book holds an Author, with __eq__ and __str__.',
   icon: '📝',
   color: 'from-emerald-500 to-teal-400',
-  locked: false,
+  locked: true,
   isMidterm: true,
   lessons: [],
   questions: [

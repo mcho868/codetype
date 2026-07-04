@@ -9,7 +9,7 @@ const test5: Module = {
     'Transfer-level practice: counting nested structures, Euclidean GCD, and recursive palindrome checks.',
   icon: '📝',
   color: 'from-indigo-500 to-blue-400',
-  locked: false,
+  locked: true,
   isMidterm: true,
   lessons: [],
   questions: [

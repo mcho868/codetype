@@ -17,7 +17,7 @@ const test8: Module = {
     'Transfer-level practice: range sum queries, BST validation, and kth smallest via in-order.',
   icon: '📝',
   color: 'from-violet-500 to-purple-400',
-  locked: false,
+  locked: true,
   isMidterm: true,
   lessons: [],
   questions: [

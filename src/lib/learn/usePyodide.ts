@@ -13,6 +13,8 @@ const EXECUTION_TIMEOUT_MS = 15_000;
 const TIMEOUT_MSG =
   "TimeoutError: Program ran for too long — possible infinite loop. Check your loop conditions.";
 
+let runIdCounter = 0;
+
 export function usePyodide() {
   const workerRef = useRef<Worker | null>(null);
   const inputBufferRef = useRef<SharedArrayBuffer | null>(null);
@@ -49,15 +51,9 @@ export function usePyodide() {
     onDone: () => void,
     timeoutMs = EXECUTION_TIMEOUT_MS
   ): Promise<{ error: string }> {
-    if (workerRef.current) {
-      workerRef.current.terminate();
-      workerRef.current = null;
-      inputBufferRef.current = null;
-      inputLenBufferRef.current = null;
-    }
-
     const worker = getWorker();
     resumeExecutionTimeoutRef.current = null;
+    const runId = ++runIdCounter;
 
     return new Promise((resolve) => {
       let settled = false;
@@ -114,6 +110,7 @@ export function usePyodide() {
 
       worker.onmessage = (e) => {
         const msg = e.data;
+        if (msg.runId !== undefined && msg.runId !== runId) return; // stale message from a superseded run
         if (msg.type === "stdout") {
           ensureExecutionTimeout();
           onLine({ type: "output", text: msg.text });
@@ -148,6 +145,7 @@ export function usePyodide() {
       worker.postMessage({
         type: "run",
         code,
+        runId,
         inputBuffer: inputBufferRef.current,
         inputLenBuffer: inputLenBufferRef.current,
       });

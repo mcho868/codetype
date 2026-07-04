@@ -9,7 +9,7 @@ const test4: Module = {
     'Transfer-level practice: postfix evaluation, bracket validation, and queue-based task simulation.',
   icon: '📝',
   color: 'from-orange-500 to-amber-400',
-  locked: false,
+  locked: true,
   isMidterm: true,
   lessons: [],
   questions: [

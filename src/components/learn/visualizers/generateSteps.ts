@@ -9,6 +9,9 @@ import { mergeSortSteps } from './mergeSortSteps';
 const SEARCH_ARRAY = [34, 7, 23, 32, 5, 62, 18, 45];
 const SEARCH_TARGET = 23;
 
+const BINARY_SEARCH_ARRAY = [4, 9, 12, 17, 23, 28, 34, 41, 47, 52, 58, 63, 69, 75, 81, 88];
+const BINARY_SEARCH_TARGET = 75;
+
 const SORT_ARRAY = [38, 27, 43, 3, 9, 82, 10, 55];
 
 export function generateSteps(kind: VisualizerKind): VisualizerStep[] {
@@ -16,7 +19,7 @@ export function generateSteps(kind: VisualizerKind): VisualizerStep[] {
     case 'linear-search':
       return linearSearchSteps(SEARCH_ARRAY, SEARCH_TARGET);
     case 'binary-search':
-      return binarySearchSteps(SEARCH_ARRAY, SEARCH_TARGET);
+      return binarySearchSteps(BINARY_SEARCH_ARRAY, BINARY_SEARCH_TARGET);
     case 'selection-sort':
       return selectionSortSteps(SORT_ARRAY);
     case 'bubble-sort':

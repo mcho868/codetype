@@ -52,11 +52,21 @@ function syncInput(prompt) {
   return result;
 }
 
+// The worker is now reused across runs (see usePyodide.ts). Every message
+// this worker emits is tagged with the runId it belongs to; the main thread
+// drops anything that doesn't match the run it's currently waiting on. This
+// matters because Pyodide's `batched` stdout callback can flush asynchronously
+// — without tagging, a trailing flush from a superseded run could arrive after
+// the next run's onmessage handler is attached and get misattributed to it,
+// which is exactly what caused output to "accumulate" across test cases.
+let currentRunId = null;
+
 self.onmessage = async (e) => {
   const { type } = e.data;
 
   if (type === "run") {
-    const { code, inputBuffer: ib, inputLenBuffer: ilb } = e.data;
+    const { code, inputBuffer: ib, inputLenBuffer: ilb, runId } = e.data;
+    currentRunId = runId;
     inputBuffer = new Int32Array(ib);
     inputLenBuffer = new Int32Array(ilb);
 
@@ -67,10 +77,16 @@ self.onmessage = async (e) => {
     seedSampleFiles();
 
     pyodide.setStdout({
-      batched: (s) => self.postMessage({ type: "stdout", text: s }),
+      batched: (s) => {
+        if (runId !== currentRunId) return; // stale flush from a superseded run
+        self.postMessage({ type: "stdout", text: s, runId });
+      },
     });
     pyodide.setStderr({
-      batched: (s) => self.postMessage({ type: "stderr", text: s }),
+      batched: (s) => {
+        if (runId !== currentRunId) return;
+        self.postMessage({ type: "stderr", text: s, runId });
+      },
     });
 
     // Expose syncInput to Python globals
@@ -88,10 +104,15 @@ _builtins.input = _mock_input
 `;
 
     try {
-      await pyodide.runPythonAsync(mockSetup + code);
-      self.postMessage({ type: "done" });
+      const runGlobals = pyodide.globals.get("dict")();
+      await pyodide.runPythonAsync(mockSetup + code, { globals: runGlobals });
+      runGlobals.destroy();
+      // Force out any output still sitting in the line buffer (e.g. a final
+      // print with no trailing newline) before this run is considered done.
+      pyodide.runPython("import sys; sys.stdout.flush(); sys.stderr.flush()");
+      self.postMessage({ type: "done", runId });
     } catch (err) {
-      self.postMessage({ type: "error", text: err.message });
+      self.postMessage({ type: "error", text: err.message, runId });
     }
   }
 };

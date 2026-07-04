@@ -297,7 +297,12 @@ export default function CodeRunnerCard({
     runTestCasesLocally(testCases, previousAnswer.selectedAnswer)
       .then((results) => {
         setServerResults(results);
-        setAllPassed(results.length > 0 && results.every((r) => r.passed));
+        // Trust the originally-graded, persisted result for correctness — this
+        // re-run is only to repopulate the per-case display table. Re-executing
+        // in a fresh Pyodide worker on every reload is inherently a bit flaky
+        // (timing, shared worker state), so it must never downgrade a stored
+        // "correct" to "incorrect".
+        setAllPassed(previousAnswer.isCorrect);
       })
       .catch(() => {
         setSubmitError("Could not reload test results.");

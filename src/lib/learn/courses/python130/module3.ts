@@ -9,7 +9,7 @@ const module3: Module = {
   description: 'Build your own data types using Python classes, attributes, and methods.',
   icon: '🏗️',
   color: 'from-emerald-500 to-teal-400',
-  locked: false,
+  locked: true,
   lessons: [
     {
       id: 'lesson-3-1',

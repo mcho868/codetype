@@ -9,7 +9,7 @@ const test9: Module = {
     'Transfer-level practice: a chaining-based set and word frequency counting with a hash table.',
   icon: '📝',
   color: 'from-pink-500 to-rose-400',
-  locked: false,
+  locked: true,
   isMidterm: true,
   lessons: [],
   questions: [

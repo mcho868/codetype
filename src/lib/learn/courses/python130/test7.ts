@@ -17,7 +17,7 @@ const test7: Module = {
     'Transfer-level practice: tree depth, nodes at a level, building from preorder, and mirroring.',
   icon: '📝',
   color: 'from-green-500 to-emerald-400',
-  locked: false,
+  locked: true,
   isMidterm: true,
   lessons: [],
   questions: [

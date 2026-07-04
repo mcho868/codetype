@@ -9,7 +9,7 @@ const test10: Module = {
     'Transfer-level practice: k smallest via a heap, heap sort, and validating min-heap structure.',
   icon: '📝',
   color: 'from-teal-500 to-green-400',
-  locked: false,
+  locked: true,
   isMidterm: true,
   lessons: [],
   questions: [

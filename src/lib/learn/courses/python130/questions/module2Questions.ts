@@ -178,7 +178,7 @@ export const module2Questions: Question[] = [
     'Selection sort places the minimum of the unsorted suffix.'
   ),
   mc(
-    'q2-9',
+    'q2-5',
     'You will search a large dataset thousands of times. Which approach is most efficient overall?',
     [
       { id: 'a', text: 'Linear search every time' },
@@ -242,7 +242,7 @@ export const module2Questions: Question[] = [
     'Binary search relies on order to decide which half to discard — on unsorted data its assumptions break.'
   ),
   mc(
-    'q2-9',
+    'q2-10',
     'Why is bubble sort O(n²) in the worst case while merge sort is O(n log n)?',
     [
       { id: 'a', text: 'It uses recursion, which is always slower' },

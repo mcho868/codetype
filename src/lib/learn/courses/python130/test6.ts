@@ -16,7 +16,7 @@ const test6: Module = {
     'Transfer-level practice: reverse a chain, remove all matching values, and find the nth node from the end.',
   icon: '📝',
   color: 'from-cyan-500 to-sky-400',
-  locked: false,
+  locked: true,
   isMidterm: true,
   lessons: [],
   questions: [
