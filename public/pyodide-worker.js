@@ -89,9 +89,6 @@ self.onmessage = async (e) => {
       },
     });
 
-    // Expose syncInput to Python globals
-    pyodide.globals.set("_sync_input_js", syncInput);
-
     const mockSetup = `
 import builtins as _builtins
 import sys
@@ -105,6 +102,12 @@ _builtins.input = _mock_input
 
     try {
       const runGlobals = pyodide.globals.get("dict")();
+      // _sync_input_js must live in THIS run's globals dict, not the module-level
+      // pyodide.globals — since runPythonAsync executes with a fresh, isolated
+      // `globals=runGlobals` (added to stop variables leaking between runs), a
+      // name set only on pyodide.globals is invisible to code run against
+      // runGlobals and _mock_input's lookup of _sync_input_js would NameError.
+      runGlobals.set("_sync_input_js", syncInput);
       await pyodide.runPythonAsync(mockSetup + code, { globals: runGlobals });
       runGlobals.destroy();
       // Force out any output still sitting in the line buffer (e.g. a final
