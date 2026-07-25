@@ -6,7 +6,7 @@ import AuthGuard from "@/components/learn/AuthGuard";
 import ProgressBar from "@/components/learn/ProgressBar";
 import QuestionCard from "@/components/learn/QuestionCard";
 import { QuestionAnswer, calculateScore } from "@/lib/learn/progress";
-import { saveAnswer, loadModuleAnswers } from "@/lib/learn/db";
+import { clearModuleAnswers, loadModuleAnswers, saveAnswer } from "@/lib/learn/db";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { cn } from "@/lib/utils";
 import LearnMarkdown from "@/components/learn/LearnMarkdown";
