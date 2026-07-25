@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 // Pre-compute total questions per course using the slug prefix stored in DB
 const COURSE_META = STUDENT_VISIBLE_COURSES.map((course) => ({
   slug: course.slug,
+  storageSlug: course.storageSlug ?? course.slug,
   title: course.title,
   totalQ: course.modules.reduce((s, m) => s + m.questions.length, 0),
   moduleCount: course.modules.length,
@@ -178,7 +179,11 @@ export default function AdminPage() {
                     {/* Per-course breakdown */}
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                       {filteredCourses.map((course) => {
-                        const { score, answered, pct } = getCourseProgress(row, course.slug, course.totalQ);
+                        const { score, answered, pct } = getCourseProgress(
+                          row,
+                          course.storageSlug,
+                          course.totalQ
+                        );
                         const statusColor =
                           answered === 0 ? "text-slate-600"
                           : pct >= 80 ? "text-emerald-400"

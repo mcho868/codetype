@@ -16,7 +16,12 @@ const AlgorithmVisualizer = dynamic(
   { ssr: false }
 );
 import { getModule } from "@/lib/learn/courseData";
-import { getCourse, getModuleFromCourse, isCourseHiddenForUsername } from "@/lib/learn/registry";
+import {
+  getCourse,
+  getCourseStorageSlug,
+  getModuleFromCourse,
+  isCourseHiddenForUsername,
+} from "@/lib/learn/registry";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { loadAttemptHistory } from "@/lib/learn/db";
 import type { QuizAttemptSummary } from "@/lib/learn/db";
@@ -173,7 +178,9 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
     (course?.adminOnly && user?.role !== "admin") ||
     (user?.role !== "admin" && isCourseHiddenForUsername(course, user?.username))
   );
-  const storageSlug = courseSlug ? `${courseSlug}/${mod?.slug ?? moduleId}` : (mod?.slug ?? moduleId);
+  const storageSlug = courseSlug
+    ? `${getCourseStorageSlug(courseSlug)}/${mod?.slug ?? moduleId}`
+    : (mod?.slug ?? moduleId);
   const quizPath = courseSlug
     ? `/learn/courses/${courseSlug}/${moduleId}/quiz`
     : `/learn/${moduleId}/quiz`;

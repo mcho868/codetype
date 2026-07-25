@@ -6,13 +6,17 @@ import { getAllModules as getSql101Modules } from './courses/sql101/index';
 import { getAllModules as getTypescript101Modules } from './courses/typescript101/index';
 import { getAllModules as getGdscript101Modules } from './courses/gdscript101/index';
 import { getAllModules as getLeetcodeModules } from './courses/leetcode/index';
-import { getAllModules as getCompsci101Modules } from './courses/compsci101/index';
+import { getAllModules as getPythonEssentialsModules } from './courses/python-essentials/index';
 import { getAllModules as getPythonIntermediateModules } from './courses/python-intermediate/index';
 
 export interface CourseInfo {
   slug: string;
   title: string;
   modules: Module[];
+  /** Existing database prefix retained when a public course slug is renamed. */
+  storageSlug?: string;
+  /** Previous public slugs that should continue resolving during a rename. */
+  legacySlugs?: string[];
   adminOnly?: boolean;
   /** Usernames (lowercase) blocked from this course, dashboard card + direct URL, even though it's not adminOnly. */
   hiddenForUsernames?: string[];
@@ -22,7 +26,13 @@ const NEW_COHORT_USERNAMES = ['yejun', 'jaeseung', 'heein', 'seewan'];
 
 export const COURSES: CourseInfo[] = [
   { slug: 'python101', title: 'Python 101', modules: getPython101Modules(), hiddenForUsernames: NEW_COHORT_USERNAMES },
-  { slug: 'compsci101', title: 'Python Essentials', modules: getCompsci101Modules() },
+  {
+    slug: 'python-essentials',
+    storageSlug: 'compsci101',
+    legacySlugs: ['compsci101'],
+    title: 'Python Essentials',
+    modules: getPythonEssentialsModules(),
+  },
   { slug: 'python-intermediate', title: 'Python Intermediate', modules: getPythonIntermediateModules() },
   { slug: 'java-oop', title: 'OOP in Java', modules: getJavaOopModules() },
   { slug: 'python130', title: 'Python 130', modules: getPython130Modules(), hiddenForUsernames: NEW_COHORT_USERNAMES },
@@ -36,7 +46,14 @@ export const STUDENT_VISIBLE_COURSES = COURSES.filter((course) => !course.adminO
 export const ADMIN_ONLY_COURSES = COURSES.filter((course) => course.adminOnly);
 
 export function getCourse(courseSlug: string): CourseInfo | undefined {
-  return COURSES.find((c) => c.slug === courseSlug);
+  return COURSES.find(
+    (course) => course.slug === courseSlug || course.legacySlugs?.includes(courseSlug)
+  );
+}
+
+export function getCourseStorageSlug(courseSlug: string): string {
+  const course = getCourse(courseSlug);
+  return course?.storageSlug ?? course?.slug ?? courseSlug;
 }
 
 /** True when this course should be blocked for the given username (dashboard + direct URL). */

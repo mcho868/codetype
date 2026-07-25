@@ -98,6 +98,8 @@ export interface Module {
   questions: Question[];
   /** If true, this module is a midterm/exam rather than a regular lesson module */
   isMidterm?: boolean;
+  /** Opens the module directly in the standard quiz view when it has no lessons. */
+  quizOnly?: boolean;
   /** Optional section label rendered as a divider above this module */
   section?: string;
 }

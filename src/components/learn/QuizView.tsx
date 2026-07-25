@@ -6,7 +6,12 @@ import AuthGuard from "@/components/learn/AuthGuard";
 import QuestionCard from "@/components/learn/QuestionCard";
 import ProgressBar from "@/components/learn/ProgressBar";
 import { getModule } from "@/lib/learn/courseData";
-import { getCourse, getModuleFromCourse, isCourseHiddenForUsername } from "@/lib/learn/registry";
+import {
+  getCourse,
+  getCourseStorageSlug,
+  getModuleFromCourse,
+  isCourseHiddenForUsername,
+} from "@/lib/learn/registry";
 import { QuestionAnswer, calculateScore } from "@/lib/learn/progress";
 import {
   saveAnswer,
@@ -60,7 +65,9 @@ export default function QuizView({ moduleId, courseSlug }: QuizViewProps) {
     }
   }, [courseSlug, isCourseRestricted, mod, router, user]);
   // Storage slug is prefixed with courseSlug to avoid collisions between courses with the same module slug numbers
-  const storageSlug = courseSlug ? `${courseSlug}/${mod?.slug ?? moduleId}` : (mod?.slug ?? moduleId);
+  const storageSlug = courseSlug
+    ? `${getCourseStorageSlug(courseSlug)}/${mod?.slug ?? moduleId}`
+    : (mod?.slug ?? moduleId);
   const lessonPath = courseSlug
     ? `/learn/courses/${courseSlug}/${moduleId}`
     : `/learn/${moduleId}`;

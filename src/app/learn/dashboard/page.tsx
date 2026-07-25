@@ -65,9 +65,9 @@ export default function LearnDashboard() {
               Available Courses
             </h2>
 
-            {/* COMPSCI 101 card */}
+            {/* Python Essentials card */}
             <div
-              onClick={() => router.push("/learn/courses/compsci101")}
+              onClick={() => router.push("/learn/courses/python-essentials")}
               className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
             >
               <div className="bg-gradient-to-r from-indigo-500 to-violet-400 h-1.5" />

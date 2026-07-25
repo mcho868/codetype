@@ -150,11 +150,13 @@ export default function CoursePageLayout({
                   const elements: React.ReactNode[] = [];
                   let currentSection: string | null = null;
                   let groupCards: React.ReactNode[] = [];
+                  let sectionIndex = 0;
+                  let groupIndex = 0;
 
                   const flushGroup = () => {
                     if (groupCards.length > 0) {
                       elements.push(
-                        <div key={`group-${currentSection ?? 'default'}`} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        <div key={`group-${groupIndex++}-${currentSection ?? 'default'}`} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                           {groupCards}
                         </div>
                       );
@@ -167,7 +169,7 @@ export default function CoursePageLayout({
                       flushGroup();
                       currentSection = mod.section;
                       elements.push(
-                        <div key={`section-${mod.section}`} className="flex items-center gap-4 pt-2">
+                        <div key={`section-${sectionIndex++}-${mod.section}`} className="flex items-center gap-4 pt-2">
                           <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">{mod.section}</span>
                           <div className="flex-1 h-px bg-slate-700/60" />
                         </div>

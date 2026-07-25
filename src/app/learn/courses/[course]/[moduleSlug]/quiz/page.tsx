@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import QuizView from "@/components/learn/QuizView";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +11,9 @@ interface Props {
 
 export default async function CourseQuizPage({ params }: Props) {
   const { course, moduleSlug } = await params;
+  if (course === "compsci101") {
+    redirect(`/learn/courses/python-essentials/${moduleSlug}/quiz`);
+  }
   return (
     <Suspense
       fallback={

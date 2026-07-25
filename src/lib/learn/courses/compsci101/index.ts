@@ -8,6 +8,7 @@ import week3 from './week3';
 import test3 from './test3';
 import week4 from './week4';
 import test4 from './test4';
+import midtermExam from './midtermExam';
 import week5 from './week5';
 import test5 from './test5';
 import week6 from './week6';
@@ -20,6 +21,7 @@ import week9 from './week9';
 import test9 from './test9';
 import week10 from './week10';
 import test10 from './test10';
+import finalExam from './finalExam';
 import type { Module } from '../python101/types';
 
 /**
@@ -45,6 +47,7 @@ export const MODULES: Module[] = [
   test3,
   week4,
   test4,
+  midtermExam,
   week5,
   test5,
   week6,
@@ -57,6 +60,7 @@ export const MODULES: Module[] = [
   test9,
   week10,
   test10,
+  finalExam,
 ].map(stripStarterCode);
 
 export function getAllModules(): Module[] {
