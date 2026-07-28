@@ -1,1 +1,1 @@
-export type { QuestionType, Question, CodeExample, Lesson, Module } from '../python101/types';
+export type { QuestionType, Question, CodeExample, Lesson, Module, TestCase } from '../python101/types';

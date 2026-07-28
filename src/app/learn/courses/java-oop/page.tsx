@@ -7,12 +7,13 @@ import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { getAllModules } from "@/lib/learn/courses/java-oop/index";
 import { loadAllProgress } from "@/lib/learn/db";
 
-const modules = getAllModules();
-const totalQ = modules.reduce((s, m) => s + m.questions.length, 0);
+const COURSE_SLUG = "java-oop";
 
 interface ModuleProgress { score: number; answeredCount: number; }
 
 export default function JavaOopPage() {
+  const modules = getAllModules();
+  const totalQ = modules.reduce((s, m) => s + m.questions.length, 0);
   const { user, studentId, logout } = useLearnAuth();
   const router = useRouter();
   const [progress, setProgress] = useState<Record<string, ModuleProgress>>({});
@@ -34,15 +35,15 @@ export default function JavaOopPage() {
   }, [studentId]);
 
   const totalCorrect = Object.entries(progress)
-    .filter(([key]) => key.startsWith("java-oop/"))
+    .filter(([key]) => key.startsWith(`${COURSE_SLUG}/`))
     .reduce((s, [, m]) => s + m.score, 0);
 
   return (
     <CoursePageLayout
-      courseSlug="java-oop"
+      courseSlug={COURSE_SLUG}
       courseTitle="OOP in Java"
       courseIcon="☕"
-      courseLevel="Intermediate"
+      courseLevel="Intermediate · 12 Core Weeks + Extensions"
       moduleCount={modules.length}
       totalCorrect={totalCorrect}
       totalQ={totalQ}
@@ -54,6 +55,7 @@ export default function JavaOopPage() {
       onTabChange={() => {}}
       isAdmin={user?.role === "admin"}
       onLogout={() => { logout(); router.push("/learn/auth"); }}
+      overviewHref={`/learn/courses/${COURSE_SLUG}/overview`}
     />
   );
 }

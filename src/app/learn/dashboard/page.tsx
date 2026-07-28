@@ -130,28 +130,26 @@ export default function LearnDashboard() {
             </div>
             )}
 
-            {/* Java OOP card — admin only */}
-            {user?.role === "admin" && (
-              <div
-                onClick={() => router.push("/learn/courses/java-oop")}
-                className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
-              >
-                <div className="bg-gradient-to-r from-orange-500 to-amber-400 h-1.5" />
-                <div className="p-8 flex items-center gap-6">
-                  <span className="text-5xl">☕</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
-                      Intermediate · 18 Modules
-                    </p>
-                    <h3 className="text-2xl font-semibold text-white mb-1">OOP in Java</h3>
-                    <p className="text-sm text-slate-400">
-                      Master object-oriented programming — classes, inheritance, polymorphism, abstract classes, and interfaces.
-                    </p>
-                  </div>
-                  <span className="text-slate-600 text-xl shrink-0">→</span>
+            {/* Java OOP card */}
+            <div
+              onClick={() => router.push("/learn/courses/java-oop")}
+              className="rounded-3xl border border-slate-800/70 bg-slate-900/70 shadow-sm backdrop-blur overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-slate-600/60 hover:shadow-lg transition"
+            >
+              <div className="bg-gradient-to-r from-orange-500 to-amber-400 h-1.5" />
+              <div className="p-8 flex items-center gap-6">
+                <span className="text-5xl">☕</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-1">
+                    Intermediate · 26 Modules
+                  </p>
+                  <h3 className="text-2xl font-semibold text-white mb-1">OOP in Java</h3>
+                  <p className="text-sm text-slate-400">
+                    Object-oriented software development in Java — expressions, loops, arrays, classes, design, concurrency, and patterns. Week 1 is open; later weeks are admin-only for now.
+                  </p>
                 </div>
+                <span className="text-slate-600 text-xl shrink-0">→</span>
               </div>
-            )}
+            </div>
 
             {/* Python 130 card */}
             {!hidePython130 && (

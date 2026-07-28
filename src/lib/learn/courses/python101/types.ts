@@ -53,6 +53,10 @@ export interface CodeExample {
   language: 'python' | 'java' | 'sql' | 'typescript';
   code: string;
   caption?: string;
+  /** Optional input prefilled for runnable examples that read from stdin */
+  sampleInput?: string;
+  /** Optional expected stdout for runnable examples */
+  expectedOutput?: string;
   /** If true, the code block will be an editable runner */
   editable?: boolean;
 }

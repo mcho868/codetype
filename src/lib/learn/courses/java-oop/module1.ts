@@ -4,7 +4,7 @@ const module1: Module = {
   id: 'java-module-1',
   slug: 'java-1',
   title: 'Classes & Objects',
-  description: 'Learn how to create blueprints (classes) and build objects from them with constructors, fields, and methods.',
+  description: 'Learn how to create classes, objects, instance state, constructors, accessors, mutators, and class-wide static members in Java.',
   icon: '🏗️',
   color: 'from-blue-500 to-indigo-400',
   locked: false,
@@ -22,13 +22,23 @@ An **object** is a specific instance created from that blueprint.
 
 You can create many cookies from one cutter. Each cookie is independent — you can decorate them differently — but they all share the same shape.
 
-**Built-in classes**
-Java comes with many pre-built classes. For example:
+The lecture also emphasizes that Java gives you many **built-in classes** before you write your own:
 - \`String\` — represents text
 - \`Math\` — provides mathematical operations
 - \`Scanner\` — reads user input
+- \`Point\` and \`Rectangle\` from \`java.awt\`
 
-You use these classes every time you write Java code!`,
+For object creation, the slides separate the process into:
+1. **Declaration** — declare a variable that can refer to an object
+2. **Instantiation** — use \`new\` to allocate the object
+3. **Initialization** — run a constructor to give it its starting state
+
+\`\`\`java
+Point p;
+Point p2 = new Point(23, 94);
+\`\`\`
+
+The variable stores a **reference** to the object. The object itself lives elsewhere in memory.`,
       codeExamples: [
         {
           language: 'java',
@@ -50,6 +60,7 @@ public class BuiltInClasses {
     }
 }`,
           caption: 'Using the built-in Point class',
+          expectedOutput: 'p1 x = 3\np1 y = 4\np2 x = 10\np1 after move: x=7, y=8',
           editable: true,
         },
       ],
@@ -73,7 +84,14 @@ The golden rule: **instance variables should be private**. This is **encapsulati
 2. **Instantiate** — \`myBall = new Ball();\`
 3. (Or combine) — \`Ball myBall = new Ball();\`
 
-The \`new\` keyword allocates memory and calls the constructor.`,
+The \`new\` keyword allocates memory and calls the constructor.
+
+The slides also stress an important memory idea:
+- a class declaration defines the structure of an object
+- but it does **not** allocate storage for each future instance variable value
+- memory for instance variables is allocated when each object is instantiated
+
+That is why three different \`Car\` objects can all have different speeds, models, and years even though they share the same class definition.`,
       codeExamples: [
         {
           language: 'java',
@@ -115,6 +133,8 @@ The \`new\` keyword allocates memory and calls the constructor.`,
     }
 }`,
           caption: 'A complete Ball class with constructor, getters, setters, and a method',
+          expectedOutput:
+            'Ball 1: red, radius=5.0\nBall 1 volume: 523.60\nBall 2: blue, radius=3.0\nBall 2 new colour: green',
           editable: true,
         },
         {
@@ -158,6 +178,8 @@ The \`new\` keyword allocates memory and calls the constructor.`,
     }
 }`,
           caption: 'A Car class — try adding a horn() method!',
+          expectedOutput:
+            '2022 Toyota Corolla (speed: 0.0 km/h)\nToyota Corolla accelerates to 60.0 km/h\nToyota Corolla accelerates to 100.0 km/h\nToyota Corolla slows to 70.0 km/h\n2022 Toyota Corolla (speed: 70.0 km/h)',
           editable: true,
         },
       ],
@@ -182,7 +204,21 @@ Inside a class, \`this\` refers to the current object. It's commonly used when a
 this.radius = radius;  // "this" instance's radius = parameter radius
 \`\`\`
 
-You can also use \`this(...)\` to call another constructor from within a constructor.`,
+You can also use \`this(...)\` to call another constructor from within a constructor.
+
+Two details from the lecture matter a lot:
+- if a class defines **no constructor**, Java supplies a default no-argument constructor
+- once you define **any** constructor yourself, Java does **not** generate that default one for you
+
+That is why:
+\`\`\`java
+Author a = new Author();
+\`\`\`
+fails when the class only defines \`Author(String name)\`.
+
+The lecture also covers **shadowing**:
+- if a parameter and an instance variable have the same name, the parameter hides the field inside the method body
+- use \`this.fieldName\` to explicitly refer to the instance variable`,
       codeExamples: [
         {
           language: 'java',
@@ -223,6 +259,176 @@ You can also use \`this(...)\` to call another constructor from within a constru
     }
 }`,
           caption: 'Overloaded constructors using this() chaining',
+          expectedOutput:
+            'Alice (age 0, unknown)\nBob (age 25, unknown)\nCharlie (age 30, charlie@example.com)',
+          editable: true,
+        },
+      ],
+    },
+    {
+      id: 'java-lesson-1-4',
+      title: 'Accessor, Mutator, and Behaviour Methods',
+      content: `A well-designed class exposes behaviour through methods rather than letting outside code manipulate fields directly.
+
+The lecture introduces two common categories:
+- **Accessor methods** (getters): return information from the object
+- **Mutator methods** (setters): update the object’s state
+
+Examples:
+- \`getX()\`
+- \`setX(int x)\`
+- \`getAge()\`
+- \`setAge(int age)\`
+
+This gives the class a place to enforce rules. For example:
+- only accept ages between 0 and 120
+- keep a radius positive
+- clamp a speed so it never drops below 0
+
+The class can also expose higher-level behaviour methods such as:
+- \`growOlder()\`
+- \`isOfLegalAge()\`
+- \`getBodyMassIndex()\`
+
+These methods make the class more meaningful than just a bag of fields.`,
+      codeExamples: [
+        {
+          language: 'java',
+          code: `public class Person {
+    private String name;
+    private int age;
+    private double weight;
+    private double height;
+
+    public Person(String name, int age, double weight, double height) {
+        this.name = name;
+        this.age = age;
+        this.weight = weight;
+        this.height = height;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAge(int age) {
+        if (age >= 0 && age <= 120) {
+            this.age = age;
+        }
+    }
+
+    public void growOlder() {
+        age++;
+    }
+
+    public boolean isOfLegalAge() {
+        return age >= 18;
+    }
+
+    public double getBodyMassIndex() {
+        return weight / (height * height);
+    }
+
+    public static void main(String[] args) {
+        Person p = new Person("Ava", 17, 68.0, 1.70);
+
+        System.out.println(p.getName());
+        System.out.println(p.getAge());
+        System.out.println(p.isOfLegalAge());
+
+        p.growOlder();
+        p.setAge(200); // invalid, so age stays unchanged
+
+        System.out.println(p.getAge());
+        System.out.printf("%.2f%n", p.getBodyMassIndex());
+    }
+}`,
+          caption: 'Accessors expose information; mutators enforce invariants; behaviour methods express domain logic.',
+          expectedOutput: 'Ava\n17\nfalse\n18\n23.53',
+          editable: true,
+        },
+      ],
+    },
+    {
+      id: 'java-lesson-1-5',
+      title: 'Class Variables, Class Methods, and Enums',
+      content: `The slides then move beyond per-object state to **class-wide** information.
+
+Use the \`static\` keyword for:
+- **class variables**: one shared copy for the entire class
+- **class methods**: methods that belong to the class itself, not a particular object
+
+Examples you already know:
+- \`Math.round(...)\`
+- \`Integer.parseInt(...)\`
+
+Important rules:
+- static methods can directly access other static members
+- static methods **cannot directly access instance variables**
+- instance methods can access both instance and static members
+
+This is useful for things like:
+- counting how many objects have been created
+- writing conversion helpers
+- utility functions that do not depend on any single object
+
+The lecture also revisits **enum** as a special class-like type with a fixed set of values. Enums can even define methods and private constructors.`,
+      codeExamples: [
+        {
+          language: 'java',
+          code: `public class Main {
+    static class Employee {
+    private static int count = 0;
+    private String firstName;
+    private String lastName;
+
+    public Employee(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        count++;
+    }
+
+    public static int getCount() {
+        return count;
+    }
+    }
+
+    enum Grade {
+        E, D, C, B, A;
+
+        public static Grade convertToGrade(int score) {
+            if (score > 8) return A;
+            if (score > 6) return B;
+            if (score > 4) return C;
+            if (score > 2) return D;
+            return E;
+        }
+
+        public boolean isPass() {
+            return ordinal() >= C.ordinal();
+        }
+    }
+
+    public static void main(String[] args) {
+        Employee first = new Employee("Ana", "Ng");
+        Employee second = new Employee("Ben", "Park");
+
+        System.out.println(Employee.getCount());
+
+        Grade g1 = Grade.convertToGrade(9);
+        Grade g2 = Grade.convertToGrade(5);
+
+        System.out.println(g1);
+        System.out.println(g1.isPass());
+        System.out.println(g2);
+        System.out.println(g2.isPass());
+    }
+}`,
+          caption: 'Static members belong to the class; enums can also define behaviour.',
+          expectedOutput: '2\nA\ntrue\nC\ntrue',
           editable: true,
         },
       ],
@@ -287,6 +493,113 @@ You can also use \`this(...)\` to call another constructor from within a constru
       explanation: 'Constructors have the same name as the class and no return type (not even void). A class can have multiple constructors (overloading), and they are invoked using the `new` keyword.',
     },
     {
+      id: 'java-q-1-8',
+      type: 'multiple-choice',
+      prompt: 'What does the `new` keyword do when creating an object?',
+      choices: [
+        { id: 'a', text: 'It only declares a variable' },
+        { id: 'b', text: 'It allocates memory, creates the object, and invokes a constructor' },
+        { id: 'c', text: 'It automatically makes all fields public' },
+        { id: 'd', text: 'It converts a class into an enum' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'The `new` operator creates the object, allocates space for it, and calls the appropriate constructor.',
+    },
+    {
+      id: 'java-q-1-9',
+      type: 'true-false',
+      prompt: 'If you define any constructor in a class, Java will still automatically provide a default no-argument constructor.',
+      choices: [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ],
+      correctAnswer: 'false',
+      explanation: 'Once you declare a constructor yourself, the compiler stops generating the default no-argument constructor automatically.',
+    },
+    {
+      id: 'java-q-1-10',
+      type: 'multiple-choice',
+      prompt: 'Which statement best describes an instance variable?',
+      choices: [
+        { id: 'a', text: 'One shared copy exists for the whole class' },
+        { id: 'b', text: 'It is allocated only when a method is called' },
+        { id: 'c', text: 'Each object gets its own copy of the variable' },
+        { id: 'd', text: 'It must always be public' },
+      ],
+      correctAnswer: 'c',
+      explanation: 'Instance variables belong to individual objects, so different instances can hold different values.',
+    },
+    {
+      id: 'java-q-1-11',
+      type: 'fill-in-blank',
+      prompt: 'A get method is also commonly called an ______ method.',
+      correctAnswer: 'accessor',
+      explanation: 'Getter methods are accessors because they provide access to an object’s data without directly exposing the field.',
+    },
+    {
+      id: 'java-q-1-12',
+      type: 'multiple-choice',
+      prompt: 'Why do we often make fields private and methods public?',
+      choices: [
+        { id: 'a', text: 'Because Java requires all fields to be private' },
+        { id: 'b', text: 'To support encapsulation and controlled access to state' },
+        { id: 'c', text: 'Because constructors cannot read private fields' },
+        { id: 'd', text: 'So static methods can modify any object automatically' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'Private fields hide raw state, while public methods expose safe operations that preserve the object’s rules.',
+    },
+    {
+      id: 'java-q-1-13',
+      type: 'multiple-choice',
+      prompt: 'What is true about a static method?',
+      choices: [
+        { id: 'a', text: 'It can directly use instance variables without an object' },
+        { id: 'b', text: 'It belongs to the class and can be called even if no instances exist' },
+        { id: 'c', text: 'It must be declared private' },
+        { id: 'd', text: 'It is the same thing as a constructor' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'Static methods are class methods, so they can be called via the class name without creating an object first.',
+    },
+    {
+      id: 'java-q-1-14',
+      type: 'true-false',
+      prompt: 'Instance methods can access both instance variables and static variables of the class.',
+      choices: [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ],
+      correctAnswer: 'true',
+      explanation: 'An instance method runs in the context of an object, so it can access both the object state and class-wide shared state.',
+    },
+    {
+      id: 'java-q-1-15',
+      type: 'multiple-choice',
+      prompt: 'What does `this.x = x;` do in a constructor or setter?',
+      choices: [
+        { id: 'a', text: 'Assigns the field x to itself only' },
+        { id: 'b', text: 'Assigns the parameter x to the current object’s field x' },
+        { id: 'c', text: 'Creates a new object named x' },
+        { id: 'd', text: 'Calls a static method named x' },
+      ],
+      correctAnswer: 'b',
+      explanation: '`this.x` refers to the current object’s field, while the bare `x` usually refers to the local parameter.',
+    },
+    {
+      id: 'java-q-1-16',
+      type: 'multiple-choice',
+      prompt: 'Which statement about enums in Java is correct?',
+      choices: [
+        { id: 'a', text: 'Enums cannot define methods' },
+        { id: 'b', text: 'Enums are a special type with a fixed set of constant values' },
+        { id: 'c', text: 'Enums must always be converted to strings before use' },
+        { id: 'd', text: 'Enums are primitive types' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'Enums define a fixed set of named constants and can also include fields, methods, and private constructors.',
+    },
+    {
       id: 'java-q-1-6',
       type: 'code-challenge',
       language: 'java',
@@ -305,6 +618,26 @@ You can also use \`this(...)\` to call another constructor from within a constru
       expectedOutput: '15',
       correctAnswer: '__code__',
       explanation: 'Constructor: Rectangle(int w, int h) { width = w; height = h; } Area method: public int area() { return width * height; }',
+    },
+    {
+      id: 'java-q-1-17',
+      type: 'code-challenge',
+      language: 'java',
+      prompt: 'Exercise 1-2 style question: define a `Person` class with private fields `name` and `age`, two constructors (`Person()` and `Person(String, int)`), and a `toString()` method. In `main`, create `new Person("Michael", 21)` and print it. Expected output:\nMichael(21)',
+      starterCode: `public class Main {\n    static class Person {\n        private String name;\n        private int age;\n\n        // add constructors and toString()\n    }\n\n    public static void main(String[] args) {\n        Person p1 = new Person("Michael", 21);\n        System.out.println(p1);\n    }\n}`,
+      expectedOutput: 'Michael(21)',
+      correctAnswer: '__code__',
+      explanation: 'This matches the lecture exercise: private fields, overloaded constructors, and a readable toString() result.',
+    },
+    {
+      id: 'java-q-1-18',
+      type: 'code-challenge',
+      language: 'java',
+      prompt: 'Exercise 10 style question: complete an `Employee` class with private fields `firstName` and `lastName`, a static variable that counts how many Employee objects were created, and a static `getCount()` method. In `main`, create two Employee objects and print the count. Expected output:\n2',
+      starterCode: `public class Main {\n    static class Employee {\n        private String firstName;\n        private String lastName;\n        // add static count\n\n        public Employee(String firstName, String lastName) {\n            // complete constructor\n        }\n\n        public static int getCount() {\n            // return count\n            return 0;\n        }\n    }\n\n    public static void main(String[] args) {\n        Employee bob = new Employee("Bob", "Blue");\n        Employee susan = new Employee("Susan", "Baker");\n        System.out.println(Employee.getCount());\n    }\n}`,
+      expectedOutput: '2',
+      correctAnswer: '__code__',
+      explanation: 'Use a shared static field, increment it inside the constructor, and access it through a static class method.',
     },
   ],
 };

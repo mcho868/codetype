@@ -104,6 +104,36 @@ interface CodeRunnerCardProps {
 
 const FONT = "var(--font-mono), monospace";
 
+function getRunnerLanguage(question: Question): NonNullable<Question["language"]> {
+  return question.language ?? "python";
+}
+
+function getRunnerAccentClass(language: NonNullable<Question["language"]>): string {
+  switch (language) {
+    case "java":
+      return "bg-orange-400 hover:bg-orange-300";
+    case "sql":
+      return "bg-teal-400 hover:bg-teal-300";
+    case "typescript":
+      return "bg-blue-400 hover:bg-blue-300";
+    default:
+      return "bg-cyan-400 hover:bg-cyan-300";
+  }
+}
+
+function getRunnerButtonClass(language: NonNullable<Question["language"]>): string {
+  switch (language) {
+    case "java":
+      return "text-orange-300 hover:border-orange-500/60 hover:text-orange-200";
+    case "sql":
+      return "text-teal-300 hover:border-teal-500/60 hover:text-teal-200";
+    case "typescript":
+      return "text-blue-300 hover:border-blue-500/60 hover:text-blue-200";
+    default:
+      return "text-cyan-300 hover:border-cyan-500/60 hover:text-cyan-200";
+  }
+}
+
 function cleanStdout(s: string): string {
   return s
     .replace(/\r\n/g, "\n")
@@ -194,8 +224,11 @@ export default function CodeRunnerCard({
       : `code-draft:${question.id}`;
   const testCases = question.testCases ?? [];
   const gradeMode = question.gradeMode ?? "stdout";
+  const language = getRunnerLanguage(question);
   const visibleCases = testCases.filter((tc) => !tc.hidden);
-  const interactiveRun = gradeMode === "stdout";
+  const interactiveRun = language === "python" && gradeMode === "stdout";
+  const accentClass = getRunnerAccentClass(language);
+  const actionButtonClass = getRunnerButtonClass(language);
 
   const { user } = useLearnAuth();
   const isAdmin = user?.role === "admin";
@@ -294,9 +327,9 @@ export default function CodeRunnerCard({
     setAllPassed(previousAnswer.isCorrect);
     setRestoreLoading(true);
 
-    runTestCasesLocally(testCases, previousAnswer.selectedAnswer)
+    gradeCodeRunnerQuestion(question, previousAnswer.selectedAnswer)
       .then((results) => {
-        setServerResults(results);
+        setServerResults(results.results);
         // Trust the originally-graded, persisted result for correctness — this
         // re-run is only to repopulate the per-case display table. Re-executing
         // in a fresh Pyodide worker on every reload is inherently a bit flaky
@@ -337,6 +370,10 @@ export default function CodeRunnerCard({
     cases: TestCase[],
     submittedCode: string
   ): Promise<CaseResult[]> {
+    if (language !== "python") {
+      throw new Error(`Local execution is not supported for ${language}.`);
+    }
+
     const results: CaseResult[] = [];
 
     const filePreamble = (tc: TestCase): string => {
@@ -452,7 +489,7 @@ export default function CodeRunnerCard({
     setTestRunLoading(false);
   }
 
-  async function runVisibleLocally() {
+  async function runVisibleCases() {
     if (examLocked || visibleCases.length === 0) return;
     setTestRunLoading(true);
     setLocalResults(null);
@@ -460,8 +497,16 @@ export default function CodeRunnerCard({
     setSubmitError("");
 
     try {
-      const results = await runTestCasesLocally(visibleCases, code);
-      setLocalResults(results);
+      if (language === "python") {
+        const results = await runTestCasesLocally(visibleCases, code);
+        setLocalResults(results);
+        return;
+      }
+
+      const data = await gradeCodeRunnerQuestion(question, code, visibleCases);
+      setLocalResults(data.results);
+    } catch {
+      setSubmitError(`Failed to run the ${language} test cases.`);
     } finally {
       setTestRunLoading(false);
     }
@@ -471,7 +516,7 @@ export default function CodeRunnerCard({
     if (interactiveRun) {
       void handleInteractiveRun();
     } else {
-      void runVisibleLocally();
+      void runVisibleCases();
     }
   }
 
@@ -502,6 +547,23 @@ export default function CodeRunnerCard({
     URL.revokeObjectURL(url);
   }
 
+  function resetToStarter() {
+    if (examLocked) return;
+    const starter = question.starterCode ?? "";
+    setCode(starter);
+    localStorage.removeItem(draftKey);
+    setCodeRevision((r) => r + 1);
+    setLocalResults(null);
+    setServerResults(null);
+    setSubmitError("");
+    setAllPassed(false);
+    setTermLines([]);
+    setRunStatus("idle");
+    setInputValue("");
+    setInputPrompt("");
+    lastSubmittedRef.current = null;
+  }
+
   async function submitToServer() {
     if (examLocked) return;
     setSubmitLoading(true);
@@ -509,17 +571,13 @@ export default function CodeRunnerCard({
     setLocalResults(null);
 
     try {
-      const results = await runTestCasesLocally(testCases, code);
-      const data = {
-        results,
-        allPassed: results.length > 0 && results.every((r) => r.passed),
-      };
+      const data = await gradeCodeRunnerQuestion(question, code);
       setServerResults(data.results);
       setAllPassed(data.allPassed);
       lastSubmittedRef.current = { questionId: question.id, code };
       onAnswerSubmit({ selectedAnswer: code, isCorrect: data.allPassed });
     } catch {
-      setSubmitError("Failed to reach the Python test runner.");
+      setSubmitError(`Failed to reach the ${language} test runner.`);
     } finally {
       setSubmitLoading(false);
     }
@@ -587,13 +645,26 @@ export default function CodeRunnerCard({
   return (
     <div className="rounded-2xl border border-slate-800/70 overflow-hidden bg-slate-950/70">
       <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/60 border-b border-slate-800/70">
-        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">python</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+          {language}
+        </span>
         <div className="flex items-center gap-2">
+          <button
+            onClick={resetToStarter}
+            disabled={examLocked || runLoading || submitLoading || restoreLoading}
+            title="Discard your draft and reload the question starter code"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-slate-500 hover:text-slate-100 disabled:opacity-40"
+          >
+            Reset to starter
+          </button>
           {sampleFileCase && (
             <button
               onClick={downloadSampleFile}
               title={`Download the sample ${downloadFileName} your code reads`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold text-cyan-300 transition hover:border-cyan-500/60 hover:text-cyan-200"
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border border-slate-600 px-3 py-1.5 text-xs font-semibold transition",
+                actionButtonClass
+              )}
             >
               <span aria-hidden>↓</span>
               <span style={{ fontFamily: FONT }}>{downloadFileName}</span>
@@ -627,7 +698,10 @@ export default function CodeRunnerCard({
             <button
               onClick={handleRunClick}
               disabled={examLocked || (!interactiveRun && visibleCases.length === 0)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 px-4 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-slate-400 hover:text-white disabled:opacity-40"
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border border-slate-600 px-4 py-1.5 text-xs font-semibold transition disabled:opacity-40",
+                actionButtonClass
+              )}
             >
               ▶ Run
             </button>
@@ -637,7 +711,7 @@ export default function CodeRunnerCard({
             disabled={examLocked || submitLoading || restoreLoading}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-slate-950 transition disabled:opacity-50",
-              "bg-cyan-400 hover:bg-cyan-300"
+              accentClass
             )}
           >
             {submitLoading ? "Submitting…" : examMode ? "Save Answer" : serverResults ? "Re-submit" : "Submit"}
@@ -648,7 +722,7 @@ export default function CodeRunnerCard({
       <CodeMirrorEditor
         key={`${question.id}-${codeRevision}`}
         initialCode={code}
-        language="python"
+        language={language}
         onChange={handleCodeChange}
         readOnly={examLocked}
       />
@@ -773,14 +847,20 @@ export default function CodeRunnerCard({
 
 export async function gradeCodeRunnerQuestion(
   question: Question,
-  studentCode: string
+  studentCode: string,
+  testCasesOverride?: TestCase[]
 ): Promise<{ allPassed: boolean; results: CaseResult[] }> {
-  const res = await fetch("/api/run-python-tests", {
+  const language = getRunnerLanguage(question);
+  const endpoint =
+    language === "java"
+      ? "/api/run-java-tests"
+      : "/api/run-python-tests";
+  const res = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       studentCode,
-      testCases: question.testCases ?? [],
+      testCases: testCasesOverride ?? question.testCases ?? [],
       gradeMode: question.gradeMode ?? "stdout",
       timeoutMs: question.timeoutMs ?? 8000,
     }),

@@ -8,6 +8,7 @@ const CodeMirrorEditor = dynamic(() => import("./CodeMirrorEditor"), { ssr: fals
 interface JavaEditorProps {
   initialCode: string;
   caption?: string;
+  sampleInput?: string;
   expectedOutput?: string;
 }
 
@@ -15,8 +16,14 @@ type Status = "idle" | "compiling" | "running" | "done" | "pass" | "fail";
 
 const FONT = "var(--font-mono), monospace";
 
-export default function JavaEditor({ initialCode, caption, expectedOutput }: JavaEditorProps) {
+export default function JavaEditor({
+  initialCode,
+  caption,
+  sampleInput,
+  expectedOutput,
+}: JavaEditorProps) {
   const [code, setCode] = useState(initialCode);
+  const [stdin, setStdin] = useState(sampleInput ?? "");
   const [resetKey, setResetKey] = useState(0);
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
@@ -40,7 +47,7 @@ export default function JavaEditor({ initialCode, caption, expectedOutput }: Jav
       const res = await fetch("/api/run-java", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, stdin }),
       });
       const data = await res.json();
       setStatus("running");
@@ -63,6 +70,7 @@ export default function JavaEditor({ initialCode, caption, expectedOutput }: Jav
 
   function handleReset() {
     setCode(initialCode);
+    setStdin(sampleInput ?? "");
     setResetKey((k) => k + 1);
     setOutput("");
     setError("");
@@ -112,6 +120,24 @@ export default function JavaEditor({ initialCode, caption, expectedOutput }: Jav
         language="java"
         onChange={setCode}
       />
+
+      <div className="border-t border-slate-800/70">
+        <div className="px-5 py-2 bg-slate-900/60 border-b border-slate-800/70">
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+            Input
+          </span>
+        </div>
+        <div className="px-5 py-4">
+          <textarea
+            value={stdin}
+            onChange={(e) => setStdin(e.target.value)}
+            className="min-h-24 w-full resize-y rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-cyan-300 outline-none transition focus:border-orange-400/70"
+            style={{ fontFamily: FONT }}
+            spellCheck={false}
+            placeholder={"One line per input value.\nExample:\n42"}
+          />
+        </div>
+      </div>
 
       {/* Output */}
       {hasOutput && (

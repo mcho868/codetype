@@ -323,18 +323,22 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
                       key={ci}
                       initialCode={ex.code}
                       caption={ex.caption}
+                      sampleInput={ex.sampleInput}
+                      expectedOutput={ex.expectedOutput}
                     />
                   ) : ex.editable && ex.language === 'typescript' ? (
                     <TypeScriptEditor
                       key={ci}
                       initialCode={ex.code}
                       caption={ex.caption}
+                      expectedOutput={ex.expectedOutput}
                     />
                   ) : ex.editable ? (
                     <CodeEditor
                       key={ci}
                       initialCode={ex.code}
                       caption={ex.caption}
+                      expectedOutput={ex.expectedOutput}
                     />
                   ) : (
                     <CodeBlock

@@ -3,35 +3,39 @@ import type { Module } from './types';
 const module9: Module = {
   id: 'module-9',
   slug: '9',
-  title: 'Generics',
-  description: 'Write type-safe, reusable classes and methods using Java generics and bounded type parameters.',
+  title: 'Collections & Generics',
+  description: 'Use Java collections effectively and write type-safe reusable code with generics.',
   icon: '🧩',
   color: 'from-purple-500 to-violet-400',
   locked: false,
   lessons: [
     {
       id: 'lesson-9-1',
-      title: 'What Are Generics?',
-      content: `**Generics** let you write classes, interfaces, and methods that work with any type, while still being type-safe. Instead of working with \`Object\` (which requires casting), you parameterize the class with a type \`<T>\`.
+      title: 'Collections, ArrayList, and Type Safety',
+      content: `In the frameworks part of COMPSCI 230, **collections** matter because real programs rarely store just one object. They manage many objects: windows contain widgets, libraries contain books, and MVC models often contain lists of records.
+
+The most common starting point is \`ArrayList<T>\`:
+- \`List<T>\` is the interface
+- \`ArrayList<T>\` is a common resizable implementation
+- the \`<T>\` makes the collection **type-safe**
 
 Without generics:
 \`\`\`java
-// Old way — Object-based (not type safe)
 ArrayList list = new ArrayList();
 list.add("hello");
-list.add(42);  // No error at compile time — but this is a bug!
-String s = (String) list.get(1); // ClassCastException at runtime!
+list.add(42);   // compiles, but this is a bug waiting to happen
+String s = (String) list.get(1);  // runtime ClassCastException
 \`\`\`
 
 With generics:
 \`\`\`java
-// Type-safe — compiler catches mistakes
-ArrayList<String> list = new ArrayList<>();
-list.add("hello");
-// list.add(42);  // COMPILE ERROR — saves us from a bug!
-String s = list.get(0);  // No cast needed
-System.out.println(s);
-\`\`\``,
+List<String> names = new ArrayList<>();
+names.add("hello");
+// names.add(42);  // compile-time error
+String s = names.get(0);
+\`\`\`
+
+This is why collections and generics naturally belong together: the collection stores many values, and generics let the compiler protect you from mixing the wrong types.`,
       codeExamples: [
         {
           language: 'java',
