@@ -138,7 +138,11 @@ export async function POST(req: NextRequest) {
     await mkdir(dir, { recursive: true });
     await writeFile(filePath, code, "utf8");
 
-    const compileResult = await runCommand("javac", [`${className}.java`], dir);
+    const compileResult = await runCommand(
+      "javac",
+      ["-encoding", "UTF-8", `${className}.java`],
+      dir
+    );
 
     if (compileResult.error) {
       return NextResponse.json({

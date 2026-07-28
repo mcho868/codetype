@@ -193,7 +193,12 @@ export async function POST(req: NextRequest) {
     await mkdir(dir, { recursive: true });
     await writeFile(filePath, studentCode, "utf8");
 
-    const compileResult = await runCommand("javac", [`${className}.java`], dir, timeoutMs);
+    const compileResult = await runCommand(
+      "javac",
+      ["-encoding", "UTF-8", `${className}.java`],
+      dir,
+      timeoutMs
+    );
 
     if (compileResult.error) {
       const results: CaseResult[] = testCases.map((testCase) => ({
