@@ -111,6 +111,32 @@ The lecture also uses **nested loops** for patterns, grids, and multi-step repet
           language: 'java',
           code: `public class Main {
     public static void main(String[] args) {
+        int counter = 1;
+
+        do {
+            System.out.print(counter + " ");
+            counter++;
+        } while (counter <= 5);
+
+        System.out.printf("%nLoop ended with counter=%d%n", counter);
+
+        // The body always runs at least once, even when the condition starts false
+        int value = 100;
+
+        do {
+            System.out.println("Ran once with value=" + value);
+            value++;
+        } while (value < 0);
+    }
+}`,
+          caption: 'do-while tests the condition after the body, so the body always runs at least once.',
+          expectedOutput: '1 2 3 4 5 \nLoop ended with counter=6\nRan once with value=100',
+          editable: true,
+        },
+        {
+          language: 'java',
+          code: `public class Main {
+    public static void main(String[] args) {
         int count;
 
         for (count = 1; count <= 10; count++) {
