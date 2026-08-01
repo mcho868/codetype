@@ -35,12 +35,15 @@ ENV PORT=3000
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
-# The Java API routes invoke both javac and java at runtime.
+# The code-runner API routes invoke Java and Python at runtime.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends openjdk-17-jdk-headless \
+    && apt-get install -y --no-install-recommends \
+        openjdk-17-jdk-headless \
+        python3 \
     && rm -rf /var/lib/apt/lists/* \
     && java -version \
-    && javac -version
+    && javac -version \
+    && python3 --version
 
 RUN groupadd --system --gid 1001 nodejs \
     && useradd --system --uid 1001 --gid nodejs nextjs
