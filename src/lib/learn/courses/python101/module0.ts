@@ -129,6 +129,7 @@ input() pauses the program and waits for the user to type something and press En
           code: `name = input("What is your name? ")
 print("Hello,", name)`,
           caption: 'Ask the user for their name',
+          sampleInput: 'Alice\n',
           editable: true,
         },
         {
@@ -138,6 +139,7 @@ age = int(age_str)       # convert string to int
 next_year = age + 1
 print("Next year you will be", next_year)`,
           caption: 'Converting input to a number',
+          sampleInput: '14\n',
           editable: true,
         },
       ],
@@ -163,6 +165,7 @@ name = input("Enter your name: ")
 # Step 2: greet them
 print("Hello,", name)`,
           caption: 'Comments explain your code',
+          sampleInput: 'Alice\n',
           editable: true,
         },
       ],

@@ -98,7 +98,8 @@ function buildModules(): Module[] {
         const courseModule = sourceModuleBySlug.get(slug);
         if (!courseModule) return [];
         const section = `Week ${week.week} · ${week.lectureRange}`;
-        const locked = courseModule.locked || week.week > 2;
+        // Weeks 1–3 are available to every student; later weeks remain gated.
+        const locked = courseModule.locked || week.week > 3;
 
         return [
           {

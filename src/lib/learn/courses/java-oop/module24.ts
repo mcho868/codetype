@@ -12,13 +12,13 @@ const module24: Module = {
     {
       id: 'lesson-24-1',
       title: 'while Loops and Sentinel-Controlled Repetition',
-      content: `Lecture 5 starts with **repetition structure**: statements that run repeatedly while a loop condition remains true.
+      content: `A **repetition structure** consists of statements that run repeatedly while a loop condition remains true.
 
 Two important loop categories appear immediately:
 - **counter-controlled repetition**: you know how many iterations you want
 - **sentinel-controlled repetition**: you do not know in advance how many values will arrive, so a special value ends the loop
 
-The lecture's key sentinel idea is:
+The key sentinel pattern is:
 1. read the first value **before** the loop
 2. test whether that value is the sentinel
 3. process it
@@ -75,7 +75,7 @@ This is ideal when you already know the repetition pattern:
 - visit every array index
 - print a fixed-size pattern
 
-The lecture also points out that a \`for\` loop can usually be rewritten as a \`while\` loop, but \`for\` is typically clearer when a control variable is doing the counting.`,
+A \`for\` loop can usually be rewritten as a \`while\` loop, but \`for\` is typically clearer when a control variable is doing the counting.`,
       codeExamples: [
         {
           language: 'java',
@@ -97,15 +97,15 @@ The lecture also points out that a \`for\` loop can usually be rewritten as a \`
       title: 'do-while, break, continue, and Nested Loops',
       content: `A **do-while** loop checks its condition **after** executing the body, so it runs **one or more times**.
 
-Lecture 5 then moves to loop-control statements:
+Loop-control statements include:
 - **break**: terminate the innermost loop immediately
 - **continue**: skip the rest of the current iteration and move to the next one
 
-One especially important lecture warning:
+One important warning:
 - in a \`for\` loop, the increment still happens after \`continue\`
 - in a \`while\` loop, if your increment is written **after** the \`continue\`, you may accidentally create an infinite loop
 
-The lecture also uses **nested loops** for patterns, grids, and multi-step repetition.`,
+**Nested loops** are useful for patterns, grids, and multi-step repetition.`,
       codeExamples: [
         {
           language: 'java',
@@ -179,9 +179,9 @@ The lecture also uses **nested loops** for patterns, grids, and multi-step repet
     {
       id: 'lesson-24-4',
       title: 'Random Numbers in Practice',
-      content: `The lecture introduces **SecureRandom** for nondeterministic random values, but it also makes a practical teaching point: in a code runner, deterministic output is often more useful.
+      content: `**SecureRandom** provides nondeterministic random values, but in a code runner, deterministic output is often more useful.
 
-So the slides recommend:
+For predictable output:
 - use a **single** random object
 - do not create a new random object for every value
 - use a **seeded** \`Random\` in CodeRunner-style environments when you want reproducible output
@@ -318,7 +318,7 @@ public class Main {
       starterCode: `public class Main {\n    public static void main(String[] args) {\n        // Print the pattern using nested loops\n    }\n}`,
       expectedOutput: '***\n**\n*',
       correctAnswer: '__code__',
-      explanation: 'For row lengths 3, 2, and 1, either count downward directly or use a break condition like the lecture example.',
+      explanation: 'For row lengths 3, 2, and 1, either count downward directly or use a break condition like the example.',
     },
   ],
 };

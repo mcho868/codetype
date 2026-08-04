@@ -338,6 +338,7 @@ export default function LessonView({ moduleId, courseSlug }: LessonViewProps) {
                       key={ci}
                       initialCode={ex.code}
                       caption={ex.caption}
+                      sampleInput={ex.sampleInput}
                       expectedOutput={ex.expectedOutput}
                     />
                   ) : (

@@ -12,7 +12,7 @@ const module25: Module = {
     {
       id: 'lesson-25-1',
       title: 'Declaring, Creating, and Initializing Arrays',
-      content: `Lecture 6 introduces arrays as fixed-length collections of values that all have the **same element type**.
+      content: `Arrays are fixed-length collections of values that all have the **same element type**.
 
 Three creation steps matter:
 1. **declare** the array variable
@@ -30,7 +30,7 @@ or, with an initializer:
 int[] courseMarks = new int[]{26, 73, 55, 97};
 \`\`\`
 
-Lecture points to remember:
+Key points:
 - arrays are **objects** in Java
 - indexing starts at **0**
 - valid indexes run from \`0\` to \`length - 1\`
@@ -61,7 +61,7 @@ Lecture points to remember:
     {
       id: 'lesson-25-2',
       title: 'Traversing Arrays, Enhanced for, and Varargs',
-      content: `The lecture uses ordinary \`for\` loops to walk over indexes and the **enhanced for loop** to walk directly over elements.
+      content: `Use ordinary \`for\` loops to walk over indexes and the **enhanced for loop** to walk directly over elements.
 
 Index-based traversal:
 \`\`\`java
@@ -81,7 +81,7 @@ Each style has a purpose:
 - use an **index loop** when you need the position
 - use an **enhanced for** when you only need the values
 
-Lecture 6 also reminds you that:
+Remember that:
 - \`String[] args\` in \`main\` is itself an array
 - Java treats **varargs** as an array inside the method body`,
       codeExamples: [
@@ -162,7 +162,7 @@ Do **not** assume every row has the same number of columns unless the array is k
     {
       id: 'lesson-25-4',
       title: 'ArrayList, Generics, Wrapper Classes, and Arrays vs ArrayList',
-      content: `The lecture then introduces **ArrayList** as a resizable collection class.
+      content: `**ArrayList** is a resizable collection class.
 
 Important differences from arrays:
 - arrays have fixed length
@@ -174,7 +174,7 @@ Because ArrayList stores **objects**, not primitive values directly, wrappers ma
 - use \`ArrayList<Integer>\`, not \`ArrayList<int>\`
 - use \`ArrayList<Double>\`, not \`ArrayList<double>\`
 
-Lecture 6 also introduces:
+Related concepts include:
 - **generics**: \`ArrayList<String>\`, \`ArrayList<Integer>\`
 - **wrapper classes**: \`Integer\`, \`Double\`, \`Boolean\`, etc.
 - **autoboxing / unboxing**: Java often converts between \`int\` and \`Integer\` for you automatically`,

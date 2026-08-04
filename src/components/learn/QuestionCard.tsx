@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Question } from "@/lib/learn/courseData";
 import { QuestionAnswer } from "@/lib/learn/progress";
-import { usePyodide } from "@/lib/learn/usePyodide";
+import { runPythonCode } from "@/lib/learn/pythonRunner";
 import { cn } from "@/lib/utils";
 import CodeRunnerCard from "./CodeRunnerCard";
 import LearnMarkdown from "./LearnMarkdown";
@@ -41,7 +41,6 @@ export default function QuestionCard({
   attemptNumber,
 }: QuestionCardProps) {
   const isCodeChallenge = question.type === "code-challenge";
-  const isCodeRunner = question.type === "code-runner";
   const draftKey = `code-draft:${question.id}`;
   const hideReveal = examMode && !examFinished;
 
@@ -56,12 +55,15 @@ export default function QuestionCard({
   const [selected, setSelected] = useState(previousAnswer?.selectedAnswer ?? "");
   const [submitted, setSubmitted] = useState(!!previousAnswer && (!examMode || examFinished));
   const [code, setCode] = useState(savedCode ?? draftCode ?? question.starterCode ?? "");
+  const [codeStdin, setCodeStdin] = useState("");
+  const runAbortRef = useRef<AbortController | null>(null);
 
   // Reset all state when the question changes (e.g. after content updates)
   useEffect(() => {
     setSelected(previousAnswer?.selectedAnswer ?? "");
     setSubmitted(!!previousAnswer);
     setCode(savedCode ?? draftCode ?? question.starterCode ?? "");
+    setCodeStdin("");
     setCodeOutput("");
     setCodeError("");
     setPatternError("");
@@ -79,12 +81,13 @@ export default function QuestionCard({
   const [codeError, setCodeError] = useState("");
   const [patternError, setPatternError] = useState("");
   const [runStatus, setRunStatus] = useState<"idle" | "loading" | "pass" | "fail">("idle");
-  const { runCodeSimple, terminateWorker } = usePyodide();
 
   const isJava = question.language === "java";
   const isSQL = question.language === "sql";
   const isTypeScript = question.language === "typescript";
+  const isPython = !isJava && !isSQL && !isTypeScript;
   const lang = isJava ? "java" : isSQL ? "sql" : isTypeScript ? "typescript" : "python";
+  const codeReadsInput = isPython && /\binput\s*\(/.test(code);
 
   const normalise = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '');
 
@@ -123,6 +126,14 @@ export default function QuestionCard({
           return;
         }
       }
+    }
+
+    if (codeReadsInput && codeStdin.length === 0) {
+      setCodeError(
+        "This program reads input. Enter one line per input() call in the field below, then run it again."
+      );
+      setRunStatus("fail");
+      return;
     }
 
     let output = "";
@@ -168,9 +179,19 @@ export default function QuestionCard({
         error = "Failed to reach the TypeScript runner.";
       }
     } else {
-      const result = await runCodeSimple(code);
-      output = result.output;
-      error = result.error;
+      const controller = new AbortController();
+      runAbortRef.current = controller;
+      try {
+        const result = await runPythonCode(code, codeStdin, controller.signal);
+        output = result.output;
+        error = result.error;
+      } catch (runError) {
+        if ((runError as Error).name !== "AbortError") {
+          error = (runError as Error).message;
+        }
+      } finally {
+        runAbortRef.current = null;
+      }
     }
 
     setCodeOutput(output);
@@ -350,7 +371,7 @@ export default function QuestionCard({
               {runStatus === "loading" ? (
                 <button
                   onClick={() => {
-                    terminateWorker();
+                    runAbortRef.current?.abort();
                     setCodeError("Execution stopped by user.");
                     setRunStatus("fail");
                   }}
@@ -380,6 +401,25 @@ export default function QuestionCard({
               onChange={handleCodeChange}
               readOnly={submitted}
             />
+
+            {isPython && (
+              <div className="border-t border-slate-800/70">
+                <div className="px-4 py-2 bg-slate-900/60 border-b border-slate-800/70">
+                  <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                    Input (optional)
+                  </span>
+                </div>
+                <textarea
+                  value={codeStdin}
+                  onChange={(e) => !submitted && setCodeStdin(e.target.value)}
+                  disabled={submitted || runStatus === "loading"}
+                  placeholder="One line per input() call"
+                  className="w-full min-h-16 resize-y bg-slate-950/50 px-4 py-3 text-sm text-slate-200 outline-none placeholder:text-slate-600 disabled:opacity-60"
+                  style={{ fontFamily: FONT }}
+                  spellCheck={false}
+                />
+              </div>
+            )}
 
             {patternError && (
               <div className="border-t border-slate-800/70 px-4 py-3 bg-amber-500/5">

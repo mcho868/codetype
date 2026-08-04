@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Question, TestCase } from "@/lib/learn/courseData";
 import { QuestionAnswer } from "@/lib/learn/progress";
-import { usePyodide, type TerminalLine } from "@/lib/learn/usePyodide";
+import { runPythonCode } from "@/lib/learn/pythonRunner";
 import { useLearnAuth } from "@/lib/learn/AuthContext";
 import { cn } from "@/lib/utils";
 import LearnMarkdown from "./LearnMarkdown";
@@ -81,6 +81,10 @@ interface CaseResult {
   error?: string;
 }
 
+type TerminalLine =
+  | { type: "output"; text: string }
+  | { type: "error"; text: string };
+
 interface DisplayRow {
   caseId: string;
   description: string;
@@ -132,16 +136,6 @@ function getRunnerButtonClass(language: NonNullable<Question["language"]>): stri
     default:
       return "text-cyan-300 hover:border-cyan-500/60 hover:text-cyan-200";
   }
-}
-
-function cleanStdout(s: string): string {
-  return s
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0)
-    .join("\n")
-    .toLowerCase();
 }
 
 function formatValue(v: unknown): string {
@@ -261,21 +255,18 @@ export default function CodeRunnerCard({
 
   // Interactive terminal — same pattern as CodeEditor (course runner)
   const [termLines, setTermLines] = useState<TerminalLine[]>([]);
-  const [runStatus, setRunStatus] = useState<
-    "idle" | "loading" | "running" | "waiting" | "done"
-  >("idle");
-  const [inputPrompt, setInputPrompt] = useState("");
-  const [inputValue, setInputValue] = useState("");
+  const [runStatus, setRunStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [stdin, setStdin] = useState(
+    () => testCases.find((tc) => !tc.hidden)?.stdin ?? ""
+  );
   const termRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const runAbortRef = useRef<AbortController | null>(null);
   const lastSubmittedRef = useRef<{ questionId: string; code: string } | null>(null);
 
-  const { runCode, runCodeSimple, submitInput, terminateWorker } = usePyodide();
-
   const isInteractiveRunning =
-    runStatus === "loading" || runStatus === "running" || runStatus === "waiting";
+    runStatus === "loading";
   const runLoading = interactiveRun ? isInteractiveRunning : testRunLoading;
-  const hasTerminalContent = termLines.length > 0 || runStatus === "waiting";
+  const hasTerminalContent = termLines.length > 0;
 
   const showRunResults = !examMode && localResults !== null;
   const showSubmitResults = !examMode && serverResults !== null;
@@ -311,8 +302,7 @@ export default function CodeRunnerCard({
     setServerResults(null);
     setTermLines([]);
     setRunStatus("idle");
-    setInputValue("");
-    setInputPrompt("");
+    setStdin(testCases.find((tc) => !tc.hidden)?.stdin ?? "");
 
     if (examMode) {
       setAllPassed(false);
@@ -347,10 +337,6 @@ export default function CodeRunnerCard({
   }, [question.id, previousAnswer?.selectedAnswer, examMode]);
 
   useEffect(() => {
-    if (runStatus === "waiting") inputRef.current?.focus();
-  }, [runStatus]);
-
-  useEffect(() => {
     if (termRef.current) {
       termRef.current.scrollTop = termRef.current.scrollHeight;
     }
@@ -366,124 +352,37 @@ export default function CodeRunnerCard({
     [examLocked, draftKey]
   );
 
-  async function runTestCasesLocally(
-    cases: TestCase[],
-    submittedCode: string
-  ): Promise<CaseResult[]> {
-    if (language !== "python") {
-      throw new Error(`Local execution is not supported for ${language}.`);
-    }
-
-    const results: CaseResult[] = [];
-
-    const filePreamble = (tc: TestCase): string => {
-      if (tc.fileContent === undefined || tc.fileContent === null) return "";
-      const name = tc.fileName ?? "input.txt";
-      return `with open(${JSON.stringify(name)}, "w") as __f:\n    __f.write(${JSON.stringify(tc.fileContent)})\n`;
-    };
-
-    const stdoutPreamble = (tc: TestCase): string => {
-      const stdin = tc.stdin ?? "";
-      return `import builtins as __builtins\n__inputs = iter(${JSON.stringify(stdin.split(/\r?\n/))})\n__builtins.input = lambda prompt="": next(__inputs, "")\n`;
-    };
-
-    for (const tc of cases) {
-      try {
-        if (gradeMode === "function" && tc.funcName) {
-          // Decode args via json.loads inside Python rather than inlining raw
-          // JSON as Python source — JSON `false`/`true`/`null` are not valid
-          // Python literals (they'd raise NameError). This matches the backend.
-          const argsJson = JSON.stringify(tc.args ?? []);
-          const wrapped = `${filePreamble(tc)}${submittedCode}\n\n__args = __import__("json").loads(${JSON.stringify(argsJson)})\n__result = ${tc.funcName}(*__args)`;
-          const { output, error } = await runCodeSimple(
-            `${wrapped}\nprint(__import__("json").dumps(__result))`
-          );
-          if (error) {
-            results.push({ caseId: tc.id, passed: false, error });
-            continue;
-          }
-          const line = output.trim().split("\n").pop() ?? "null";
-          let actual: unknown;
-          try {
-            actual = JSON.parse(line);
-          } catch {
-            actual = line;
-          }
-          const passed = JSON.stringify(actual) === JSON.stringify(tc.expectedReturn);
-          results.push({
-            caseId: tc.id,
-            passed,
-            expected: tc.expectedReturn,
-            actual,
-          });
-        } else {
-          const wrapped = `${stdoutPreamble(tc)}${filePreamble(tc)}${submittedCode}`;
-          const { output, error } = await runCodeSimple(wrapped);
-          if (error) {
-            results.push({ caseId: tc.id, passed: false, error });
-            continue;
-          }
-          const passed = cleanStdout(output) === cleanStdout(tc.expectedStdout ?? "");
-          results.push({
-            caseId: tc.id,
-            passed,
-            expected: tc.expectedStdout,
-            actual: output,
-          });
-        }
-      } catch (err) {
-        results.push({
-          caseId: tc.id,
-          passed: false,
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }
-
-    return results;
-  }
-
   async function handleInteractiveRun() {
     if (examLocked) return;
     setRunStatus("loading");
     setTermLines([]);
-    setInputValue("");
     setLocalResults(null);
     setServerResults(null);
     setSubmitError("");
 
-    const { error } = await runCode(
-      code,
-      (line) => {
-        setRunStatus("running");
-        setTermLines((prev) => [...prev, line]);
-      },
-      (prompt) => {
-        setInputPrompt(prompt);
-        setRunStatus("waiting");
-      },
-      () => {}
-    );
-
-    if (error) {
-      setRunStatus("done");
-    } else {
+    const controller = new AbortController();
+    runAbortRef.current = controller;
+    try {
+      const result = await runPythonCode(code, stdin, controller.signal);
+      setTermLines(
+        result.error
+          ? [{ type: "error", text: result.error }]
+          : result.output
+          ? [{ type: "output", text: result.output }]
+          : []
+      );
+    } catch (error) {
+      if ((error as Error).name !== "AbortError") {
+        setTermLines([{ type: "error", text: (error as Error).message }]);
+      }
+    } finally {
+      runAbortRef.current = null;
       setRunStatus("done");
     }
   }
 
-  function handleInputSubmit() {
-    if (runStatus !== "waiting") return;
-    const val = inputValue;
-    setTermLines((prev) => [...prev, { type: "input", prompt: inputPrompt, value: val }]);
-    setInputValue("");
-    setInputPrompt("");
-    setRunStatus("running");
-    submitInput(val);
-  }
-
   function handleStopRun() {
-    terminateWorker();
+    runAbortRef.current?.abort();
     setTermLines((prev) => [...prev, { type: "error", text: "Execution stopped by user." }]);
     setRunStatus("done");
     setTestRunLoading(false);
@@ -497,12 +396,6 @@ export default function CodeRunnerCard({
     setSubmitError("");
 
     try {
-      if (language === "python") {
-        const results = await runTestCasesLocally(visibleCases, code);
-        setLocalResults(results);
-        return;
-      }
-
       const data = await gradeCodeRunnerQuestion(question, code, visibleCases);
       setLocalResults(data.results);
     } catch {
@@ -559,8 +452,7 @@ export default function CodeRunnerCard({
     setAllPassed(false);
     setTermLines([]);
     setRunStatus("idle");
-    setInputValue("");
-    setInputPrompt("");
+    setStdin(testCases.find((tc) => !tc.hidden)?.stdin ?? "");
     lastSubmittedRef.current = null;
   }
 
@@ -727,6 +619,25 @@ export default function CodeRunnerCard({
         readOnly={examLocked}
       />
 
+      {interactiveRun && (
+        <div className="border-t border-slate-800/70">
+          <div className="px-4 py-2 bg-slate-900/60 border-b border-slate-800/70">
+            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+              Input (optional)
+            </span>
+          </div>
+          <textarea
+            value={stdin}
+            onChange={(e) => !examLocked && setStdin(e.target.value)}
+            disabled={examLocked || runLoading}
+            placeholder="One line per input() call"
+            className="w-full min-h-16 resize-y bg-slate-950/50 px-4 py-3 text-sm text-slate-200 outline-none placeholder:text-slate-600 disabled:opacity-60"
+            style={{ fontFamily: FONT }}
+            spellCheck={false}
+          />
+        </div>
+      )}
+
       {restoreLoading && (
         <div className="border-t border-slate-800/70 px-4 py-3 text-xs text-slate-500">
           Loading your previous results…
@@ -759,40 +670,12 @@ export default function CodeRunnerCard({
                   </div>
                 );
               }
-              if (line.type === "input") {
-                return (
-                  <div key={i} className="text-slate-300 whitespace-pre-wrap">
-                    {line.prompt}
-                    <span className="text-cyan-300">{line.value}</span>
-                  </div>
-                );
-              }
               return (
                 <div key={i} className="text-red-400 whitespace-pre-wrap">
                   {line.text}
                 </div>
               );
             })}
-            {runStatus === "waiting" && (
-              <div className="flex items-center gap-0 text-slate-300">
-                <span className="whitespace-pre">{inputPrompt}</span>
-                <input
-                  ref={inputRef}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleInputSubmit();
-                    }
-                  }}
-                  className="flex-1 bg-transparent text-cyan-300 outline-none caret-cyan-400 min-w-0"
-                  style={{ fontFamily: FONT }}
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-              </div>
-            )}
           </div>
         </div>
       )}

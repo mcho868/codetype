@@ -22,13 +22,13 @@ An **object** is a specific instance created from that blueprint.
 
 You can create many cookies from one cutter. Each cookie is independent — you can decorate them differently — but they all share the same shape.
 
-The lecture also emphasizes that Java gives you many **built-in classes** before you write your own:
+Java provides many **built-in classes** before you write your own:
 - \`String\` — represents text
 - \`Math\` — provides mathematical operations
 - \`Scanner\` — reads user input
 - \`Point\` and \`Rectangle\` from \`java.awt\`
 
-For object creation, the slides separate the process into:
+Object creation has three steps:
 1. **Declaration** — declare a variable that can refer to an object
 2. **Instantiation** — use \`new\` to allocate the object
 3. **Initialization** — run a constructor to give it its starting state
@@ -86,7 +86,7 @@ The golden rule: **instance variables should be private**. This is **encapsulati
 
 The \`new\` keyword allocates memory and calls the constructor.
 
-The slides also stress an important memory idea:
+An important memory idea is:
 - a class declaration defines the structure of an object
 - but it does **not** allocate storage for each future instance variable value
 - memory for instance variables is allocated when each object is instantiated
@@ -206,7 +206,7 @@ this.radius = radius;  // "this" instance's radius = parameter radius
 
 You can also use \`this(...)\` to call another constructor from within a constructor.
 
-Two details from the lecture matter a lot:
+Two details matter a lot:
 - if a class defines **no constructor**, Java supplies a default no-argument constructor
 - once you define **any** constructor yourself, Java does **not** generate that default one for you
 
@@ -216,7 +216,7 @@ Author a = new Author();
 \`\`\`
 fails when the class only defines \`Author(String name)\`.
 
-The lecture also covers **shadowing**:
+**Shadowing** occurs when:
 - if a parameter and an instance variable have the same name, the parameter hides the field inside the method body
 - use \`this.fieldName\` to explicitly refer to the instance variable`,
       codeExamples: [
@@ -270,7 +270,7 @@ The lecture also covers **shadowing**:
       title: 'Accessor, Mutator, and Behaviour Methods',
       content: `A well-designed class exposes behaviour through methods rather than letting outside code manipulate fields directly.
 
-The lecture introduces two common categories:
+Two common categories are:
 - **Accessor methods** (getters): return information from the object
 - **Mutator methods** (setters): update the object’s state
 
@@ -355,7 +355,7 @@ These methods make the class more meaningful than just a bag of fields.`,
     {
       id: 'java-lesson-1-5',
       title: 'Class Variables, Class Methods, and Enums',
-      content: `The slides then move beyond per-object state to **class-wide** information.
+      content: `Java also supports **class-wide** information.
 
 Use the \`static\` keyword for:
 - **class variables**: one shared copy for the entire class
@@ -375,7 +375,7 @@ This is useful for things like:
 - writing conversion helpers
 - utility functions that do not depend on any single object
 
-The lecture also revisits **enum** as a special class-like type with a fixed set of values. Enums can even define methods and private constructors.`,
+An **enum** is a special class-like type with a fixed set of values. Enums can even define methods and private constructors.`,
       codeExamples: [
         {
           language: 'java',
@@ -623,17 +623,17 @@ The lecture also revisits **enum** as a special class-like type with a fixed set
       id: 'java-q-1-17',
       type: 'code-challenge',
       language: 'java',
-      prompt: 'Exercise 1-2 style question: define a `Person` class with private fields `name` and `age`, two constructors (`Person()` and `Person(String, int)`), and a `toString()` method. In `main`, create `new Person("Michael", 21)` and print it. Expected output:\nMichael(21)',
+      prompt: 'Define a `Person` class with private fields `name` and `age`, two constructors (`Person()` and `Person(String, int)`), and a `toString()` method. In `main`, create `new Person("Michael", 21)` and print it. Expected output:\nMichael(21)',
       starterCode: `public class Main {\n    static class Person {\n        private String name;\n        private int age;\n\n        // add constructors and toString()\n    }\n\n    public static void main(String[] args) {\n        Person p1 = new Person("Michael", 21);\n        System.out.println(p1);\n    }\n}`,
       expectedOutput: 'Michael(21)',
       correctAnswer: '__code__',
-      explanation: 'This matches the lecture exercise: private fields, overloaded constructors, and a readable toString() result.',
+      explanation: 'Use private fields, overloaded constructors, and a readable toString() result.',
     },
     {
       id: 'java-q-1-18',
       type: 'code-challenge',
       language: 'java',
-      prompt: 'Exercise 10 style question: complete an `Employee` class with private fields `firstName` and `lastName`, a static variable that counts how many Employee objects were created, and a static `getCount()` method. In `main`, create two Employee objects and print the count. Expected output:\n2',
+      prompt: 'Complete an `Employee` class with private fields `firstName` and `lastName`, a static variable that counts how many Employee objects were created, and a static `getCount()` method. In `main`, create two Employee objects and print the count. Expected output:\n2',
       starterCode: `public class Main {\n    static class Employee {\n        private String firstName;\n        private String lastName;\n        // add static count\n\n        public Employee(String firstName, String lastName) {\n            // complete constructor\n        }\n\n        public static int getCount() {\n            // return count\n            return 0;\n        }\n    }\n\n    public static void main(String[] args) {\n        Employee bob = new Employee("Bob", "Blue");\n        Employee susan = new Employee("Susan", "Baker");\n        System.out.println(Employee.getCount());\n    }\n}`,
       expectedOutput: '2',
       correctAnswer: '__code__',

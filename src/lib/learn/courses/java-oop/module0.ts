@@ -161,7 +161,7 @@ public class HelloWorld {
     {
       id: 'java-lesson-0-4',
       title: 'Variables, Literals, Identifiers, and Constants',
-      content: `Lecture 3 introduces Java as a **statically typed** language. That means every variable must have a declared type before you use it.
+      content: `Java is a **statically typed** language. That means every variable must have a declared type before you use it.
 
 **Key vocabulary**
 - A **variable** is a named storage location in memory
@@ -212,7 +212,7 @@ Style convention:
         System.out.println("GST rate = " + GST_RATE);
     }
 }`,
-          caption: 'Declarations, assignments, and final constants from the Java Basics lecture.',
+          caption: 'Declarations, assignments, and final constants.',
           editable: true,
         },
       ],
@@ -372,7 +372,7 @@ import java.util.Scanner;
 Scanner console = new Scanner(System.in);
 \`\`\`
 
-The steps from the lecture are:
+The steps are:
 1. import the \`Scanner\` class
 2. construct one \`Scanner\` object
 3. display a prompt

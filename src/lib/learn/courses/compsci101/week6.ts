@@ -46,6 +46,7 @@ if answer.lower() == "yes":
 else:
     print("Cancelled.")`,
           caption: 'Case-insensitive comparison with lower()',
+          sampleInput: 'YES\n',
           editable: true,
         },
       ],

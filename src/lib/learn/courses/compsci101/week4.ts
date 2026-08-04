@@ -121,6 +121,7 @@ while num != 0:
     num = int(input())
 print(total)`,
           caption: 'Sum integers until sentinel 0 (0 is not included)',
+          sampleInput: '5\n-2\n0\n',
           editable: true,
         },
         {
@@ -132,6 +133,7 @@ while line != "":
     line = input()
 print(count)`,
           caption: 'Count lines until a blank line',
+          sampleInput: 'hello\nworld\n\n',
           editable: true,
         },
       ],
@@ -165,6 +167,7 @@ while age < 0 or age > 120:
     age = int(input())
 print("Age accepted:", age)`,
           caption: 'Re-read until age is in range',
+          sampleInput: '-1\n25\n',
           editable: true,
         },
         {
@@ -174,6 +177,7 @@ while len(password) < 8:
     password = input()
 print("ok")`,
           caption: 'Repeat until password is long enough',
+          sampleInput: 'short\nlongenough\n',
           editable: true,
         },
       ],

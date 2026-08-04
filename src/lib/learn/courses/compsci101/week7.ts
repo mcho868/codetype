@@ -305,6 +305,7 @@ print(sum(nums))
 
 # Try input like:  3 1 2`,
           caption: 'The int(input().split()) idiom for reading number lists',
+          sampleInput: '3 1 2\n',
           editable: true,
         },
       ],

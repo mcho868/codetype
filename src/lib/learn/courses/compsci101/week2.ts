@@ -32,6 +32,7 @@ Because input() always returns a string, convert it when you need a number:
           code: `name = input()
 print("Hi", name)`,
           caption: 'Read a name and greet the user',
+          sampleInput: 'Alice\n',
           editable: true,
         },
         {
@@ -39,6 +40,7 @@ print("Hi", name)`,
           code: `age = int(input())
 print("Next year you will be", age + 1)`,
           caption: 'Convert input to int before doing arithmetic',
+          sampleInput: '14\n',
           editable: true,
         },
       ],
@@ -109,6 +111,7 @@ print(a * b)
 print(a // b)
 print(a % b)`,
           caption: 'A two-number calculator from stdin',
+          sampleInput: '17\n5\n',
           editable: true,
         },
         {
@@ -134,6 +137,7 @@ height = float(input())
 area = width * height
 print(area)`,
           caption: 'Rectangle area with float input',
+          sampleInput: '4.5\n3\n',
           editable: true,
         },
       ],
@@ -163,6 +167,7 @@ x = 7
 y = 3
 print(f"{x} + {y} = {x + y}")`,
           caption: 'f-strings with variables and expressions',
+          sampleInput: 'Alice\n14\n',
           editable: true,
         },
         {
@@ -171,6 +176,7 @@ print(f"{x} + {y} = {x + y}")`,
 fahrenheit = celsius * 9 / 5 + 32
 print(f"{celsius}°C is {fahrenheit}°F")`,
           caption: 'Temperature conversion with an f-string',
+          sampleInput: '20\n',
           editable: true,
         },
       ],
@@ -198,6 +204,7 @@ Comments and docstrings never change what the program computes — they are for 
 name = input()          # read one line from stdin
 print("Welcome,", name) # comma adds a space automatically`,
           caption: 'Inline and full-line comments',
+          sampleInput: 'Alice\n',
           editable: true,
         },
         {

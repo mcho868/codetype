@@ -12,7 +12,7 @@ const module23: Module = {
     {
       id: 'lesson-23-1',
       title: 'Arithmetic Expressions, Promotion, and Precedence',
-      content: `Lecture 4 begins with **expressions**: pieces of code that evaluate to a single value.
+      content: `An **expression** is a piece of code that evaluates to a single value.
 
 The core arithmetic operators are:
 
@@ -24,7 +24,7 @@ The core arithmetic operators are:
 | \`/\` | division |
 | \`%\` | remainder |
 
-The lecture stresses two rules that students often miss:
+Two rules are easy to miss:
 - **integer division truncates**: \`10 / 4\` is \`2\`, not \`2.5\`
 - Java performs **widening promotion** automatically when needed: \`1.0 / 2\` becomes \`0.5\`
 
@@ -46,13 +46,13 @@ Parentheses are still the safest way to make your intent obvious.`,
     public static void main(String[] args) {
         int whole = 10 / 4;
         double exact = 10 / 4.0;
-        double lectureValue = 3 / 2 * 3.0 + 8 / 3;
+        double mixedValue = 3 / 2 * 3.0 + 8 / 3;
         double promoted = 2.0 * 4 / 5 + 6 / 4.0;
         int remainder = 7 % 3;
 
         System.out.println(whole);
         System.out.println(exact);
-        System.out.println(lectureValue);
+        System.out.println(mixedValue);
         System.out.println(promoted);
         System.out.println(remainder);
     }
@@ -79,7 +79,7 @@ Comparison operators:
 | \`==\` | equal to |
 | \`!=\` | not equal to |
 
-The lecture highlights two common mistakes:
+Two common mistakes are:
 - confusing \`=\` (assignment) with \`==\` (equality)
 - trying to chain comparisons like \`1 < value < 100\` as if Java were mathematics
 
@@ -96,7 +96,7 @@ Important precedence:
 2. \`&&\`
 3. \`||\`
 
-The slides also introduce **short-circuit evaluation**:
+Java also uses **short-circuit evaluation**:
 - \`&&\` stops as soon as the answer must be false
 - \`||\` stops as soon as the answer must be true`,
       codeExamples: [
@@ -123,12 +123,12 @@ The slides also introduce **short-circuit evaluation**:
       title: 'Selection Structures: if, else-if, Ternary, and switch',
       content: `Once you can build conditions, you can control which statements run.
 
-Lecture 4 covers three major selection tools:
+Java provides three major selection tools:
 - **if**: run code only when a condition is true
 - **if-else / else-if**: choose between alternatives
 - **switch**: select among several discrete constant values
 
-The lecture also introduces the **ternary operator**:
+The **ternary operator** has this form:
 \`\`\`java
 result = condition ? valueIfTrue : valueIfFalse;
 \`\`\`
@@ -294,7 +294,7 @@ If you forget a \`break\`, control "falls through" into later cases.`,
       id: 'java-q-23-9',
       type: 'code-challenge',
       language: 'java',
-      prompt: 'Use an `if-else-if` chain with `int grade = 78;` and print the letter grade using the lecture cutoffs:\n- `<= 60` prints `D`\n- `< 75` prints `C`\n- `< 90` prints `B`\n- otherwise prints `A`\n\nExpected output:\n```text\nB\n```',
+      prompt: 'Use an `if-else-if` chain with `int grade = 78;` and print the letter grade using these cutoffs:\n- `<= 60` prints `D`\n- `< 75` prints `C`\n- `< 90` prints `B`\n- otherwise prints `A`\n\nExpected output:\n```text\nB\n```',
       starterCode: `public class Main {\n    public static void main(String[] args) {\n        int grade = 78;\n        // Print the correct letter grade\n    }\n}`,
       expectedOutput: 'B',
       correctAnswer: '__code__',
