@@ -98,7 +98,30 @@ if (p instanceof Chef) {
       codeExamples: [
         {
           language: 'java',
-          code: `public class PolyArray {
+          code: `// The hierarchy from the previous lesson, repeated so this example runs on its own
+class Person {
+    private String name;
+    public Person(String name) { this.name = name; }
+    public String getName()    { return name; }
+    public String getJob()     { return "Person (no specific job)"; }
+}
+
+class Chef extends Person {
+    public Chef(String name) { super(name); }
+    @Override public String getJob() { return "Chef"; }
+}
+
+class PizzaChef extends Chef {
+    public PizzaChef(String name) { super(name); }
+    @Override public String getJob() { return "Pizza Chef"; }
+}
+
+class KFCChef extends Chef {
+    public KFCChef(String name) { super(name); }
+    @Override public String getJob() { return "KFC Chef"; }
+}
+
+public class PolyArray {
     public static void main(String[] args) {
         // Array of Person — but each element is a different subclass
         Person[] people = {
@@ -122,7 +145,7 @@ if (p instanceof Chef) {
                 chefCount++;
             }
         }
-        System.out.println("\nNumber of chefs: " + chefCount);
+        System.out.println("\\nNumber of chefs: " + chefCount);
     }
 }`,
           caption: 'Polymorphic array — mixed objects, uniform processing',

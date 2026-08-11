@@ -3,6 +3,7 @@ import { mkdir, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { spawn } from "child_process";
+import { prepareJavaSource } from "@/lib/learn/javaSource";
 
 export const runtime = "nodejs";
 
@@ -17,20 +18,6 @@ type CommandResult = {
   timedOut: boolean;
   error?: string;
 };
-
-function extractEntryTypeName(code: string): string {
-  const publicTypeMatch = code.match(
-    /public\s+(?:final\s+|abstract\s+)?(?:class|record|enum)\s+([A-Za-z_]\w*)/
-  );
-  if (publicTypeMatch) return publicTypeMatch[1];
-
-  const anyTypeMatch = code.match(
-    /(?:final\s+|abstract\s+)?(?:class|record|enum)\s+([A-Za-z_]\w*)/
-  );
-  if (anyTypeMatch) return anyTypeMatch[1];
-
-  return "Main";
-}
 
 function sanitizeJavaOutput(text: string, dir: string): string {
   return text
@@ -130,13 +117,13 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const className = extractEntryTypeName(code);
+  const { className, source } = prepareJavaSource(code);
   const dir = join(tmpdir(), `java-run-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const filePath = join(dir, `${className}.java`);
 
   try {
     await mkdir(dir, { recursive: true });
-    await writeFile(filePath, code, "utf8");
+    await writeFile(filePath, source, "utf8");
 
     const compileResult = await runCommand(
       "javac",

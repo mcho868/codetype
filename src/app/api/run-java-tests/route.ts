@@ -4,6 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { spawn } from "child_process";
 import type { TestCase } from "@/lib/learn/courseData";
+import { prepareJavaSource } from "@/lib/learn/javaSource";
 
 export const runtime = "nodejs";
 
@@ -27,20 +28,6 @@ type CommandResult = {
   timedOut: boolean;
   error?: string;
 };
-
-function extractEntryTypeName(code: string): string {
-  const publicTypeMatch = code.match(
-    /public\s+(?:final\s+|abstract\s+)?(?:class|record|enum)\s+([A-Za-z_]\w*)/
-  );
-  if (publicTypeMatch) return publicTypeMatch[1];
-
-  const anyTypeMatch = code.match(
-    /(?:final\s+|abstract\s+)?(?:class|record|enum)\s+([A-Za-z_]\w*)/
-  );
-  if (anyTypeMatch) return anyTypeMatch[1];
-
-  return "Main";
-}
 
 function sanitizeJavaOutput(text: string, dir: string): string {
   return text
@@ -182,7 +169,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ results, allPassed: false });
   }
 
-  const className = extractEntryTypeName(studentCode);
+  const { className, source } = prepareJavaSource(studentCode);
   const dir = join(
     tmpdir(),
     `java-tests-${Date.now()}-${Math.random().toString(36).slice(2)}`
@@ -191,7 +178,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await mkdir(dir, { recursive: true });
-    await writeFile(filePath, studentCode, "utf8");
+    await writeFile(filePath, source, "utf8");
 
     const compileResult = await runCommand(
       "javac",

@@ -159,22 +159,44 @@ public class Main {
       "java-cr-2-1",
       `Build a small payroll program using inheritance.
 
-Create an \`Employee\` superclass with a \`name\` field and a \`calculatePay()\` method. Then create:
-- \`SalariedEmployee\` with a fixed weekly salary
-- \`HourlyEmployee\` with hours worked and hourly rate
+Create an \`Employee\` superclass with a \`name\` field and a \`calculatePay()\` method, then override that method in two subclasses:
+- \`SalariedEmployee\` stores a weekly \`salary\` — its pay **is** that salary
+- \`HourlyEmployee\` stores \`hours\` and \`rate\` — its pay is \`hours * rate\`
 
-Input format:
-\`\`\`
+There is no overtime rule and no tax: pay is exactly the value above.
+
+**Input format**
+
+The first line is \`n\`, the number of employees. Each of the next \`n\` lines describes one employee, starting with a type letter. Names never contain spaces; salary, hours, and rate may have decimals.
+\`\`\`text
 <n>
-S <name> <salary>
-H <name> <hours> <rate>
-...
+S <name> <salary>      // salaried
+H <name> <hours> <rate>  // hourly
 \`\`\`
 
-Print one line per employee in input order, then a total:
+**Output format**
+
+One line per employee in input order, then the total of all pay. Every amount is printed to exactly 2 decimal places (use \`System.out.printf\`).
+\`\`\`text
+<name>: <pay>
+TOTAL: <sum>
 \`\`\`
-<name>: <pay to 2 decimals>
-TOTAL: <sum to 2 decimals>
+
+**Worked example**
+
+Input:
+\`\`\`text
+3
+S Ava 1200
+H Ben 18 20
+H Chloe 12 25
+\`\`\`
+Ava is salaried, so her pay is \`1200\`. Ben worked \`18 * 20 = 360\`, Chloe \`12 * 25 = 300\`, giving a total of \`1860\`. Output:
+\`\`\`text
+Ava: 1200.00
+Ben: 360.00
+Chloe: 300.00
+TOTAL: 1860.00
 \`\`\``,
       `import java.util.*;
 

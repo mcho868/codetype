@@ -49,7 +49,7 @@ public class Directory implements File {
     public String getDetails() {
         StringBuilder sb = new StringBuilder(name + "/");
         for (File f : contents) {
-            sb.append("\n  ").append(f.getDetails());
+            sb.append("\\n  ").append(f.getDetails());
         }
         return sb.toString();
     }
@@ -95,7 +95,7 @@ public class Department implements Employee {
     public void addMember(Employee e) { members.add(e); }
     public String getSummary() {
         StringBuilder sb = new StringBuilder("Dept: " + name);
-        for (Employee e : members) sb.append("\n  ").append(e.getSummary());
+        for (Employee e : members) sb.append("\\n  ").append(e.getSummary());
         return sb.toString();
     }
     public double getTotalSalary() {

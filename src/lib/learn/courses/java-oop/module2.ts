@@ -104,7 +104,23 @@ Best practice: keep fields private and use \`super\`'s getter methods instead.`,
       codeExamples: [
         {
           language: 'java',
-          code: `public class Sphere extends Ball {
+          code: `// Base of the hierarchy
+public class Ball {
+    private double radius;
+    private String color;
+
+    public Ball(double radius, String color) {
+        this.radius = radius;
+        this.color  = color;
+    }
+
+    public double getRadius() { return radius; }
+    public String getColor()  { return color; }
+
+    public double getVolume() { return 0.0; }
+}
+
+public class Sphere extends Ball {
     // Ball has: private double radius, private String color
 
     // Sphere just adds a colour field on top (Ball already has radius)
