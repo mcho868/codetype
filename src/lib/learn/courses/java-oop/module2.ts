@@ -234,6 +234,67 @@ public class TestShapes {
         },
       ],
     },
+    {
+      id: 'java-lesson-2-4',
+      title: 'The Object class and value identity',
+      content: `Every Java class ultimately extends the built-in \`Object\` class, either directly or through another superclass. This gives every object methods such as \`toString()\`, \`equals(Object)\`, and \`hashCode()\`.
+
+The default implementations are often not what a value class needs:
+
+- \`toString()\` normally contains a class name and identity-like number, so override it for readable output.
+- \`equals\` uses reference identity by default. Two separately created objects with the same data are not equal unless the class defines value equality.
+- If you override \`equals\`, also override \`hashCode\`. Equal objects must return the same hash code so collections such as \`HashSet\` behave correctly.
+
+The \`==\` operator compares primitive values or object references. It does not call \`equals\` for objects.`,
+      codeExamples: [
+        {
+          language: 'java',
+          code: `import java.util.Objects;
+
+public class Main {
+    static class Book {
+        private final String isbn;
+        private final String title;
+
+        Book(String isbn, String title) {
+            this.isbn = isbn;
+            this.title = title;
+        }
+
+        @Override
+        public String toString() {
+            return title + " (" + isbn + ")";
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof Book)) return false;
+            Book book = (Book) other;
+            return Objects.equals(isbn, book.isbn);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(isbn);
+        }
+    }
+
+    public static void main(String[] args) {
+        Book first = new Book("978-1", "Java");
+        Book second = new Book("978-1", "Java");
+
+        System.out.println(first);
+        System.out.println(first == second);
+        System.out.println(first.equals(second));
+        System.out.println(first.hashCode() == second.hashCode());
+    }
+}`,
+          caption: 'Value objects override toString, equals, and hashCode together.',
+          editable: true,
+        },
+      ],
+    },
   ],
   questions: [
     {
@@ -312,6 +373,37 @@ public class TestShapes {
       expectedOutput: 'Toyota\n4',
       correctAnswer: '__code__',
       explanation: 'Vehicle(String b) { brand = b; } and Car(String b, int d) { super(b); doors = d; }',
+    },
+    {
+      id: 'java-q-2-8',
+      type: 'multiple-choice',
+      prompt: 'What is the direct superclass of every Java class when no other superclass is named?',
+      choices: [
+        { id: 'a', text: 'Main' },
+        { id: 'b', text: 'Object' },
+        { id: 'c', text: 'ClassLoader' },
+        { id: 'd', text: 'System' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'Every Java class ultimately inherits from java.lang.Object.',
+    },
+    {
+      id: 'java-q-2-9',
+      type: 'true-false',
+      prompt: 'For object references, the == operator calls the class\'s equals method.',
+      choices: [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ],
+      correctAnswer: 'false',
+      explanation: 'For references, == compares whether two variables point to the same object. equals is a separate method that a class can override.',
+    },
+    {
+      id: 'java-q-2-10',
+      type: 'fill-in-blank',
+      prompt: 'When overriding equals for a value class, you should also override ______.',
+      correctAnswer: 'hashCode',
+      explanation: 'Equal objects must have equal hash codes so hash-based collections remain consistent.',
     },
   ],
 };

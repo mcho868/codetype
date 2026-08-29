@@ -205,6 +205,58 @@ public class Main {
         },
       ],
     },
+    {
+      id: 'lesson-25-5',
+      title: 'Arrays utilities and arrays of objects',
+      content: `The \`java.util.Arrays\` class provides useful static methods for common array operations:
+
+- \`Arrays.toString\` produces readable one-dimensional output.
+- \`Arrays.sort\` orders primitive values or comparable objects.
+- \`Arrays.copyOf\` creates a new array with a chosen length.
+- \`Arrays.fill\` assigns a value to a range or an entire array.
+
+Arrays can hold object references as well as primitive values. For example, a \`Student[]\` stores references to Student objects; each element is either a Student object or \`null\` until assigned. The array itself still has a fixed length.`,
+      codeExamples: [
+        {
+          language: 'java',
+          code: `import java.util.Arrays;
+
+public class Main {
+    static class Student {
+        private final String name;
+
+        Student(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    public static void main(String[] args) {
+        int[] marks = {73, 26, 97, 55};
+        Arrays.sort(marks);
+        System.out.println(Arrays.toString(marks));
+
+        int[] extended = Arrays.copyOf(marks, 6);
+        Arrays.fill(extended, 4, 6, 100);
+        System.out.println(Arrays.toString(extended));
+
+        Student[] students = {
+            new Student("Mia"),
+            new Student("Tane"),
+            null
+        };
+        System.out.println(Arrays.toString(students));
+    }
+}`,
+          caption: 'Arrays utility methods work with primitive arrays and arrays of object references.',
+          editable: true,
+        },
+      ],
+    },
   ],
   questions: [
     {
@@ -309,6 +361,30 @@ public class Main {
       expectedOutput: '[One, Fred, Two, Three]\ntrue\n1',
       correctAnswer: '__code__',
       explanation: 'Use `add`, `add(index, value)`, `contains`, and `indexOf`. The inserted `"Fred"` ends up at index 1.',
+    },
+    {
+      id: 'java-q-25-10',
+      type: 'multiple-choice',
+      prompt: 'Which method prints a readable representation of a one-dimensional array?',
+      choices: [
+        { id: 'a', text: 'Arrays.toString' },
+        { id: 'b', text: 'Arrays.readable' },
+        { id: 'c', text: 'array.print' },
+        { id: 'd', text: 'Arrays.output' },
+      ],
+      correctAnswer: 'a',
+      explanation: 'Arrays.toString(array) returns a readable string containing the array elements.',
+    },
+    {
+      id: 'java-q-25-11',
+      type: 'true-false',
+      prompt: 'An array of objects stores references, so an element can be null until an object is assigned.',
+      choices: [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ],
+      correctAnswer: 'true',
+      explanation: 'Object arrays are initialized with null references by default, unlike primitive arrays which receive primitive default values.',
     },
   ],
 };

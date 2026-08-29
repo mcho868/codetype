@@ -2,6 +2,97 @@ import type { Question } from "./types";
 import { cr, stdoutCases } from "./authoring";
 
 export const JAVA_OOP_EXTRA_RUNNER_QUESTIONS: Partial<Record<string, Question[]>> = {
+  "java-26": [
+    cr(
+      "java-cr-26-1",
+      "Read numbers.txt one integer per line. Ignore blank lines, add the remaining values, and print SUM: followed by the total.",
+      `import java.io.File;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Scanner input = new Scanner(new File("numbers.txt"));
+        int total = 0;
+
+        // Read each line, ignore blank lines, and add the integers.
+
+        input.close();
+        System.out.println("SUM: " + total);
+    }
+}`,
+      [
+        {
+          id: "sample-1",
+          description: "positive and negative numbers",
+          fileName: "numbers.txt",
+          fileContent: "10\n-3\n5\n",
+          expectedStdout: "SUM: 12",
+        },
+        {
+          id: "sample-2",
+          description: "blank lines are ignored",
+          fileName: "numbers.txt",
+          fileContent: "7\n\n-2\n11\n",
+          expectedStdout: "SUM: 16",
+        },
+        {
+          id: "hidden-1",
+          hidden: true,
+          fileName: "numbers.txt",
+          fileContent: "0\n-10\n25\n-5\n",
+          expectedStdout: "SUM: 10",
+        },
+        {
+          id: "hidden-2",
+          hidden: true,
+          fileName: "numbers.txt",
+          fileContent: "\n  4\n\n6\n",
+          expectedStdout: "SUM: 10",
+        },
+      ],
+      "Read with hasNextLine() and nextLine(), trim each line, skip empty strings, and parse the remaining text with Integer.parseInt()."
+    ),
+    cr(
+      "java-cr-26-2",
+      "Read names.txt as comma-delimited text. Print one trimmed name per line in the format Name: <name>.",
+      `import java.io.File;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Scanner input = new Scanner(new File("names.txt"));
+
+        // Configure the comma delimiter and print each trimmed token.
+
+        input.close();
+    }
+}`,
+      [
+        {
+          id: "sample-1",
+          description: "comma-separated names",
+          fileName: "names.txt",
+          fileContent: "Ada, Grace, James, Linus\n",
+          expectedStdout: "Name: Ada\nName: Grace\nName: James\nName: Linus",
+        },
+        {
+          id: "sample-2",
+          description: "whitespace around names",
+          fileName: "names.txt",
+          fileContent: "Mina,  Tane,Noah\n",
+          expectedStdout: "Name: Mina\nName: Tane\nName: Noah",
+        },
+        {
+          id: "hidden-1",
+          hidden: true,
+          fileName: "names.txt",
+          fileContent: "Ava,Ben,Chen\n",
+          expectedStdout: "Name: Ava\nName: Ben\nName: Chen",
+        },
+      ],
+      "Call useDelimiter(\",\") before the loop, use hasNext() and next(), and trim each token before printing it."
+    ),
+  ],
   "java-0": [
     cr(
       "java-cr-0-1",
@@ -286,16 +377,21 @@ public class Main {
       "java-cr-3-1",
       `Build a pet hotel summary using polymorphism.
 
-Create a \`Pet\` superclass with a \`name\` field plus two methods:
-- \`sound()\`
-- \`dailyFoodKg()\`
+Create a \`Pet\` superclass holding a \`name\` and a \`weight\` (kg), plus two methods:
+- \`sound()\` — the noise that kind of pet makes
+- \`dailyFoodKg()\` — how much food it eats per day
 
-Then create \`Dog\`, \`Cat\`, and \`Bird\` subclasses. Food rules:
-- Dog: \`weight * 0.04\`
-- Cat: \`weight * 0.03\`
-- Bird: \`weight * 0.02\`
+Then create \`Dog\`, \`Cat\`, and \`Bird\` subclasses that override both methods:
 
-Input format:
+| Subclass | \`sound()\` returns | \`dailyFoodKg()\` returns |
+| --- | --- | --- |
+| \`Dog\` | \`woof\` | \`weight * 0.04\` |
+| \`Cat\` | \`meow\` | \`weight * 0.03\` |
+| \`Bird\` | \`chirp\` | \`weight * 0.02\` |
+
+The sounds are lowercase, exactly as written above.
+
+Input format — the first line is \`n\`, the number of pets, then one line per pet. The tag is \`DOG\`, \`CAT\`, or \`BIRD\`; names never contain spaces; weights may have decimals:
 \`\`\`
 <n>
 DOG <name> <weight>
@@ -304,13 +400,30 @@ BIRD <name> <weight>
 ...
 \`\`\`
 
-Print one line per pet:
+Print one line per pet, in input order:
 \`\`\`
 <name>: <sound> <food to 2 decimals>
 \`\`\`
-Then print:
+Then one final line:
 \`\`\`
 TOTAL FOOD: <sum to 2 decimals>
+\`\`\`
+
+Add up the **exact** food amounts and round only when printing, so the total can differ by a cent from adding the printed lines. Use \`System.out.printf\` with \`%.2f\` for every amount.
+
+**Worked example** — for this input:
+\`\`\`
+3
+DOG Rex 20
+CAT Luna 4
+BIRD Pip 1.5
+\`\`\`
+Rex eats \`20 * 0.04 = 0.8\`, Luna eats \`4 * 0.03 = 0.12\`, Pip eats \`1.5 * 0.02 = 0.03\`, so the output is:
+\`\`\`
+Rex: woof 0.80
+Luna: meow 0.12
+Pip: chirp 0.03
+TOTAL FOOD: 0.95
 \`\`\``,
       `import java.util.*;
 
@@ -418,7 +531,7 @@ public class Main {
           {
             id: "hidden-2",
             stdin: "4\nBIRD Sky 0.8\nCAT Misty 3.2\nDOG Bruno 25\nCAT Nori 4.5\n",
-            expectedStdout: "Sky: chirp 0.02\nMisty: meow 0.10\nBruno: woof 1.00\nNori: meow 0.14\nTOTAL FOOD: 1.26",
+            expectedStdout: "Sky: chirp 0.02\nMisty: meow 0.10\nBruno: woof 1.00\nNori: meow 0.14\nTOTAL FOOD: 1.25",
           },
         ]
       ),

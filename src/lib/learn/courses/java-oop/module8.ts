@@ -150,6 +150,61 @@ public class Main {
         },
       ],
     },
+    {
+      id: 'lesson-8-4',
+      title: 'Local classes, adapters, and Iterable',
+      content: `A **local class** is declared inside a method and is useful when a helper type is needed only for one operation. It can use effectively final local variables from the surrounding method.
+
+Adapter classes provide convenient default implementations for listener interfaces. For example, \`WindowAdapter\` lets a window handler override only \`windowClosing\` instead of implementing every \`WindowListener\` method. \`MouseAdapter\` follows the same idea for mouse callbacks.
+
+The \`Iterable<T>\` interface connects a type to the enhanced for loop. An iterable supplies an \`iterator()\`, and the returned \`Iterator<T>\` moves through values with \`hasNext()\` and \`next()\`. This separates the collection from the mechanism used to traverse it.`,
+      codeExamples: [
+        {
+          language: 'java',
+          code: `import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Iterator;
+import java.util.List;
+
+public class Main {
+    static void demonstrate() {
+        class Label {
+            private final String text;
+
+            Label(String text) {
+                this.text = text;
+            }
+
+            void print() {
+                System.out.println(text);
+            }
+        }
+
+        new Label("Local class").print();
+
+        Iterator<Integer> iterator = List.of(2, 4, 6).iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+        WindowAdapter closeHandler = new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent event) {
+                System.out.println("Closing");
+            }
+        };
+        System.out.println(closeHandler.getClass().getSuperclass().getSimpleName());
+    }
+
+    public static void main(String[] args) {
+        demonstrate();
+    }
+}`,
+          caption: 'Local classes scope helpers to a method, adapters reduce listener boilerplate, and Iterator traverses values.',
+          editable: true,
+        },
+      ],
+    },
   ],
   questions: [
     {
@@ -289,6 +344,43 @@ public class Main {
       expectedOutput: 'HELLO',
       correctAnswer: '__code__',
       explanation: '@Override public void print(String msg) { System.out.println(msg.toUpperCase()); } — anonymous class implements Printer inline.',
+    },
+    {
+      id: 'q8-13',
+      type: 'multiple-choice',
+      prompt: 'Which method does an Iterable provide so that a value can be traversed?',
+      choices: [
+        { id: 'a', text: 'iterateAll' },
+        { id: 'b', text: 'iterator' },
+        { id: 'c', text: 'nextValue' },
+        { id: 'd', text: 'forEachOnly' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'Iterable<T> provides iterator(), which returns an Iterator<T> for traversal.',
+    },
+    {
+      id: 'q8-14',
+      type: 'multiple-choice',
+      prompt: 'Why would a programmer use WindowAdapter instead of implementing WindowListener directly?',
+      choices: [
+        { id: 'a', text: 'It removes the need for a JFrame' },
+        { id: 'b', text: 'It supplies empty methods so only required callbacks need to be overridden' },
+        { id: 'c', text: 'It turns all events into mouse events' },
+        { id: 'd', text: 'It makes every class static' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'Adapter classes provide default empty implementations for multi-method listener interfaces.',
+    },
+    {
+      id: 'q8-15',
+      type: 'true-false',
+      prompt: 'A local class is declared inside a method body and is not directly visible outside that method.',
+      choices: [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ],
+      correctAnswer: 'true',
+      explanation: 'The scope of a local class is the method or block in which it is declared.',
     },
   ],
 };

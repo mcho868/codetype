@@ -207,6 +207,47 @@ public class TotalArea {
         },
       ],
     },
+    {
+      id: 'java-lesson-3-3',
+      title: 'Packages and access control',
+      content: `A **package** is a namespace that groups related classes and helps control visibility. A source file declares its package at the top, and another package can use a public class after importing it.
+
+Java has four practical access levels:
+
+- **public**: accessible from any package.
+- **protected**: accessible in the declaring class, classes in the same package, and subclasses in other packages.
+- **package-private** (no modifier): accessible only inside the same package.
+- **private**: accessible only inside the declaring class.
+
+Use the most restrictive visibility that still supports the design. In particular, keep representation fields private and expose a small public method surface. A package is also part of a class's fully qualified name, so a class called Student in university.people is different from a class called Student in another package.`,
+      codeExamples: [
+        {
+          language: 'java',
+          code: `package university.people;
+
+public class Student {
+    private String name;
+    protected int year;
+    String tutor; // package-private
+
+    public Student(String name, int year) {
+        this.name = name;
+        this.year = year;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    private void resetName() {
+        name = "Unknown";
+    }
+}`,
+          caption: 'The modifier determines which classes can see each member.',
+          editable: false,
+        },
+      ],
+    },
   ],
   questions: [
     {
@@ -285,6 +326,43 @@ public class TotalArea {
       expectedOutput: 'Woof!\nMeow!\nWoof!',
       correctAnswer: '__code__',
       explanation: 'for (Animal a : animals) { a.speak(); } — dynamic binding calls each subclass\'s speak() at runtime.',
+    },
+    {
+      id: 'java-q-3-8',
+      type: 'multiple-choice',
+      prompt: 'Which access level allows a member to be used from any package?',
+      choices: [
+        { id: 'a', text: 'private' },
+        { id: 'b', text: 'package-private' },
+        { id: 'c', text: 'protected only' },
+        { id: 'd', text: 'public' },
+      ],
+      correctAnswer: 'd',
+      explanation: 'public members are accessible wherever the containing class is accessible.',
+    },
+    {
+      id: 'java-q-3-9',
+      type: 'multiple-choice',
+      prompt: 'What does a member with no access modifier have?',
+      choices: [
+        { id: 'a', text: 'private access' },
+        { id: 'b', text: 'package-private access' },
+        { id: 'c', text: 'public access' },
+        { id: 'd', text: 'protected access in every package' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'With no modifier, the member is visible to classes in the same package but not to unrelated packages.',
+    },
+    {
+      id: 'java-q-3-10',
+      type: 'true-false',
+      prompt: 'A subclass in another package can access a protected member through the inheritance relationship.',
+      choices: [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ],
+      correctAnswer: 'true',
+      explanation: 'protected permits access in subclasses outside the package, subject to the protected access rules.',
     },
   ],
 };

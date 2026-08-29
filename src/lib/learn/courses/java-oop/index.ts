@@ -26,6 +26,8 @@ import module22 from './module22';
 import module23 from './module23';
 import module24 from './module24';
 import module25 from './module25';
+import module26 from './module26';
+import module27 from './module27';
 import { JAVA_OOP_WEEK_PLAN } from './schedule';
 import { JAVA_OOP_EXTRA_RUNNER_QUESTIONS } from './extraRunnerQuestions';
 import type { Module, Question } from './types';
@@ -57,6 +59,8 @@ const sourceModules: Module[] = [
   module23,
   module24,
   module25,
+  module26,
+  module27,
 ];
 
 const sourceModuleBySlug = new Map(sourceModules.map((module) => [module.slug, module]));

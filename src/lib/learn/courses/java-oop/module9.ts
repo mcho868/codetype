@@ -168,6 +168,52 @@ printTitles(jBooks);`,
         },
       ],
     },
+    {
+      id: 'lesson-9-4',
+      title: 'Generic subtyping and wildcards',
+      content: `Generic types are invariant: \`List<Integer>\` is not a subtype of \`List<Number>\`, even though \`Integer\` is a subtype of \`Number\`. If it were allowed, a \`Double\` could be inserted into a list that promises to contain only integers.
+
+Wildcards express safe flexibility:
+
+- \`List<? extends Number>\` is a producer. You can read values as \`Number\`, but you should not add a new number because the exact subtype is unknown.
+- \`List<? super Integer>\` is a consumer. You can safely add \`Integer\` values, but values read from it have only the type \`Object\`.
+- \`List<?>\` means a list of some unknown type. You can inspect its size and read values as \`Object\`, but you cannot add ordinary values.
+
+A useful memory aid is **PECS**: Producer Extends, Consumer Super.`,
+      codeExamples: [
+        {
+          language: 'java',
+          code: `import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    static double sum(List<? extends Number> values) {
+        double total = 0;
+        for (Number value : values) {
+            total += value.doubleValue();
+        }
+        return total;
+    }
+
+    static void addDefaults(List<? super Integer> values) {
+        values.add(0);
+        values.add(0);
+    }
+
+    public static void main(String[] args) {
+        List<Integer> scores = List.of(8, 5);
+        System.out.println(sum(scores));
+
+        List<Number> totals = new ArrayList<>();
+        addDefaults(totals);
+        System.out.println(totals);
+    }
+}`,
+          caption: 'extends reads from a producer; super accepts values for a consumer.',
+          editable: true,
+        },
+      ],
+    },
   ],
   questions: [
     {
@@ -303,6 +349,43 @@ printTitles(jBooks);`,
       expectedOutput: '12\nmango',
       correctAnswer: '__code__',
       explanation: 'return a.compareTo(b) >= 0 ? a : b; — compareTo returns positive if a > b, so we return a in that case.',
+    },
+    {
+      id: 'q9-13',
+      type: 'true-false',
+      prompt: 'Because Integer extends Number, List<Integer> can be assigned directly to a variable of type List<Number>.',
+      choices: [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ],
+      correctAnswer: 'false',
+      explanation: 'Generic types are invariant. List<Integer> and List<Number> are different types even though Integer extends Number.',
+    },
+    {
+      id: 'q9-14',
+      type: 'multiple-choice',
+      prompt: 'Which wildcard is most suitable for a method that only needs to read Number values?',
+      choices: [
+        { id: 'a', text: 'List<? extends Number>' },
+        { id: 'b', text: 'List<? super Number>' },
+        { id: 'c', text: 'List<Number> only' },
+        { id: 'd', text: 'List<?> with no cast ever' },
+      ],
+      correctAnswer: 'a',
+      explanation: 'An extends wildcard accepts lists of Number or any Number subtype and lets the method read each value as Number.',
+    },
+    {
+      id: 'q9-15',
+      type: 'multiple-choice',
+      prompt: 'Which wildcard is suitable for a method that needs to add Integer values to a list?',
+      choices: [
+        { id: 'a', text: 'List<? extends Integer>' },
+        { id: 'b', text: 'List<? super Integer>' },
+        { id: 'c', text: 'List<?> and any value' },
+        { id: 'd', text: 'List<Object> only' },
+      ],
+      correctAnswer: 'b',
+      explanation: 'A super wildcard accepts a list of Integer, Number, or Object and safely permits adding Integer values.',
     },
   ],
 };

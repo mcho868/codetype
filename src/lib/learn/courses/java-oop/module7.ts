@@ -126,6 +126,39 @@ t.showBoth();`,
         },
       ],
     },
+    {
+      id: 'lesson-7-4',
+      title: 'Final fields and final classes',
+      content: `The \`final\` keyword has several related uses:
+
+- A **final variable** can be assigned only once. A final reference cannot point to a different object, although the referenced object may still be mutable.
+- A **final method** cannot be overridden by a subclass.
+- A **final class** cannot be extended.
+
+Use final for constants and for design decisions that subclasses must not change. Constants are conventionally named in uppercase and declared \`static final\`.`,
+      codeExamples: [
+        {
+          language: 'java',
+          code: `public final class CourseInfo {
+    public static final int MAX_WEEKS = 12;
+    private final String code;
+
+    public CourseInfo(String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
+    }
+}
+
+// This would be a compile-time error:
+// class SpecialCourse extends CourseInfo { }`,
+          caption: 'Final prevents reassignment, overriding, or inheritance depending on where it is used.',
+          editable: true,
+        },
+      ],
+    },
   ],
   questions: [
     {
@@ -265,6 +298,30 @@ t.showBoth();`,
       expectedOutput: 'I am Base',
       correctAnswer: '__code__',
       explanation: 'final methods are statically bound — Sub inherits describe() but cannot override it. The Base version always runs.',
+    },
+    {
+      id: 'q7-13',
+      type: 'true-false',
+      prompt: 'A final reference variable can never point to a different object after it is assigned.',
+      choices: [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ],
+      correctAnswer: 'true',
+      explanation: 'final prevents reassignment of the reference. It does not automatically make the referenced object immutable.',
+    },
+    {
+      id: 'q7-14',
+      type: 'multiple-choice',
+      prompt: 'What does declaring a class final prevent?',
+      choices: [
+        { id: 'a', text: 'Creating objects from the class' },
+        { id: 'b', text: 'Calling public methods' },
+        { id: 'c', text: 'Extending the class' },
+        { id: 'd', text: 'Using fields inside the class' },
+      ],
+      correctAnswer: 'c',
+      explanation: 'A final class can be instantiated and used normally, but no subclass may extend it.',
     },
   ],
 };
