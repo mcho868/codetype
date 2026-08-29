@@ -6,7 +6,7 @@ const module1: Module = {
   id: 'module-1',
   slug: '1',
   title: 'Algorithm Complexity',
-  description: 'Analyse algorithm efficiency with Big-O notation and understand time vs space trade-offs.',
+  description: 'Analyse algorithm efficiency with Big-O notation and understand time vs space trade-offs. Learn why set membership is O(1) on average: Python hashes a value to jump to its likely table slot instead of scanning every item; collisions can make individual lookups slower.',
   icon: '📈',
   color: 'from-purple-500 to-violet-400',
   locked: false,
@@ -18,7 +18,7 @@ const module1: Module = {
 
 We use **Big-O notation** to describe this growth rate. The letter n represents the size of the input (e.g., the length of a list). Big-O tells us: as n grows very large, how does the number of operations scale? Crucially, we care about the *dominant* behaviour, so we drop constants and lower-order terms. O(2n) simplifies to O(n); O(n² + n) simplifies to O(n²).
 
-The most common complexity classes, from fastest to slowest: **O(1) constant** — the operation takes the same time regardless of input size (e.g., accessing list[i]). **O(log n) logarithmic** — the work roughly halves each step (e.g., binary search). **O(n) linear** — you visit each element once (e.g., finding the max in an unsorted list). **O(n log n)** — slightly worse than linear, typical for efficient sorting. **O(n²) quadratic** — nested loops over all pairs. **O(2^n) exponential** — doubles with each added element, catastrophically slow.
+The most common complexity classes, from fastest to slowest: **O(1) constant** — the operation takes the same time regardless of input size (e.g., accessing list[i]). **O(log n) logarithmic** — the work roughly halves each step (e.g., repeatedly halving a search range). **O(n) linear** — you visit each element once (e.g., finding the max in an unsorted list). **O(n log n)** — slightly worse than linear, typical for efficient sorting. **O(n²) quadratic** — nested loops over all pairs. **O(2^n) exponential** — doubles with each added element, catastrophically slow.
 
 To see why this matters in practice: O(n²) with n = 10,000 means roughly 100,000,000 operations. O(n log n) with the same input is only about 130,000 — a 750× difference. On real hardware, an O(n²) algorithm that works fine with 1,000 elements might take hours with 100,000 elements.
 
@@ -67,7 +67,7 @@ for n in [10, 100, 1000, 10000]:
     {
       id: 'lesson-1-2',
       title: 'Analysing Code',
-      content: `To determine the Big-O of a piece of code, you count the number of operations as a function of the input size n. The key patterns to recognise are: a **single loop** from 0 to n is O(n). **Two nested loops** each running n times is O(n²). **Halving** the search space each iteration (like binary search) is O(log n).
+      content: `To determine the Big-O of a piece of code, you count the number of operations as a function of the input size n. The key patterns to recognise are: a **single loop** from 0 to n is O(n). **Two nested loops** each running n times is O(n²). **Halving** the search space each iteration is O(log n).
 
 When code has sequential sections (one block after another), you take the *maximum* complexity — O(n) followed by O(n²) is still O(n²). Constants don't change the Big-O class: a loop that does 5 operations per iteration is still O(n), not O(5n).
 

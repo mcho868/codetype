@@ -136,7 +136,7 @@ export const module1Questions: Question[] = [
   ),
   mc(
     'q1-6',
-    'An algorithm that halves its search space each step (like binary search) has O(_____) complexity.',
+    'An algorithm that halves its search space each step has O(_____) complexity.',
     [
       { id: 'a', text: '1' },
       { id: 'b', text: 'log n' },

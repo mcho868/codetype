@@ -90,13 +90,13 @@ const test1: Module = {
         n = n // 2
         steps += 1
     return steps`,
-        'Each step throws away half of what remains, so the number of steps is about log₂(n) — this is why halving algorithms like binary search are O(log n). Contrast with a single loop over n elements (O(n)) or nested loops (O(n²)): halving reaches 0 in only ~10 steps for n = 1000.'
+        'Each step throws away half of what remains, so the number of steps is about log₂(n) — any algorithm that repeatedly halves its remaining work is O(log n). Contrast with a single loop over n elements (O(n)) or nested loops (O(n²)): halving reaches 0 in only ~10 steps for n = 1000.'
       )
     ),
 
     mc(
       't1-q4',
-      'A sorted list of 1,000,000 elements is searched with **binary search**. How does the maximum number of comparisons grow when the list doubles to 2,000,000 elements?',
+      'A search process starts with a range of 1,000,000 possibilities and halves the remaining range after each comparison. How does the maximum number of comparisons grow when the range doubles to 2,000,000 possibilities?',
       [
         { id: 'a', text: 'It doubles — O(n)' },
         { id: 'b', text: 'It increases by about 1 — O(log n)' },
@@ -106,7 +106,7 @@ const test1: Module = {
       'b',
       ms(
         'O(log n) — one extra comparison when n doubles.',
-        'Binary search halves the search space each step, so the comparison count grows logarithmically. Doubling n adds at most one more halving step — the hallmark of O(log n).'
+        'Halving the remaining range each step makes the comparison count grow logarithmically. Doubling the range adds at most one more halving step — the hallmark of O(log n).'
       )
     ),
 

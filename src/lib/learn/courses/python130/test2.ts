@@ -6,55 +6,26 @@ const test2: Module = {
   slug: 'test-2',
   title: 'Module 2 Test — Sorting & Searching',
   description:
-    'Transfer-level practice: full merge sort, sortedness check, and binary search on tricky edge inputs.',
+    'Transfer-level practice: merge-sort trade-offs, sortedness checking, and binary search on tricky edge inputs.',
   icon: '📝',
   color: 'from-blue-500 to-cyan-400',
   locked: false,
   isMidterm: true,
   lessons: [],
   questions: [
-    cr(
+    mc(
       't2-q1',
-      'Implement `merge_sort(lst)` returning a **new sorted list** (do not mutate the input). Use divide-and-conquer: split in half, recursively sort each half, then merge.\n\nYou may define a helper `merge(a, b)` inside your solution.',
-      `def merge_sort(lst):
-    pass
-`,
-      'function',
-      funcCases(
-        'merge_sort',
-        [
-          { id: 's1', description: 'Unsorted list', args: [[3, 1, 4, 1, 5]], expectedReturn: [1, 1, 3, 4, 5] },
-          { id: 's2', description: 'Empty list', args: [[]], expectedReturn: [] },
-        ],
-        [
-          { id: 'h1', args: [[1]], expectedReturn: [1] },
-          { id: 'h2', args: [[5, 4, 3, 2, 1]], expectedReturn: [1, 2, 3, 4, 5] },
-          { id: 'h3', args: [[2, 2, 2]], expectedReturn: [2, 2, 2] },
-          { id: 'h4', args: [[-1, 0, -3, 2]], expectedReturn: [-3, -1, 0, 2] },
-        ]
-      ),
+      'Which statement best describes the time and extra-space cost of the merge sort implementation taught this week?',
+      [
+        { id: 'a', text: 'O(n²) time and O(1) extra space' },
+        { id: 'b', text: 'O(n log n) time and O(n) extra space' },
+        { id: 'c', text: 'O(log n) time and O(n²) extra space' },
+        { id: 'd', text: 'O(n) time and O(log n) extra space' },
+      ],
+      'b',
       ms(
-        `def merge_sort(lst):
-    if len(lst) <= 1:
-        return lst[:]
-    mid = len(lst) // 2
-    left = merge_sort(lst[:mid])
-    right = merge_sort(lst[mid:])
-    return merge(left, right)
-
-def merge(a, b):
-    result, i, j = [], 0, 0
-    while i < len(a) and j < len(b):
-        if a[i] <= b[j]:
-            result.append(a[i])
-            i += 1
-        else:
-            result.append(b[j])
-            j += 1
-    result.extend(a[i:])
-    result.extend(b[j:])
-    return result`,
-        'Merge sort splits until trivial (0–1 elements), then merges sorted halves in O(n) per level — O(n log n) overall. Copying with lst[:] keeps the original list unchanged.'
+        'O(n log n) time and O(n) extra space.',
+        'There are about log n levels of splitting, and each level processes n elements while merging. The temporary lists and merge results require O(n) additional space.'
       )
     ),
 
@@ -127,17 +98,17 @@ def merge(a, b):
 
     mc(
       't2-q4',
-      'Merge sort combines two sorted halves of total length `n` in the merge step. What is the time complexity of one merge operation?',
+      'Which statement correctly compares selection sort and insertion sort?',
       [
-        { id: 'a', text: 'O(1)' },
-        { id: 'b', text: 'O(log n)' },
-        { id: 'c', text: 'O(n)' },
-        { id: 'd', text: 'O(n²)' },
+        { id: 'a', text: 'Selection sort is O(n) on an already-sorted list, while insertion sort is always O(n²).' },
+        { id: 'b', text: 'Selection sort makes O(n²) comparisons regardless of input, while insertion sort can be O(n) on an already-sorted list.' },
+        { id: 'c', text: 'Both algorithms are O(n log n) in the worst case.' },
+        { id: 'd', text: 'Both algorithms require the input list to be sorted before they can run.' },
       ],
-      'c',
+      'b',
       ms(
-        'O(n) — each element is moved at most once.',
-        'Merge walks both halves with two pointers, appending the smaller head each time. Every element is visited once, so a single merge is linear in the combined size.'
+        'Selection sort makes O(n²) comparisons regardless of input, while insertion sort can be O(n) on an already-sorted list.',
+        'Selection sort always scans the remaining unsorted section to find the minimum, so its comparisons stay O(n²). Insertion sort can move through an already-sorted list with one comparison per item, giving a best case of O(n).'
       )
     ),
 
