@@ -1,8 +1,87 @@
 import type { Question, TestCase } from '../python101/types';
 
+function formatPythonValue(value: unknown): string {
+  if (value === null) return 'None';
+  if (value === true) return 'True';
+  if (value === false) return 'False';
+  if (typeof value === 'string') return JSON.stringify(value);
+  if (typeof value === 'number') return String(value);
+  if (Array.isArray(value)) {
+    return `[${value.map(formatPythonValue).join(', ')}]`;
+  }
+  if (typeof value === 'object') {
+    return `{${Object.entries(value as Record<string, unknown>)
+      .map(([key, item]) => `${JSON.stringify(key)}: ${formatPythonValue(item)}`)
+      .join(', ')}}`;
+  }
+  return String(value);
+}
+
+function formatExample(
+  testCase: TestCase,
+  gradeMode: 'stdout' | 'function',
+  index: number
+): string {
+  const heading = `**Example ${index + 1}**`;
+
+  if (gradeMode === 'function') {
+    const call = `${testCase.funcName ?? 'function'}(${(testCase.args ?? [])
+      .map(formatPythonValue)
+      .join(', ')})`;
+    const fileInput = testCase.fileContent === undefined
+      ? ''
+      : `${testCase.fileName ?? 'input.txt'}:\n${testCase.fileContent.replace(/\n$/, '')}`;
+    const input = fileInput ? `${fileInput}\n\nCall: ${call}` : call;
+
+    return `${heading}
+
+Input:
+\`\`\`text
+${input}
+\`\`\`
+
+Output:
+\`\`\`text
+${formatPythonValue(testCase.expectedReturn)}
+\`\`\``;
+  }
+
+  return `${heading}
+
+Input:
+\`\`\`text
+${testCase.stdin?.replace(/\n$/, '') || '(no input)'}
+\`\`\`
+
+Output:
+\`\`\`text
+${testCase.expectedStdout ?? ''}
+\`\`\``;
+}
+
+function addExamples(
+  prompt: string,
+  gradeMode: 'stdout' | 'function',
+  testCases: TestCase[]
+): { prompt: string; testCases: TestCase[] } {
+  const exampleCases = testCases.filter((testCase) => !testCase.hidden).slice(0, 2);
+  if (exampleCases.length === 0) {
+    return { prompt, testCases };
+  }
+
+  const examples = exampleCases
+    .map((testCase, index) => formatExample(testCase, gradeMode, index))
+    .join('\n\n');
+
+  return {
+    prompt: `${prompt}\n\n### Examples\n\n${examples}`,
+    testCases,
+  };
+}
+
 /** Format explanation for admin "Model solution" button in CodeRunnerCard */
 export function ms(code: string, why: string): string {
-  return `Model solution:\n${code.trim()}\n\nWhy: ${why}`;
+  return `Model solution:\n\`\`\`python\n${code.trim()}\n\`\`\`\n\nWhy: ${why}`;
 }
 
 /** Shorthand for a code-runner question */
@@ -14,13 +93,14 @@ export function cr(
   testCases: TestCase[],
   explanation: string
 ): Question {
+  const withExamples = addExamples(prompt, gradeMode, testCases);
   return {
     id,
     type: 'code-runner',
-    prompt,
+    prompt: withExamples.prompt,
     starterCode,
     gradeMode,
-    testCases,
+    testCases: withExamples.testCases,
     explanation,
     correctAnswer: '__code__',
   };

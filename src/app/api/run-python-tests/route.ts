@@ -54,8 +54,18 @@ def normalise_stdout(s: str) -> str:
     lines = s.replace("\\r\\n", "\\n").split("\\n")
     return "\\n".join(line.strip() for line in lines if line.strip()).lower()
 
+def comparable(value):
+    # Test cases are sent as JSON, so JavaScript arrays become Python lists.
+    # A student's function may reasonably return a tuple instead; compare both
+    # using the same JSON-compatible shape, recursively.
+    if isinstance(value, (list, tuple)):
+        return [comparable(item) for item in value]
+    if isinstance(value, dict):
+        return {key: comparable(item) for key, item in value.items()}
+    return value
+
 def values_equal(actual, expected):
-    return actual == expected
+    return comparable(actual) == comparable(expected)
 
 # Track files written for a case so we can remove them before the next case,
 # preventing one case's file from leaking into another.

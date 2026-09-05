@@ -18,7 +18,9 @@ import LearnMarkdown from "./LearnMarkdown";
 function extractModelSolution(explanation: string): string | null {
   const afterLabel = explanation.split("Model solution:")[1];
   if (afterLabel === undefined) return null;
-  const code = afterLabel.split("\n\nWhy:")[0].replace(/^\n+/, "").trimEnd();
+  const rawCode = afterLabel.split("\n\nWhy:")[0].replace(/^\n+/, "").trimEnd();
+  const fenced = rawCode.match(/^```(?:[\w-]+)?\n([\s\S]*?)\n```$/);
+  const code = (fenced?.[1] ?? rawCode).trimEnd();
   return code.length > 0 ? code : null;
 }
 

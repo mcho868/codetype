@@ -164,7 +164,7 @@ const test4: Module = {
           {
             id: 'h2',
             args: [[['pop'], ['sum_top2']]],
-            expectedReturn: [null, 0],
+            expectedReturn: [null],
           },
         ]
       ),

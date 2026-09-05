@@ -270,7 +270,12 @@ def run_shelf():
         ]
       ),
       ms(
-        `class Shelf:
+        `class Book:
+    def __init__(self, title):
+        self.title = title
+
+
+class Shelf:
     def __init__(self):
         self._books = []
 
