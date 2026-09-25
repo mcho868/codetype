@@ -1,0 +1,77 @@
+name: CodeType CI/CD (Vercel)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codetype-vercel-production
+  cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+  deploy:
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
+    needs: check
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Vercel builds Dockerfile.vercel remotely, so bake the public
+      # NEXT_PUBLIC_* values into its ARG defaults before uploading.
+      - name: Inject build-time public config
+        env:
+          SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_ANON_KEY"
+          sed -i \
+            -e "s|^ARG NEXT_PUBLIC_SUPABASE_URL\$|ARG NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}|" \
+            -e "s|^ARG NEXT_PUBLIC_SUPABASE_ANON_KEY\$|ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}|" \
+            Dockerfile.vercel
+          grep -q "^ARG NEXT_PUBLIC_SUPABASE_URL=" Dockerfile.vercel
+          grep -q "^ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=" Dockerfile.vercel
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Deploy to Vercel production
+        run: vercel deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"

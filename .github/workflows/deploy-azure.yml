@@ -1,10 +1,7 @@
 name: CodeType CI/CD
 
+# Superseded by deploy-vercel.yml; kept runnable by hand until Azure is retired.
 on:
-  pull_request:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
